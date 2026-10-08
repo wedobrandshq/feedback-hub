@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  iOS
+  Android
+  Web
+  CrossPlatform @map("Cross-platform")
+}
+
+enum FeedbackType {
+  idea
+  problem
+  improvement
+  bug
+  other
+}
+
+enum FeedbackStatus {
+  new
+  reviewed
+  linked
+  closed
+}
+
+model Workspace {
+  id        String      @id @default(cuid())
+  name      String
+  slug      String      @unique
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  apps      App[]
+  admins    AdminUser[]
+
+  @@map("workspaces")
+}
+
+model App {
+  id             String    @id @default(cuid())
+  workspaceId    String    @map("workspace_id")
+  name           String
+  slug           String
+  icon           String?
+  platform       Platform
+  status         String    @default("active")
+  credentialHash String    @unique @map("credential_hash")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  workspace      Workspace @relation(fields: [workspaceId], references: [id])
+  users          User[]
+  feedback       Feedback[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@map("apps")
+}
+
+model User {
+  id             String     @id @default(cuid())
+  appId          String     @map("app_id")
+  externalUserId String     @map("external_user_id")
+  email          String?
+  name           String?
+  plan           String?
+  locale         String?
+  timezone       String?
+  appVersion     String?    @map("app_version")
+  osVersion      String?    @map("os_version")
+  device         String?
+  createdAt      DateTime   @default(now()) @map("created_at")
+  lastSeenAt     DateTime   @default(now()) @map("last_seen_at")
+  metadata       Json       @default("{}")
+  app            App        @relation(fields: [appId], references: [id])
+  feedback       Feedback[]
+
+  @@unique([appId, externalUserId])
+  @@index([appId])
+  @@map("users")
+}
+
+model Feedback {
+  id                     String               @id @default(cuid())
+  appId                  String               @map("app_id")
+  userId                 String               @map("user_id")
+  type                   FeedbackType
+  title                  String?
+  body                   String
+  status                 FeedbackStatus       @default(new)
+  source                 String               @default("in_app")
+  appVersionAtSubmission String?              @map("app_version_at_submission")
+  osVersionAtSubmission  String?              @map("os_version_at_submission")
+  deviceAtSubmission     String?              @map("device_at_submission")
+  localeAtSubmission     String?              @map("locale_at_submission")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+  deletedAt              DateTime?            @map("deleted_at")
+  app                    App                  @relation(fields: [appId], references: [id])
+  user                   User                 @relation(fields: [userId], references: [id])
+  attachments            FeedbackAttachment[]
+
+  @@index([appId, createdAt])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("feedback")
+}
+
+model FeedbackAttachment {
+  id          String   @id @default(cuid())
+  feedbackId  String   @map("feedback_id")
+  fileName    String   @map("file_name")
+  contentType String   @map("content_type")
+  sizeBytes   Int      @map("size_bytes")
+  storageKey  String   @unique @map("storage_key")
+  createdAt   DateTime @default(now()) @map("created_at")
+  feedback    Feedback @relation(fields: [feedbackId], references: [id])
+
+  @@index([feedbackId])
+  @@map("feedback_attachments")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  appId       String   @map("app_id")
+  actorType   String   @map("actor_type")
+  actorId     String?  @map("actor_id")
+  type        String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  payload     Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId, createdAt])
+  @@index([appId, createdAt])
+  @@map("events")
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  workspaceId  String    @map("workspace_id")
+  email        String    @unique
+  name         String
+  passwordHash String    @map("password_hash")
+  role         String    @default("owner")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@index([workspaceId])
+  @@map("admin_users")
+}
