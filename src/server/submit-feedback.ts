@@ -108,6 +108,60 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
         },
       });
 
+      const conversation = await tx.conversation.create({
+        data: {
+          appId: app.id,
+          userId: user.id,
+          feedbackId: feedback.id,
+          status: "open",
+        },
+      });
+
+      const message = await tx.message.create({
+        data: {
+          conversationId: conversation.id,
+          senderType: "user",
+          senderId: user.id,
+          body: feedback.body,
+          channel: "in_app",
+        },
+      });
+
+      await tx.event.create({
+        data: {
+          workspaceId: app.workspaceId,
+          appId: app.id,
+          actorType: "user",
+          actorId: user.id,
+          type: "conversation.created",
+          entityType: "conversation",
+          entityId: conversation.id,
+          payload: {
+            actorName: user.name,
+            feedbackId: feedback.id,
+          },
+        },
+      });
+
+      await tx.event.create({
+        data: {
+          workspaceId: app.workspaceId,
+          appId: app.id,
+          actorType: "user",
+          actorId: user.id,
+          type: "message.sent",
+          entityType: "message",
+          entityId: message.id,
+          payload: {
+            actorName: user.name,
+            conversationId: conversation.id,
+            feedbackId: feedback.id,
+            senderType: "user",
+            channel: "in_app",
+          },
+        },
+      });
+
       return feedback;
     });
   } catch (error) {

@@ -1,6 +1,6 @@
 # Feedback Hub
 
-Feedback Hub is a multi-app product feedback system. This repository is the first vertical slice: a person submits feedback inside a host app, it is stored, and an admin reads it.
+Feedback Hub is a multi-app product feedback system. A person submits feedback inside a host app, it becomes a conversation, and an admin can reply. The person sees that reply in the host app and can answer.
 
 Healthy Steps is the seeded workspace. It has two apps, Willow and Earn It. The phone at `/demo` is Willow. The admin tool lists and opens feedback for one app or for every app.
 
@@ -11,10 +11,12 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Submit feedback from the Willow demo: kind, message, optional screenshot.
 - Identify the seeded Willow user on the server. The browser does not send an app secret or choose who the message belongs to.
 - Store the original message, submission context, and screenshot.
-- Admin list and detail, with Mark reviewed and Close.
-- An event for `feedback.created`, `feedback.reviewed`, and `feedback.closed`.
+- Create a conversation and the first in-app message from that submission.
+- Admin Inbox and conversation detail: reply, close, and reopen. Reply also works on feedback detail.
+- Willow Messages: unread badge, thread, and a reply from that user.
+- Events for `feedback.created`, `feedback.reviewed`, `feedback.closed`, `conversation.created`, `message.sent`, and `conversation.closed`.
 
-Conversations, requests, voting, roadmap, changelog, notifications, and the other admin sections are not in this slice. Those nav items explain that.
+Requests, voting, roadmap, changelog, notifications, and the other admin sections are not in this slice. Those nav items explain that. Email delivery is not built.
 
 ## Local setup
 
@@ -34,8 +36,9 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 | Path | What it is |
 | --- | --- |
-| `/demo` | Willow phone. Entry is Feedback. |
+| `/demo` | Willow phone. Feedback and Messages. |
 | `/admin/login` | Admin sign-in |
+| `/admin/inbox` | Conversations that need attention |
 | `/admin/feedback` | Feedback list |
 
 `.env.example` matches a local database user `feedback` with password `feedback`. Change `DATABASE_URL` if your Postgres user is different. Create that role if you want the example URL as written:
@@ -65,7 +68,7 @@ The Willow demo is Maya Chen (`maya.chen@example.com`, plan Plus). Earn It start
 npm test
 ```
 
-Tests use `feedback_hub_test` and cover submit, identify (upsert by app + external user id), and separation between Willow and Earn It.
+Tests use `feedback_hub_test` and cover submit, identify (upsert by app + external user id), separation between Willow and Earn It, an admin reply, a user reply, and that Earn It cannot see a Willow conversation.
 
 ## Hosted
 

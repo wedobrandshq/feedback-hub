@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/admin/activity-feed";
+import { ConversationThread } from "@/components/admin/conversation-thread";
 import { FeedbackActions } from "@/components/admin/feedback-actions";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, userLabel } from "@/domain/feedback";
 import { requireAdmin } from "@/server/auth/admin";
+import { getAdminThreadForFeedback } from "@/server/conversations";
 import { getFeedbackDetail } from "@/server/feedback-queries";
 
 export const metadata = { title: "Feedback" };
@@ -22,7 +24,10 @@ function ContextRow({ label, value }: { label: string; value: string | null }) {
 export default async function FeedbackDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin();
   const { id } = await params;
-  const detail = await getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id });
+  const [detail, thread] = await Promise.all([
+    getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id }),
+    getAdminThreadForFeedback({ workspaceId: admin.workspaceId, feedbackId: id }),
+  ]);
   if (!detail) notFound();
 
   const { feedback, events } = detail;
@@ -32,13 +37,35 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
       <PageHeader
         title="Feedback"
         description={`${feedback.app.name} · ${formatDateTime(feedback.createdAt)}`}
-        actions={<FeedbackActions key={feedback.status} feedbackId={feedback.id} status={feedback.status} />}
+        actions={
+          <FeedbackActions
+            key={`${feedback.status}-${thread?.status ?? "none"}`}
+            feedbackId={feedback.id}
+            status={feedback.status}
+            conversation={thread ? { id: thread.id, status: thread.status } : null}
+          />
+        }
       />
       <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:px-6">
         <div className="min-w-0 space-y-8">
           <section>
             <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Original feedback</h2>
             <p className="mt-3 text-base leading-7 whitespace-pre-wrap">{feedback.body}</p>
+          </section>
+          <section>
+            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Conversation</h2>
+            {thread ? (
+              <div className="mt-3 space-y-4">
+                <ConversationThread messages={thread.messages} />
+                <p className="text-sm">
+                  <Link href={`/admin/inbox/${thread.id}`} className="text-muted-foreground hover:text-foreground">
+                    Open in Inbox
+                  </Link>
+                </p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">No conversation for this feedback.</p>
+            )}
           </section>
           <section>
             <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Screenshot</h2>

@@ -86,12 +86,21 @@ export async function getFeedbackDetail(input: { workspaceId: string; feedbackId
   });
   if (!feedback) return null;
 
+  const conversation = await prisma.conversation.findFirst({
+    where: { feedbackId: feedback.id },
+    select: { id: true, messages: { select: { id: true } } },
+  });
+  const messageIds = conversation?.messages.map((message) => message.id) ?? [];
+
   const events = await prisma.event.findMany({
     where: {
       workspaceId: input.workspaceId,
       appId: feedback.appId,
-      entityType: "feedback",
-      entityId: feedback.id,
+      OR: [
+        { entityType: "feedback", entityId: feedback.id },
+        ...(conversation ? [{ entityType: "conversation", entityId: conversation.id }] : []),
+        ...(messageIds.length > 0 ? [{ entityType: "message", entityId: { in: messageIds } }] : []),
+      ],
     },
     orderBy: { createdAt: "asc" },
   });

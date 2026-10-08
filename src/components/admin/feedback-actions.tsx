@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { closeFeedbackAction, markReviewedAction } from "@/app/(admin)/admin/(console)/actions";
 import type { FeedbackStatusName } from "@/domain/config";
+import type { ConversationStatusName } from "@/domain/conversation";
+import { MessageComposer } from "@/components/admin/message-composer";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -20,19 +22,32 @@ const initial = { error: null };
 export function FeedbackActions({
   feedbackId,
   status,
+  conversation,
 }: {
   feedbackId: string;
   status: FeedbackStatusName;
+  conversation: { id: string; status: ConversationStatusName } | null;
 }) {
   const [reviewState, reviewAction, reviewPending] = useActionState(markReviewedAction, initial);
   const [closeState, closeAction, closePending] = useActionState(closeFeedbackAction, initial);
+  const [replyOpen, setReplyOpen] = useState(false);
   const error = reviewState.error ?? closeState.error;
   const canReview = status === "new";
   const canClose = status === "new" || status === "reviewed";
+  const canReply = conversation?.status === "open";
 
   return (
     <div className="flex flex-col items-start gap-2 md:items-end">
       <div className="flex flex-wrap gap-2">
+        {canReply && conversation ? (
+          <Button type="button" variant="outline" onClick={() => setReplyOpen((open) => !open)}>
+            Reply
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" disabled>
+            Reply
+          </Button>
+        )}
         <form action={reviewAction}>
           <input type="hidden" name="feedbackId" value={feedbackId} />
           <Button type="submit" variant="outline" disabled={!canReview || reviewPending}>
@@ -70,6 +85,15 @@ export function FeedbackActions({
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      {replyOpen && conversation ? (
+        <div className="w-full md:w-80">
+          <MessageComposer conversationId={conversation.id} submitLabel="Reply" />
+        </div>
+      ) : null}
+      {!conversation ? <p className="text-sm text-muted-foreground">This feedback has no conversation.</p> : null}
+      {conversation?.status === "closed" ? (
+        <p className="text-sm text-muted-foreground">This conversation is closed.</p>
+      ) : null}
       {error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}

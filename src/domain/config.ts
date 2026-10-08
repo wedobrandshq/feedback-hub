@@ -1,6 +1,8 @@
 export const BODY_MAX_LENGTH = 10_000;
 export const ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024;
 export const FEEDBACK_LIST_LIMIT = 200;
+export const INBOX_LIST_LIMIT = 200;
+export const DEMO_CONVERSATION_LIMIT = 50;
 
 export const SEEDED_ADMIN_NAME = "Alex Rivera";
 

@@ -1,15 +1,25 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { submitDemoFeedback } from "@/app/(demo)/actions";
-import { DEMO_KIND_OPTIONS } from "@/domain/feedback";
+import { useRouter } from "next/navigation";
+import { markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/(demo)/actions";
+import type { DemoMailbox } from "@/domain/conversation";
+import { DEMO_KIND_OPTIONS, formatDateTime } from "@/domain/feedback";
 import type { SubmitFeedbackType } from "@/domain/config";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-type Screen = "home" | "kind" | "message" | "done";
+type Screen = "home" | "kind" | "message" | "done" | "messages" | "thread";
 
-export function WillowFeedback({ name, plan }: { name: string; plan: string }) {
+export function WillowFeedback({
+  name,
+  plan,
+  mailbox,
+}: {
+  name: string;
+  plan: string;
+  mailbox: DemoMailbox;
+}) {
   const [screen, setScreen] = useState<Screen>("home");
   const [kind, setKind] = useState<SubmitFeedbackType | null>(null);
   const [body, setBody] = useState("");
@@ -18,6 +28,12 @@ export function WillowFeedback({ name, plan }: { name: string; plan: string }) {
   const previewRef = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [reply, setReply] = useState("");
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [replyPending, setReplyPending] = useState(false);
+  const router = useRouter();
+  const thread = mailbox.conversations.find((conversation) => conversation.id === threadId) ?? null;
 
   function replaceScreenshot(next: File | null) {
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
@@ -48,19 +64,40 @@ export function WillowFeedback({ name, plan }: { name: string; plan: string }) {
     setPending(false);
     if (result.ok) {
       setScreen("done");
+      router.refresh();
       return;
     }
     setError(result.error);
   }
 
   return (
-    <div className="flex min-h-[680px] flex-col px-5 pt-4 pb-6">
+    <div className="flex min-h-full flex-col px-5 pt-4 pb-6">
       {screen === "home" ? (
         <div className="flex flex-1 flex-col">
           <p className="text-xs text-[#6a7268]">{name} · {plan}</p>
           <h2 className="mt-8 text-[2rem] leading-none font-semibold tracking-tight text-[#1c241c]">Feedback</h2>
           <p className="mt-3 text-lg text-[#3d463d]">Help us make Willow better.</p>
-          <div className="mt-auto pt-10">
+          <div className="mt-auto space-y-3 pt-10">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 w-full justify-between bg-white"
+              onClick={() => {
+                setError(null);
+                setScreen("messages");
+                router.refresh();
+              }}
+            >
+              <span>Messages</span>
+              {mailbox.unreadCount > 0 ? (
+                <span
+                  className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#1f3d32] px-1.5 text-xs text-[#f4f1ea]"
+                  aria-label={`${mailbox.unreadCount} unread ${mailbox.unreadCount === 1 ? "reply" : "replies"}`}
+                >
+                  {mailbox.unreadCount}
+                </span>
+              ) : null}
+            </Button>
             <Button
               type="button"
               className="h-12 w-full bg-[#1f3d32] text-[#f4f1ea] hover:bg-[#1f3d32]/90"
@@ -181,7 +218,19 @@ export function WillowFeedback({ name, plan }: { name: string; plan: string }) {
             Thanks for helping us improve Willow.
           </h2>
           <p className="mt-3 text-base leading-7 text-[#3d463d]">If the team responds, you’ll get an update.</p>
-          <div className="mt-auto pt-10">
+          <div className="mt-auto space-y-3 pt-10">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 w-full"
+              onClick={() => {
+                setScreen("messages");
+                setError(null);
+                router.refresh();
+              }}
+            >
+              Messages
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -197,6 +246,133 @@ export function WillowFeedback({ name, plan }: { name: string; plan: string }) {
               Send more feedback
             </Button>
           </div>
+        </div>
+      ) : null}
+
+      {screen === "messages" ? (
+        <div className="flex flex-1 flex-col">
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("home")}>
+            Back
+          </button>
+          <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">Messages</h2>
+          {mailbox.conversations.length === 0 ? (
+            <p className="mt-4 text-sm leading-6 text-[#3d463d]">
+              No messages yet. Share feedback and the team can reply here.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-[#e2dcd0]">
+              {mailbox.conversations.map((conversation) => (
+                <li key={conversation.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-start gap-3 py-3 text-left"
+                    onClick={() => {
+                      setThreadId(conversation.id);
+                      setReply("");
+                      setReplyError(null);
+                      setScreen("thread");
+                      void markDemoThreadRead(conversation.id).then(() => router.refresh());
+                    }}
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm text-[#1c241c]">{conversation.preview}</span>
+                      <span className="mt-1 block text-xs text-[#6a7268]">{conversation.updatedLabel}</span>
+                    </span>
+                    {conversation.unreadCount > 0 ? (
+                      <span
+                        className="mt-1 inline-flex min-w-5 items-center justify-center rounded-full bg-[#1f3d32] px-1.5 text-xs text-[#f4f1ea]"
+                        aria-label={`${conversation.unreadCount} unread`}
+                      >
+                        {conversation.unreadCount}
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+
+      {screen === "thread" && thread ? (
+        <div className="flex flex-1 flex-col">
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("messages")}>
+            Back
+          </button>
+          <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">Conversation</h2>
+          <ol className="mt-4 space-y-4">
+            {thread.messages.map((message) => (
+              <li key={message.id}>
+                <p className="text-xs text-[#6a7268]">
+                  {message.senderType === "user" ? "You" : message.senderName}
+                  <span aria-hidden> · </span>
+                  <time dateTime={message.createdAt}>{formatDateTime(new Date(message.createdAt))}</time>
+                </p>
+                <p className="mt-1 text-sm leading-6 whitespace-pre-wrap text-[#1c241c]">{message.body}</p>
+              </li>
+            ))}
+          </ol>
+          {thread.closed ? (
+            <p className="mt-6 text-sm text-[#3d463d]">The team closed this conversation.</p>
+          ) : (
+            <form
+              className="mt-6"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                if (reply.trim().length === 0) {
+                  setReplyError("Write a reply before sending.");
+                  return;
+                }
+                setReplyPending(true);
+                setReplyError(null);
+                const formData = new FormData();
+                formData.set("conversationId", thread.id);
+                formData.set("body", reply);
+                const result = await replyDemoMessage(formData);
+                setReplyPending(false);
+                if (result.ok) {
+                  setReply("");
+                  router.refresh();
+                  return;
+                }
+                setReplyError(result.error);
+              }}
+            >
+              <label htmlFor="user-reply" className="text-sm font-medium text-[#1c241c]">
+                Reply
+              </label>
+              <Textarea
+                id="user-reply"
+                value={reply}
+                onChange={(event) => setReply(event.target.value)}
+                className="mt-2 min-h-24 bg-white"
+                placeholder="Write a reply"
+              />
+              {replyError ? (
+                <p className="mt-2 text-sm text-[#8a2e24]" role="alert">
+                  {replyError}
+                </p>
+              ) : null}
+              <Button
+                type="submit"
+                disabled={replyPending}
+                className="mt-3 h-11 w-full bg-[#1f3d32] text-[#f4f1ea] hover:bg-[#1f3d32]/90"
+              >
+                {replyPending ? "Sending…" : "Send"}
+              </Button>
+            </form>
+          )}
+        </div>
+      ) : null}
+
+      {screen === "thread" && !thread ? (
+        <div className="flex flex-1 flex-col">
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("messages")}>
+            Back
+          </button>
+          <p className="mt-6 text-sm text-[#8a2e24]" role="alert">
+            This conversation is not available.
+          </p>
         </div>
       ) : null}
     </div>

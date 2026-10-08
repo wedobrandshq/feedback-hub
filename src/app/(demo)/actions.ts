@@ -1,9 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { readDemoReply } from "@/domain/demo-reply";
 import { WILLOW_DEMO_USER } from "@/domain/willow-demo";
 import { willowAppSecret } from "@/domain/secrets";
 import { readDemoSubmission } from "@/domain/demo-submission";
 import { DomainError } from "@/domain/errors";
+import { markConversationReadByUser, replyAsUser } from "@/server/conversations";
 import { identifyUser } from "@/server/identify-user";
 import { submitFeedback } from "@/server/submit-feedback";
 
@@ -38,6 +41,9 @@ export async function submitDemoFeedback(formData: FormData): Promise<DemoSubmit
       },
       attachment: submission.attachment,
     });
+    revalidatePath("/demo");
+    revalidatePath("/admin/inbox");
+    revalidatePath("/admin/feedback");
     return { ok: true };
   } catch (error) {
     if (error instanceof DomainError && error.code === "validation") {
@@ -45,5 +51,40 @@ export async function submitDemoFeedback(formData: FormData): Promise<DemoSubmit
     }
     console.error(error);
     return { ok: false, error: "We couldn’t send your feedback. Try again." };
+  }
+}
+
+export async function replyDemoMessage(formData: FormData): Promise<DemoSubmitResult> {
+  try {
+    const reply = readDemoReply(formData);
+    await replyAsUser({
+      appSecret: willowAppSecret(),
+      externalUserId: WILLOW_DEMO_USER.externalUserId,
+      conversationId: reply.conversationId,
+      body: reply.body,
+    });
+    revalidatePath("/demo");
+    revalidatePath("/admin/inbox");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof DomainError && (error.code === "validation" || error.code === "conflict")) {
+      return { ok: false, error: error.message };
+    }
+    console.error(error);
+    return { ok: false, error: "We couldn’t send your reply. Try again." };
+  }
+}
+
+export async function markDemoThreadRead(conversationId: string): Promise<void> {
+  try {
+    await markConversationReadByUser({
+      appSecret: willowAppSecret(),
+      externalUserId: WILLOW_DEMO_USER.externalUserId,
+      conversationId,
+    });
+    revalidatePath("/demo");
+  } catch (error) {
+    if (error instanceof DomainError) return;
+    throw error;
   }
 }

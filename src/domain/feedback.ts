@@ -129,5 +129,9 @@ export function activitySentence(event: {
   if (event.type === "feedback.created") return `${name} submitted this feedback`;
   if (event.type === "feedback.reviewed") return `${name} marked this reviewed`;
   if (event.type === "feedback.closed") return `${name} closed this feedback`;
+  if (event.type === "conversation.created") return `${name} started a conversation`;
+  if (event.type === "message.sent") return `${name} sent a message`;
+  if (event.type === "conversation.closed") return `${name} closed this conversation`;
+  if (event.type === "conversation.reopened") return `${name} reopened this conversation`;
   return name;
 }

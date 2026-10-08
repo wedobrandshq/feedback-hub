@@ -53,3 +53,43 @@ The selector filters the list. A feedback URL still opens inside the workspace w
 ## Identify updates
 
 A later identify for the same app and external user id updates only the fields it sends. Omitted fields stay as they were. `last_seen_at` always moves forward.
+
+## One conversation per feedback
+
+Section 66 says a feedback item has zero or one conversation. This slice creates that conversation when the feedback is submitted, with the first in-app message body equal to the feedback body. Feedback submitted before this rule is not backfilled.
+
+## Conversation open and closed
+
+Section 31 says an admin can close and reopen a conversation. It does not name a status. The conversation is `open` or `closed`. Closing feedback and closing its conversation are separate actions.
+
+## Needs reply
+
+The inbox filter Needs reply is not defined as a formula. A conversation needs a reply when it is open and the latest message is from the user, including the first message created with the feedback. An admin reply clears it until the user replies again. A closed conversation does not need a reply.
+
+## Unread and read_at
+
+Section 12 has one `read_at` on a message. That field cannot record the user and the admin separately. `read_at` is when the other party opened a screen that shows the message body. The user’s unread badge counts admin messages with `read_at` null. The admin Unread filter is conversations with a user message whose `read_at` is null. Sending a message does not set `read_at`.
+
+## Reopen event name
+
+Section 54 names `conversation.closed` and does not name an event for reopen. Reopen writes `conversation.reopened` on the conversation so the activity log can tell it apart from close. That name is not a spec term.
+
+## Reply length and channel
+
+The spec does not set a message length. A reply uses the same rule as feedback: blank text is rejected, anything else is stored exactly, and the cap is 10,000 characters. This slice writes `in_app` only. `email` stays on the channel enum and is not sent. `system` stays on the sender enum and is not used.
+
+## Closed conversations do not take new messages
+
+The spec does not say whether a closed conversation can receive a reply. A reply is refused until an admin reopens it. Close writes `conversation.closed`.
+
+## Inbox order
+
+Newest activity is first. Activity is the conversation’s updated time, which moves when a message is sent or the conversation is closed or reopened. The list shows at most 200 conversations. The Willow Messages list shows at most 50. The default inbox filter is All. Needs reply uses the empty copy from section 70 when nothing in that filter needs a reply.
+
+## Where a reply is sent
+
+Reply on feedback detail and the composer on the conversation both call the same server rule. Link to Request and Create Request are not built. The conversation sidebar says there is no linked request. A separate user profile page is a later slice, so the user is shown on the conversation itself. Internal classification is not shown.
+
+## What the user is shown
+
+The Willow Messages entry lists that user’s conversations in Willow. The unread badge is for replies from the team. Opening a thread marks those replies read. The demo still identifies Maya Chen on the server. A posted user id or app secret is ignored.
