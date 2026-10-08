@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { unlink } from "node:fs/promises";
 import { BODY_MAX_LENGTH, SUBMIT_FEEDBACK_TYPES, type SubmitFeedbackType } from "@/domain/config";
 import { DomainError } from "@/domain/errors";
 import { safeFileName, validateScreenshot } from "@/domain/images";
-import { resolveStoragePath, writeAttachment } from "@/server/attachments";
+import { deleteAttachment, writeAttachment } from "@/server/attachments";
 import { prisma } from "@/server/db";
 import { resolveAppBySecret } from "@/server/identify-user";
 
@@ -114,7 +113,7 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
   } catch (error) {
     await Promise.all(
       writtenKeys.map(async (key) => {
-        await unlink(resolveStoragePath(key)).catch(() => undefined);
+        await deleteAttachment(key).catch(() => undefined);
       }),
     );
     throw error;

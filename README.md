@@ -67,6 +67,25 @@ npm test
 
 Tests use `feedback_hub_test` and cover submit, identify (upsert by app + external user id), and separation between Willow and Earn It.
 
+## Hosted
+
+Production uses hosted Postgres and Vercel Blob. The build runs `prisma migrate deploy` and the seed, so a fresh deploy has Healthy Steps, Willow, Earn It, the Willow demo user, and the owner login above.
+
+Set these on the host. Do not commit their production values.
+
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Pooled Postgres connection |
+| `DATABASE_URL_UNPOOLED` | Direct connection for migrations |
+| `WILLOW_APP_SECRET` | Server credential for Willow |
+| `EARNIT_APP_SECRET` | Server credential for Earn It |
+| `AUTH_SECRET` | Admin session signing key |
+| `ADMIN_EMAIL` | Seeded owner email |
+| `ADMIN_PASSWORD` | Seeded owner password |
+| `BLOB_READ_WRITE_TOKEN` | Private screenshot store |
+
+Local development keeps screenshots on disk when `BLOB_READ_WRITE_TOKEN` is unset. `/demo` is public. Admin pages stay behind the owner login.
+
 ## Scripts
 
 ```bash

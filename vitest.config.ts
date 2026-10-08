@@ -9,6 +9,7 @@ export default defineConfig({
     fileParallelism: false,
     env: {
       DATABASE_URL: testDatabaseUrl,
+      DATABASE_URL_UNPOOLED: testDatabaseUrl,
       WILLOW_APP_SECRET: "willow-dev-secret",
       EARNIT_APP_SECRET: "earnit-dev-secret",
       AUTH_SECRET: "dev-only-auth-secret-change-me-32bytes",
