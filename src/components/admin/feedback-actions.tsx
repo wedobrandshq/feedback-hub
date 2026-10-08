@@ -87,7 +87,7 @@ export function FeedbackActions({
       </div>
       {replyOpen && conversation ? (
         <div className="w-full md:w-80">
-          <MessageComposer conversationId={conversation.id} submitLabel="Reply" />
+          <MessageComposer conversationId={conversation.id} />
         </div>
       ) : null}
       {!conversation ? <p className="text-sm text-muted-foreground">This feedback has no conversation.</p> : null}
