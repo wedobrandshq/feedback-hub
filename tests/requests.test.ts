@@ -162,7 +162,7 @@ describe("requests", () => {
     expect(await prisma.event.count({ where: { type: "request.unvoted", entityId: request.id } })).toBe(1);
   });
 
-  it("changes status without notifying, then notifies interested Willow users only", async () => {
+  it("changes status and does not notify", async () => {
     const feedback = await willowFeedback("Weekly mood summary.");
     await identifyUser({ appSecret: earnItSecret, externalUserId: "sam", name: "Sam" });
     const admin = await actor();
@@ -176,18 +176,15 @@ describe("requests", () => {
     await publishRequest({ ...admin, requestId: request.id });
     await voteOnRequest({ appSecret: willowSecret, externalUserId: "maya", requestId: request.id });
 
-    await changeRequestStatus({ ...admin, requestId: request.id, status: "planned", notify: false });
+    await changeRequestStatus({ ...admin, requestId: request.id, status: "planned" });
     expect(await prisma.notification.count()).toBe(0);
     expect(await prisma.event.count({ where: { type: "request.status_changed", entityId: request.id } })).toBe(1);
 
-    const notified = await changeRequestStatus({ ...admin, requestId: request.id, status: "released", notify: true });
-    expect(notified.notified).toBe(1);
-    const notes = await prisma.notification.findMany();
-    expect(notes).toHaveLength(1);
-    expect(notes[0]?.channel).toBe("in_app");
-    expect(notes[0]?.body).toBe("Weekly mood summary is now Released.");
-    const maya = await prisma.user.findFirstOrThrow({ where: { externalUserId: "maya" } });
-    expect(notes[0]?.userId).toBe(maya.id);
+    const moved = await changeRequestStatus({ ...admin, requestId: request.id, status: "released" });
+    expect(moved.notified).toBe(0);
+    expect(await prisma.notification.count()).toBe(0);
+    expect((await prisma.request.findUniqueOrThrow({ where: { id: request.id } })).status).toBe("released");
+    expect(await prisma.event.count({ where: { type: "request.status_changed", entityId: request.id } })).toBe(2);
 
     await expect(
       voteOnRequest({ appSecret: earnItSecret, externalUserId: "sam", requestId: request.id }),
@@ -210,7 +207,7 @@ describe("requests", () => {
     ).rejects.toMatchObject({ code: "conflict" });
     const update = await publishRequestUpdate({ ...admin, requestId: request.id, body: "We started the Sunday recap." });
     expect(update.visibility).toBe("public");
-    await changeRequestStatus({ ...admin, requestId: request.id, status: "released", notify: false });
+    await changeRequestStatus({ ...admin, requestId: request.id, status: "released" });
     const entry = await createChangelogEntry({ ...admin, requestId: request.id, body: "Sunday recap is in Willow." });
     expect(entry.title).toBe("Weekly mood summary");
     expect(await prisma.event.count({ where: { type: "request.update_published", entityId: request.id } })).toBe(1);

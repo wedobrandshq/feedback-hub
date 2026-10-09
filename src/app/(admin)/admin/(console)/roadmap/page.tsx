@@ -21,8 +21,8 @@ export default async function RoadmapPage() {
         title="Roadmap"
         description={
           selected
-            ? `Public ${selected.name} requests. Moving a status writes an event and does not notify anyone until you choose to.`
-            : "Public requests from every app. Moving a status writes an event and does not notify anyone until you choose to."
+            ? `Public ${selected.name} requests. Moving a status writes an event and does not notify anyone.`
+            : "Public requests from every app. Moving a status writes an event and does not notify anyone."
         }
       />
       {rows.length === 0 ? (

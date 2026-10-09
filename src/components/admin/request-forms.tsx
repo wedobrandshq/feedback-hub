@@ -113,17 +113,6 @@ export function StatusForm({ requestId, status }: { requestId: string; status: R
           <option key={item} value={item}>{REQUEST_STATUS_LABELS[item]}</option>
         ))}
       </select>
-      <fieldset className="space-y-1 text-sm">
-        <legend>Notify interested users?</legend>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="notify" value="no" defaultChecked />
-          Don’t notify
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="notify" value="yes" />
-          Notify in the app
-        </label>
-      </fieldset>
       {state.error ? <p className="text-sm text-destructive" role="alert">{state.error}</p> : null}
       <Button type="submit" disabled={pending}>{pending ? "Saving…" : "Save status"}</Button>
     </form>
@@ -148,17 +137,6 @@ export function RoadmapMoveForm({ requestId, status }: { requestId: string; stat
           ))}
         </select>
       </div>
-      <fieldset className="space-y-1 text-sm">
-        <legend>Notify interested users?</legend>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="notify" value="no" defaultChecked />
-          Don’t notify
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="radio" name="notify" value="yes" />
-          Notify in the app
-        </label>
-      </fieldset>
       <Button type="submit" variant="outline" disabled={pending}>{pending ? "Moving…" : "Move"}</Button>
       {state.error ? <p className="w-full text-sm text-destructive" role="alert">{state.error}</p> : null}
     </form>

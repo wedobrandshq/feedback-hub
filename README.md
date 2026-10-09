@@ -14,7 +14,7 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Create a conversation and the first in-app message from that submission.
 - Admin Inbox and conversation detail: reply, close, and reopen. Reply also works on feedback detail.
 - Willow Messages: unread badge, thread, and a reply from that user.
-- Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. Status changes can send an in-app notice. The demo shows public requests, a simple roadmap, and a thin changelog.
+- Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. A status change moves the request and does not notify. The phone shows public requests and one roadmap. The admin Changelog stays the release note.
 - Admin Home shows the last 30 days of feedback, new requests, conversations, and votes as separate numbers, plus trending requests and conversations that need a reply.
 - Users list and user detail for product context. Apps lists connected apps. Settings shows the signed-in owner and workspace.
 - New feedback can store a generated suggestion: a type, topics, and one existing request with the similarity the model returned. An admin can link that request, create a request, or ignore it. The original message stays as submitted. A request with linked feedback can show a short generated summary to admins. The Willow demo does not show suggestions, similarity, or that summary.
@@ -40,7 +40,7 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 | Path | What it is |
 | --- | --- |
-| `/demo` | Willow phone. Feedback, public requests, roadmap, and updates. |
+| `/demo` | Willow phone. Feedback, public requests, one roadmap, and Messages. |
 | `/admin` | Home: signals, trending requests, needs attention |
 | `/admin/login` | Admin sign-in |
 | `/admin/users` | Users and user detail |

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { markDemoNotificationsRead, markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/(demo)/actions";
+import { markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/(demo)/actions";
 import { DemoCatalogScreens } from "@/components/demo/demo-catalog-screens";
 import type { DemoCatalog } from "@/server/demo-catalog";
 import type { DemoMailbox } from "@/domain/conversation";
@@ -12,7 +12,7 @@ import { FeedbackHoldRegion } from "@/host/feedback-hold-region";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-type HostScreen = "host" | "messages" | "thread" | "requests" | "request" | "roadmap" | "updates" | "changelog";
+type HostScreen = "host" | "messages" | "thread" | "requests" | "request" | "roadmap";
 type FeedbackStep = "kind" | "message" | "done";
 
 export function WillowFeedback({
@@ -153,25 +153,6 @@ export function WillowFeedback({
             <Button
               type="button"
               variant="outline"
-              className="h-11 w-full justify-between bg-white"
-              onClick={() => {
-                setHostScreen("updates");
-                void markDemoNotificationsRead().then(() => router.refresh());
-              }}
-            >
-              <span>Updates</span>
-              {catalog.unreadCount > 0 ? (
-                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#1f3d32] px-1.5 text-xs text-[#f4f1ea]">
-                  {catalog.unreadCount}
-                </span>
-              ) : null}
-            </Button>
-            <Button type="button" variant="outline" className="h-11 w-full bg-white" onClick={() => setHostScreen("changelog")}>
-              What’s new
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
               className="h-12 w-full justify-between bg-white"
               onClick={() => {
                 setError(null);
@@ -193,7 +174,7 @@ export function WillowFeedback({
         </div>
       ) : null}
 
-      {hostScreen === "requests" || hostScreen === "request" || hostScreen === "roadmap" || hostScreen === "updates" || hostScreen === "changelog" ? (
+      {hostScreen === "requests" || hostScreen === "request" || hostScreen === "roadmap" ? (
         <DemoCatalogScreens
           screen={hostScreen}
           catalog={catalog}

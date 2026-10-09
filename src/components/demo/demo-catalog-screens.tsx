@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { voteDemoRequest } from "@/app/(demo)/actions";
 import type { DemoCatalog } from "@/server/demo-catalog";
 import { publicStatusLabel, type RequestStatusName } from "@/domain/request";
-import { formatDateTime } from "@/domain/feedback";
 import { Button } from "@/components/ui/button";
 
 export function DemoCatalogScreens({
@@ -15,7 +14,7 @@ export function DemoCatalogScreens({
   onBack,
   onOpenRequest,
 }: {
-  screen: "requests" | "request" | "roadmap" | "updates" | "changelog";
+  screen: "requests" | "request" | "roadmap";
   catalog: DemoCatalog;
   requestId: string | null;
   onBack: () => void;
@@ -34,8 +33,6 @@ export function DemoCatalogScreens({
         request ? <RequestDetail request={request} /> : <p className="mt-6 text-sm text-[#8a2e24]">This request is not available.</p>
       ) : null}
       {screen === "roadmap" ? <Roadmap catalog={catalog} onOpenRequest={onOpenRequest} /> : null}
-      {screen === "updates" ? <Updates catalog={catalog} onOpenRequest={onOpenRequest} /> : null}
-      {screen === "changelog" ? <Changelog catalog={catalog} /> : null}
     </div>
   );
 }
@@ -115,21 +112,6 @@ function RequestDetail({ request }: { request: DemoCatalog["requests"][number] }
           {pending ? "Saving…" : request.voted ? "Remove vote" : "Vote"}
         </Button>
       </form>
-      {request.updates.length > 0 ? (
-        <section className="mt-6">
-          <h3 className="text-sm font-medium text-[#1c241c]">Updates</h3>
-          <ul className="mt-2 space-y-3">
-            {request.updates.map((update) => (
-              <li key={update.id}>
-                <p className="text-sm whitespace-pre-wrap text-[#1c241c]">{update.body}</p>
-                {update.publishedAt ? (
-                  <p className="mt-1 text-xs text-[#6a7268]">{formatDateTime(new Date(update.publishedAt))}</p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
     </>
   );
 }
@@ -144,7 +126,7 @@ function Roadmap({
   const sections = [
     { status: "planned", label: "Planned" },
     { status: "in_progress", label: "In progress" },
-    { status: "released", label: "Recently released" },
+    { status: "released", label: "Released" },
   ] as const;
   return (
     <>
@@ -174,54 +156,3 @@ function Roadmap({
   );
 }
 
-function Updates({
-  catalog,
-  onOpenRequest,
-}: {
-  catalog: DemoCatalog;
-  onOpenRequest: (id: string) => void;
-}) {
-  return (
-    <>
-      <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">Updates</h2>
-      {catalog.notifications.length === 0 ? (
-        <p className="mt-4 text-sm text-[#3d463d]">No updates yet.</p>
-      ) : (
-        <ul className="mt-4 space-y-3">
-          {catalog.notifications.map((item) => (
-            <li key={item.id}>
-              {item.requestId ? (
-                <button type="button" className="text-left text-sm text-[#1c241c]" onClick={() => onOpenRequest(item.requestId as string)}>
-                  {item.body}
-                </button>
-              ) : (
-                <p className="text-sm text-[#1c241c]">{item.body}</p>
-              )}
-              <p className="mt-1 text-xs text-[#6a7268]">{formatDateTime(new Date(item.createdAt))}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </>
-  );
-}
-
-function Changelog({ catalog }: { catalog: DemoCatalog }) {
-  return (
-    <>
-      <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">What’s new</h2>
-      {catalog.changelog.length === 0 ? (
-        <p className="mt-4 text-sm text-[#3d463d]">Nothing released yet.</p>
-      ) : (
-        <ul className="mt-4 space-y-4">
-          {catalog.changelog.map((entry) => (
-            <li key={entry.id}>
-              <p className="text-sm font-medium text-[#1c241c]">{entry.title}</p>
-              <p className="mt-1 text-sm whitespace-pre-wrap text-[#3d463d]">{entry.body}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </>
-  );
-}

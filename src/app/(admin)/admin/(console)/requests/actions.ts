@@ -147,7 +147,6 @@ export async function changeStatusAction(_previous: ActionState, formData: FormD
       workspaceId: admin.workspaceId,
       requestId,
       status: String(formData.get("status") ?? ""),
-      notify: formData.get("notify") === "yes",
     });
   } catch (error) {
     return fail(error);

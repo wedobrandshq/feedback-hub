@@ -96,9 +96,9 @@ A feedback item links to one request. Linking a second request is refused until 
 
 The admin list sorts by Updated, newest first, unless Feedback, Votes, or Created is chosen. Users on the list are unique authors of linked feedback. Votes on the list are the vote count. Unique voters are shown separately on the request. With the unique vote constraint those two vote numbers match, and they stay separate fields.
 
-A published request is visible in that app even while its status is Review or Under consideration. The demo does not show those two words. Roadmap in the demo is Planned, In progress, and Recently released. Voting is allowed on any public request in the same app. A private request, or a request from another app, is not found. Unlinking feedback whose status is `linked` sets that status back to `reviewed`. Closed feedback stays closed. One changelog entry is allowed per released request.
+A published request is visible in that app even while its status is Review or Under consideration. The demo does not show those two words. Roadmap in the demo is Planned, In progress, and Released. Voting is allowed on any public request in the same app. A private request, or a request from another app, is not found. Unlinking feedback whose status is `linked` sets that status back to `reviewed`. Closed feedback stays closed. One changelog entry is allowed per released request.
 
-`released_at` is set when the status becomes Released and is left in place if the status changes again. Status changes always write `request.status_changed` and do not notify anyone by themselves. Notify is offered on the status form and only sends when the new status is Planned, In progress, Released, or Not planned. Recipients are the linked feedback authors, the voters, and the conversation participants, deduplicated. The channel is in-app. The notice text is the request title plus “is now” and the status label. Opening Updates marks those notices read.
+`released_at` is set when the status becomes Released and is left in place if the status changes again. Status changes always write `request.status_changed`. A later confirmed decision in `docs/PRODUCT.md` removes the notify choice: a status change does not send an in-app notification.
 
 ## Admin home
 
@@ -116,7 +116,7 @@ The Apps list shows name, platform, status, and the latest event time. Open sele
 
 ## Roadmap moves
 
-On the roadmap, a request can move among Under consideration, Planned, In progress, and Released. That uses the same status action as the request page: it writes `request.status_changed` and does not notify unless the admin chooses Notify in the app. Review and Not planned stay on the request page.
+On the roadmap, a request can move among Under consideration, Planned, In progress, and Released. That uses the same status action as the request page: it writes `request.status_changed` and does not notify. Review and Not planned stay on the request page. The Willow phone has one roadmap, with Planned, In progress, and Released. What’s new and Updates are not on the phone.
 
 ## Host entry
 

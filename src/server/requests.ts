@@ -2,9 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { DomainError } from "@/domain/errors";
 import {
   assertStoredText,
-  isPublicRequestStatus,
   isRequestStatus,
-  notificationBody,
   type RequestSortName,
   type RequestStatusName,
 } from "@/domain/request";
@@ -357,7 +355,6 @@ export async function getAdminRequest(input: { workspaceId: string; requestId: s
 export async function changeRequestStatus(input: AdminActor & {
   requestId: string;
   status: string;
-  notify: boolean;
 }) {
   if (!isRequestStatus(input.status)) {
     throw new DomainError("That status is not available.", "validation");
@@ -367,8 +364,6 @@ export async function changeRequestStatus(input: AdminActor & {
   if (request.status === input.status) {
     throw new DomainError("This request already has that status.", "conflict");
   }
-  const notify = input.notify && isPublicRequestStatus(status);
-  const recipients = notify ? await interestedUserIds(request.id) : [];
 
   await prisma.$transaction(async (tx) => {
     await tx.request.update({
@@ -389,49 +384,9 @@ export async function changeRequestStatus(input: AdminActor & {
       entityId: request.id,
       extra: { from: request.status, to: status },
     });
-    if (notify && recipients.length > 0) {
-      const body = notificationBody(request.title, status);
-      await tx.notification.createMany({
-        data: recipients.map((userId) => ({
-          appId: request.appId,
-          userId,
-          requestId: request.id,
-          body,
-          channel: "in_app" as const,
-        })),
-      });
-      await writeEvent(tx, {
-        workspaceId: input.workspaceId,
-        appId: request.appId,
-        actorType: "admin",
-        actorId: input.id,
-        actorName: input.name,
-        type: "notification.sent",
-        entityType: "request",
-        entityId: request.id,
-        extra: { recipients: recipients.length, channel: "in_app", status },
-      });
-    }
   });
 
-  return { notified: notify ? recipients.length : 0 };
-}
-
-async function interestedUserIds(requestId: string) {
-  const [links, votes] = await Promise.all([
-    prisma.feedbackRequest.findMany({
-      where: { requestId },
-      include: { feedback: { select: { userId: true, conversation: { select: { userId: true } } } } },
-    }),
-    prisma.vote.findMany({ where: { requestId }, select: { userId: true } }),
-  ]);
-  const ids = new Set<string>();
-  for (const link of links) {
-    ids.add(link.feedback.userId);
-    if (link.feedback.conversation) ids.add(link.feedback.conversation.userId);
-  }
-  for (const vote of votes) ids.add(vote.userId);
-  return [...ids];
+  return { notified: 0 };
 }
 
 export async function publishRequestUpdate(input: AdminActor & { requestId: string; body: string }) {

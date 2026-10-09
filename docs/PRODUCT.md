@@ -2,6 +2,12 @@
 
 Source of truth for product behavior. Do not invent business logic. If implementation reveals an ambiguity, document it. If a decision materially changes product behavior, update this specification.
 
+## Confirmed decision — 9 October 2026
+
+Willow’s phone does not include What’s new or Updates. It keeps hold-to-open feedback, requests with voting, one roadmap, and Messages. Popular requests and View all requests stay. That roadmap is the user’s status view: Planned, In progress, and Released. There is not a second roadmap screen.
+
+An admin status change writes the event and moves the request. It does not ask whether to notify, and it does not send an in-app notification. The admin Changelog stays the release note on a Released request. The admin Roadmap stays.
+
 ## 1. Product overview
 
 Feedback Hub is a centralized feedback management platform for multiple mobile applications.
@@ -389,7 +395,7 @@ RequestUpdate fields: id, request_id, body, visibility, created_at, published_at
 
 Admin roadmap organizes public Requests. Sections: Under consideration, Planned, In progress, Released.
 
-Requests may be moved between statuses. Changing status should create an Event. Do not automatically notify users every time. After important status changes, ask admin whether interested users should be notified.
+Requests may be moved between statuses. Changing status creates an Event and does not send an in-app notification. The confirmed decision at the top of this document is the rule.
 
 ## 43. Changelog
 
