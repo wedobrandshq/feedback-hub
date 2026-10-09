@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { DomainError } from "@/domain/errors";
 import { requireAdmin } from "@/server/auth/admin";
 import { setSelectedAppCookie } from "@/server/auth/session";
@@ -22,6 +23,11 @@ export async function setSelectedAppAction(formData: FormData) {
     await setSelectedAppCookie(app.id);
   }
   revalidatePath("/admin", "layout");
+}
+
+export async function openAppAction(formData: FormData) {
+  await setSelectedAppAction(formData);
+  redirect("/admin");
 }
 
 export type StatusActionState = { error: string | null };

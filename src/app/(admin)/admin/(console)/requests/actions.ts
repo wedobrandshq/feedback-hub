@@ -26,6 +26,7 @@ function refresh(requestId?: string) {
   revalidatePath("/admin/requests");
   revalidatePath("/admin/roadmap");
   revalidatePath("/admin/changelog");
+  revalidatePath("/admin");
   revalidatePath("/demo");
   if (requestId) revalidatePath(`/admin/requests/${requestId}`);
 }

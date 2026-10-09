@@ -88,7 +88,7 @@ Newest activity is first. Activity is the conversation’s updated time, which m
 
 ## Where a reply is sent
 
-Reply on feedback detail and the composer on the conversation both call the same server rule. Link to Request and Create Request are not built. The conversation sidebar says there is no linked request. A separate user profile page is a later slice, so the user is shown on the conversation itself. Internal classification is not shown.
+Reply on feedback detail and the composer on the conversation both call the same server rule. Link to Request and Create Request are on feedback detail. The conversation sidebar shows the linked request when one exists. Internal classification is not shown.
 
 ## Requests
 
@@ -99,6 +99,24 @@ The admin list sorts by Updated, newest first, unless Feedback, Votes, or Create
 A published request is visible in that app even while its status is Review or Under consideration. The demo does not show those two words. Roadmap in the demo is Planned, In progress, and Recently released. Voting is allowed on any public request in the same app. A private request, or a request from another app, is not found. Unlinking feedback whose status is `linked` sets that status back to `reviewed`. Closed feedback stays closed. One changelog entry is allowed per released request.
 
 `released_at` is set when the status becomes Released and is left in place if the status changes again. Status changes always write `request.status_changed` and do not notify anyone by themselves. Notify is offered on the status form and only sends when the new status is Planned, In progress, Released, or Not planned. Recipients are the linked feedback authors, the voters, and the conversation participants, deduplicated. The channel is in-app. The notice text is the request title plus “is now” and the status label. Opening Updates marks those notices read.
+
+## Admin home
+
+Product Signals count the last 30 days: feedback created, requests created, conversations created, and votes cast. Feedback also shows the difference against the previous 30 days. Released counts requests whose `released_at` falls in the last 30 days. Trending requests are those with at least one vote in that window, ordered by that vote count. Each row shows the window’s vote count and the request’s feedback count separately. Private requests are included. Emerging Topics is not shown.
+
+Needs Attention uses the same rule as Inbox: an open conversation whose latest message is from the user. The open-conversation count is the current set, not a 30-day count. The scan stops at 200 open conversations.
+
+## Users
+
+Search matches name, email, or external id. The plan filter lists plans already stored on users in the selected app. Activity means last seen in the last 30 days, or not, because the spec does not define an activity score. The list sorts by last seen, newest first, and stops at 200. Timezone is stored and not shown. The detail page is the person opened by id, even if the app selector is on another app.
+
+## Apps and settings
+
+The Apps list shows name, platform, status, and the latest event time. Open selects that app and goes to Home. The selector does not hide apps on this screen. Icon, SDK status, integration instructions, and the section 47 toggles (public feedback, voting, roadmap, messages, notifications, SDK keys) are not shown. Settings shows the signed-in admin and the workspace only.
+
+## Roadmap moves
+
+On the roadmap, a request can move among Under consideration, Planned, In progress, and Released. That uses the same status action as the request page: it writes `request.status_changed` and does not notify unless the admin chooses Notify in the app. Review and Not planned stay on the request page.
 
 ## Host entry
 

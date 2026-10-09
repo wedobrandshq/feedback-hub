@@ -15,6 +15,8 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Admin Inbox and conversation detail: reply, close, and reopen. Reply also works on feedback detail.
 - Willow Messages: unread badge, thread, and a reply from that user.
 - Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. Status changes can send an in-app notice. The demo shows public requests, a simple roadmap, and a thin changelog.
+- Admin Home shows the last 30 days of feedback, new requests, conversations, and votes as separate numbers, plus trending requests and conversations that need a reply.
+- Users list and user detail for product context. Apps lists connected apps. Settings shows the signed-in owner and workspace.
 - Events for feedback, conversations, requests, votes, updates, and in-app notifications.
 
 Email, push, Slack, Jira, surveys, public comments, and a web SDK are not built.
@@ -38,7 +40,11 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | Path | What it is |
 | --- | --- |
 | `/demo` | Willow phone. Feedback, public requests, roadmap, and updates. |
+| `/admin` | Home: signals, trending requests, needs attention |
 | `/admin/login` | Admin sign-in |
+| `/admin/users` | Users and user detail |
+| `/admin/apps` | Connected apps |
+| `/admin/settings` | Signed-in owner and workspace |
 | `/admin/inbox` | Conversations that need attention |
 | `/admin/feedback` | Feedback list |
 | `/admin/requests` | Requests, with feedback and votes kept as separate counts |

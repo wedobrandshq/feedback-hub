@@ -11,7 +11,7 @@ import {
   unlinkFeedbackAction,
   type ActionState,
 } from "@/app/(admin)/admin/(console)/requests/actions";
-import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, type RequestStatusName } from "@/domain/request";
+import { ADMIN_ROADMAP_STATUSES, REQUEST_STATUSES, REQUEST_STATUS_LABELS, type RequestStatusName } from "@/domain/request";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -126,6 +126,41 @@ export function StatusForm({ requestId, status }: { requestId: string; status: R
       </fieldset>
       {state.error ? <p className="text-sm text-destructive" role="alert">{state.error}</p> : null}
       <Button type="submit" disabled={pending}>{pending ? "Saving…" : "Save status"}</Button>
+    </form>
+  );
+}
+
+export function RoadmapMoveForm({ requestId, status }: { requestId: string; status: RequestStatusName }) {
+  const [state, action, pending] = useActionState(changeStatusAction, initial);
+  return (
+    <form action={action} className="mt-2 flex flex-wrap items-end gap-3">
+      <input type="hidden" name="requestId" value={requestId} />
+      <div>
+        <label htmlFor={`move-${requestId}`} className="text-xs text-muted-foreground">Status</label>
+        <select
+          id={`move-${requestId}`}
+          name="status"
+          defaultValue={status}
+          className="mt-1 block h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+        >
+          {ADMIN_ROADMAP_STATUSES.map((item) => (
+            <option key={item} value={item}>{REQUEST_STATUS_LABELS[item]}</option>
+          ))}
+        </select>
+      </div>
+      <fieldset className="space-y-1 text-sm">
+        <legend>Notify interested users?</legend>
+        <label className="flex items-center gap-2">
+          <input type="radio" name="notify" value="no" defaultChecked />
+          Don’t notify
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="radio" name="notify" value="yes" />
+          Notify in the app
+        </label>
+      </fieldset>
+      <Button type="submit" variant="outline" disabled={pending}>{pending ? "Moving…" : "Move"}</Button>
+      {state.error ? <p className="w-full text-sm text-destructive" role="alert">{state.error}</p> : null}
     </form>
   );
 }
