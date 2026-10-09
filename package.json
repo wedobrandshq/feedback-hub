@@ -13,7 +13,7 @@
     "db:seed": "node --env-file=.env --import tsx prisma/seed.ts"
   },
   "prisma": {
-    "seed": "node --env-file=.env --import tsx prisma/seed.ts"
+    "seed": "node --import tsx prisma/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
