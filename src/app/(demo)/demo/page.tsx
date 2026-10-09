@@ -6,6 +6,7 @@ import { getDemoCatalog } from "@/server/demo-catalog";
 import { getDemoMailbox } from "@/server/demo-mailbox";
 
 export const instant = false;
+export const maxDuration = 60;
 
 export const metadata = {
   title: "Feedback · Willow",

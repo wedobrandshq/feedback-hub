@@ -17,6 +17,7 @@ import { refreshRequestSummary } from "@/server/suggestions";
 
 export const metadata = { title: "Request" };
 export const instant = false;
+export const maxDuration = 60;
 
 const TABS = ["overview", "feedback", "conversations", "updates", "activity"] as const;
 type Tab = (typeof TABS)[number];

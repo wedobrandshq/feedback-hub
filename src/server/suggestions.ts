@@ -30,6 +30,7 @@ async function modelObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T> 
   const { output } = await generateText({
     model: SUGGESTION_MODEL,
     output: Output.object({ schema }),
+    reasoning: "low",
     prompt,
   });
   if (!output) throw new DomainError("The model did not return a suggestion.", "validation");

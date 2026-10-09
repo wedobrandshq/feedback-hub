@@ -16,6 +16,7 @@ import { ensureFeedbackSuggestion } from "@/server/suggestions";
 
 export const metadata = { title: "Feedback" };
 export const instant = false;
+export const maxDuration = 60;
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
