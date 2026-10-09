@@ -8,7 +8,7 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 
 ## What this slice includes
 
-- Submit feedback from the Willow demo: kind, message, optional screenshot.
+- Open feedback from the Willow demo by holding the marked walk card for half a second. A tap on that card logs a walk and does not open feedback. The window is kind, message, optional screenshot, and thanks.
 - Identify the seeded Willow user on the server. The browser does not send an app secret or choose who the message belongs to.
 - Store the original message, submission context, and screenshot.
 - Create a conversation and the first in-app message from that submission.

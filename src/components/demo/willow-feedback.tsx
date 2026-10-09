@@ -6,10 +6,12 @@ import { markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/
 import type { DemoMailbox } from "@/domain/conversation";
 import { DEMO_KIND_OPTIONS, formatDateTime } from "@/domain/feedback";
 import type { SubmitFeedbackType } from "@/domain/config";
+import { FeedbackHoldRegion } from "@/host/feedback-hold-region";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-type Screen = "home" | "kind" | "message" | "done" | "messages" | "thread";
+type HostScreen = "host" | "messages" | "thread";
+type FeedbackStep = "kind" | "message" | "done";
 
 export function WillowFeedback({
   name,
@@ -20,7 +22,9 @@ export function WillowFeedback({
   plan: string;
   mailbox: DemoMailbox;
 }) {
-  const [screen, setScreen] = useState<Screen>("home");
+  const [hostScreen, setHostScreen] = useState<HostScreen>("host");
+  const [feedbackStep, setFeedbackStep] = useState<FeedbackStep | null>(null);
+  const [walks, setWalks] = useState(0);
   const [kind, setKind] = useState<SubmitFeedbackType | null>(null);
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -43,11 +47,27 @@ export function WillowFeedback({
     setPreview(url);
   }
 
+  function closeFeedback() {
+    setFeedbackStep(null);
+    setKind(null);
+    setBody("");
+    replaceScreenshot(null);
+    setError(null);
+  }
+
+  function openFeedback() {
+    setError(null);
+    setKind(null);
+    setBody("");
+    replaceScreenshot(null);
+    setFeedbackStep("kind");
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!kind) {
       setError("Choose what kind of feedback this is.");
-      setScreen("kind");
+      setFeedbackStep("kind");
       return;
     }
     if (body.trim().length === 0) {
@@ -63,7 +83,7 @@ export function WillowFeedback({
     const result = await submitDemoFeedback(formData);
     setPending(false);
     if (result.ok) {
-      setScreen("done");
+      setFeedbackStep("done");
       router.refresh();
       return;
     }
@@ -71,20 +91,37 @@ export function WillowFeedback({
   }
 
   return (
-    <div className="flex min-h-full flex-col px-5 pt-4 pb-6">
-      {screen === "home" ? (
+    <div className="relative flex h-full min-h-full flex-col px-5 pt-4 pb-6">
+      {hostScreen === "host" ? (
         <div className="flex flex-1 flex-col">
           <p className="text-xs text-[#6a7268]">{name} · {plan}</p>
-          <h2 className="mt-8 text-[2rem] leading-none font-semibold tracking-tight text-[#1c241c]">Feedback</h2>
-          <p className="mt-3 text-lg text-[#3d463d]">Help us make Willow better.</p>
-          <div className="mt-auto space-y-3 pt-10">
+          <h2 className="mt-6 text-[2rem] leading-none font-semibold tracking-tight text-[#1c241c]">Willow</h2>
+          <p className="mt-2 text-sm text-[#3d463d]">A short walk still counts.</p>
+          <FeedbackHoldRegion
+            className="mt-6 rounded-2xl border-2 border-dashed border-[#1f3d32] bg-white px-4 py-5 text-left"
+            label="Today's walk. Tap to log a walk. Hold to share feedback."
+            onOpenFeedback={openFeedback}
+            onTap={() => setWalks((count) => count + 1)}
+          >
+            <p className="text-xs font-medium tracking-[0.14em] text-[#1f3d32] uppercase">Marked region</p>
+            <p className="mt-2 text-xl font-semibold tracking-tight text-[#1c241c]">Today&apos;s walk</p>
+            <p className="mt-1 text-sm text-[#3d463d]" data-walk-count={walks}>
+              {walks === 1 ? "1 walk logged" : `${walks} walks logged`}
+            </p>
+            <p className="mt-3 text-sm text-[#6a7268]">Tap to log it. Hold to share feedback.</p>
+          </FeedbackHoldRegion>
+          <div className="mt-4 rounded-2xl border border-[#e2dcd0] bg-white/70 px-4 py-5" data-host-surface="">
+            <p className="text-sm font-medium text-[#1c241c]">This week</p>
+            <p className="mt-1 text-sm text-[#3d463d]">4,280 steps. Holding here stays in Willow.</p>
+          </div>
+          <div className="mt-auto pt-8">
             <Button
               type="button"
               variant="outline"
               className="h-12 w-full justify-between bg-white"
               onClick={() => {
                 setError(null);
-                setScreen("messages");
+                setHostScreen("messages");
                 router.refresh();
               }}
             >
@@ -98,23 +135,13 @@ export function WillowFeedback({
                 </span>
               ) : null}
             </Button>
-            <Button
-              type="button"
-              className="h-12 w-full bg-[#1f3d32] text-[#f4f1ea] hover:bg-[#1f3d32]/90"
-              onClick={() => {
-                setError(null);
-                setScreen("kind");
-              }}
-            >
-              Share feedback
-            </Button>
           </div>
         </div>
       ) : null}
 
-      {screen === "kind" ? (
-        <div className="flex flex-1 flex-col">
-          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("home")}>
+      {feedbackStep === "kind" ? (
+        <div className="absolute inset-0 z-10 flex flex-col bg-[#f3f0e8] px-5 pt-4 pb-6">
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={closeFeedback}>
             Back
           </button>
           <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">What kind of feedback?</h2>
@@ -147,7 +174,7 @@ export function WillowFeedback({
               type="button"
               disabled={!kind}
               className="h-12 w-full bg-[#1f3d32] text-[#f4f1ea] hover:bg-[#1f3d32]/90"
-              onClick={() => setScreen("message")}
+              onClick={() => setFeedbackStep("message")}
             >
               Continue
             </Button>
@@ -155,9 +182,9 @@ export function WillowFeedback({
         </div>
       ) : null}
 
-      {screen === "message" ? (
-        <form className="flex flex-1 flex-col" onSubmit={onSubmit}>
-          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("kind")}>
+      {feedbackStep === "message" ? (
+        <form className="absolute inset-0 z-10 flex flex-col bg-[#f3f0e8] px-5 pt-4 pb-6" onSubmit={onSubmit}>
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setFeedbackStep("kind")}>
             Back
           </button>
           <label htmlFor="feedback-body" className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">
@@ -212,8 +239,8 @@ export function WillowFeedback({
         </form>
       ) : null}
 
-      {screen === "done" ? (
-        <div className="flex flex-1 flex-col">
+      {feedbackStep === "done" ? (
+        <div className="absolute inset-0 z-10 flex flex-col bg-[#f3f0e8] px-5 pt-4 pb-6">
           <h2 className="mt-16 text-2xl font-semibold tracking-tight text-[#1c241c]">
             Thanks for helping us improve Willow.
           </h2>
@@ -224,7 +251,8 @@ export function WillowFeedback({
               variant="outline"
               className="h-12 w-full"
               onClick={() => {
-                setScreen("messages");
+                setFeedbackStep(null);
+                setHostScreen("messages");
                 setError(null);
                 router.refresh();
               }}
@@ -236,11 +264,11 @@ export function WillowFeedback({
               variant="outline"
               className="h-12 w-full"
               onClick={() => {
-                setScreen("home");
                 setKind(null);
                 setBody("");
                 replaceScreenshot(null);
                 setError(null);
+                setFeedbackStep("kind");
               }}
             >
               Send more feedback
@@ -249,9 +277,9 @@ export function WillowFeedback({
         </div>
       ) : null}
 
-      {screen === "messages" ? (
+      {hostScreen === "messages" ? (
         <div className="flex flex-1 flex-col">
-          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("home")}>
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setHostScreen("host")}>
             Back
           </button>
           <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">Messages</h2>
@@ -270,7 +298,7 @@ export function WillowFeedback({
                       setThreadId(conversation.id);
                       setReply("");
                       setReplyError(null);
-                      setScreen("thread");
+                      setHostScreen("thread");
                       void markDemoThreadRead(conversation.id).then(() => router.refresh());
                     }}
                   >
@@ -294,9 +322,9 @@ export function WillowFeedback({
         </div>
       ) : null}
 
-      {screen === "thread" && thread ? (
+      {hostScreen === "thread" && thread ? (
         <div className="flex flex-1 flex-col">
-          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("messages")}>
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setHostScreen("messages")}>
             Back
           </button>
           <h2 className="mt-6 text-2xl font-semibold tracking-tight text-[#1c241c]">Conversation</h2>
@@ -365,9 +393,9 @@ export function WillowFeedback({
         </div>
       ) : null}
 
-      {screen === "thread" && !thread ? (
+      {hostScreen === "thread" && !thread ? (
         <div className="flex flex-1 flex-col">
-          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setScreen("messages")}>
+          <button type="button" className="self-start text-sm text-[#1f3d32]" onClick={() => setHostScreen("messages")}>
             Back
           </button>
           <p className="mt-6 text-sm text-[#8a2e24]" role="alert">

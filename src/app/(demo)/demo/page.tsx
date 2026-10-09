@@ -21,8 +21,9 @@ export default async function DemoPage() {
           <p className="text-xs font-medium tracking-[0.16em] text-[#6d675c] uppercase">Host app</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1c241c]">Willow</h1>
           <p className="mt-3 text-sm leading-6 text-[#4c534b]">
-            Feedback Hub sits inside the host app. This phone is Willow. The admin tool is separate, and the app
-            credential never leaves the server.
+            Feedback Hub sits inside the host app. This phone is Willow. Hold the marked walk card for half a
+            second to open feedback. A tap logs the walk. The admin tool is separate, and the app credential never
+            leaves the server.
           </p>
           <Link href="/admin/login" className="mt-5 inline-block text-sm font-medium text-[#1f3d32] underline-offset-4 hover:underline">
             Open admin

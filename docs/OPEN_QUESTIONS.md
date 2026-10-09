@@ -90,6 +90,10 @@ Newest activity is first. Activity is the conversation’s updated time, which m
 
 Reply on feedback detail and the composer on the conversation both call the same server rule. Link to Request and Create Request are not built. The conversation sidebar says there is no linked request. A separate user profile page is a later slice, so the user is shown on the conversation itself. Internal classification is not shown.
 
+## Host entry
+
+The spec says the host app decides where Feedback Hub opens and does not name a gesture. This demo marks one region in code with `FeedbackHoldRegion`. A pointer that stays inside that region for 500 milliseconds opens the existing submit window over the host. Releasing sooner runs the host action. Leaving the region before 500 milliseconds does neither. The rest of the screen has no hold region. The window does not ask for email, device, or app version.
+
 ## What the user is shown
 
 The Willow Messages entry lists that user’s conversations in Willow. The unread badge is for replies from the team. Opening a thread marks those replies read. The demo still identifies Maya Chen on the server. A posted user id or app secret is ignored.
