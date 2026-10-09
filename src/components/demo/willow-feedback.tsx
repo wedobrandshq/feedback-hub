@@ -115,34 +115,6 @@ export function WillowFeedback({
             </p>
             <p className="mt-3 text-sm text-[#6a7268]">Tap to log it. Hold to share feedback.</p>
           </FeedbackHoldRegion>
-          {catalog.requests.length > 0 ? (
-            <section className="mt-5">
-              <h3 className="text-xs font-medium tracking-[0.14em] text-[#6a7268] uppercase">Popular requests</h3>
-              <ul className="mt-2 space-y-1">
-                {[...catalog.requests]
-                  .sort((left, right) => right.voteCount - left.voteCount)
-                  .slice(0, 3)
-                  .map((request) => (
-                    <li key={request.id}>
-                      <button
-                        type="button"
-                        className="text-sm text-[#1c241c]"
-                        onClick={() => {
-                          setRequestId(request.id);
-                          setHostScreen("request");
-                        }}
-                      >
-                        {request.title} · {request.voteCount}
-                      </button>
-                    </li>
-                  ))}
-              </ul>
-            </section>
-          ) : null}
-          <div className="mt-4 rounded-2xl border border-[#e2dcd0] bg-white/70 px-4 py-5" data-host-surface="">
-            <p className="text-sm font-medium text-[#1c241c]">This week</p>
-            <p className="mt-1 text-sm text-[#3d463d]">4,280 steps. Holding here stays in Willow.</p>
-          </div>
           <div className="mt-auto space-y-2 pt-8">
             <Button type="button" variant="outline" className="h-11 w-full bg-white" onClick={() => setHostScreen("requests")}>
               View all requests

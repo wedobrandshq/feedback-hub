@@ -4,7 +4,7 @@ Source of truth for product behavior. Do not invent business logic. If implement
 
 ## Confirmed decision — 9 October 2026
 
-Willow’s phone does not include What’s new or Updates. It keeps hold-to-open feedback, requests with voting, one roadmap, and Messages. Popular requests and View all requests stay. That roadmap is the user’s status view: Planned, In progress, and Released. There is not a second roadmap screen.
+Willow’s phone does not include What’s new, Updates, the Popular requests list, or the This week step card. It keeps the marked Today’s walk card, View all requests, one roadmap, and Messages. That roadmap is the user’s status view: Planned, In progress, and Released. There is not a second roadmap screen.
 
 An admin status change writes the event and moves the request. It does not ask whether to notify, and it does not send an in-app notification. The admin Changelog stays the release note on a Released request. The admin Roadmap stays.
 
