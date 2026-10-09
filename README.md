@@ -8,7 +8,7 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 
 ## What this slice includes
 
-- Open feedback from the Willow demo by holding the marked walk card for half a second. A tap on that card logs a walk and does not open feedback. The window is kind, message, optional screenshot, and thanks.
+- Open the Feedback Hub window from the Willow icon, or by holding the marked walk card. A tap on that card logs a walk. The window is submit feedback, public requests with voting, and the roadmap.
 - Identify the seeded Willow user on the server. The browser does not send an app secret or choose who the message belongs to.
 - Store the original message, submission context, and screenshot.
 - Create a conversation and the first in-app message from that submission.
@@ -40,7 +40,7 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 | Path | What it is |
 | --- | --- |
-| `/demo` | Willow phone. Feedback, public requests, one roadmap, and Messages. |
+| `/demo` | Willow phone. An icon opens the Feedback Hub window. |
 | `/admin` | Home: signals, trending requests, needs attention |
 | `/admin/login` | Admin sign-in |
 | `/admin/users` | Users and user detail |
@@ -72,6 +72,26 @@ createdb -O feedback feedback_hub_test
 Override `ADMIN_EMAIL` and `ADMIN_PASSWORD` before seeding if you want different credentials. Reseed after changing them.
 
 The Willow demo is Maya Chen (`maya.chen@example.com`, plan Plus). Earn It starts with no users. App credentials live only in server environment variables (`WILLOW_APP_SECRET`, `EARNIT_APP_SECRET`).
+
+## Embed
+
+The host server identifies the user it already knows. The app secret stays in that server’s environment. The response `session` goes in the snippet. Do not put the secret, or a raw user id, on the icon.
+
+```bash
+curl -s -X POST https://feedback-hub-smoky.vercel.app/api/embed/session \
+  -H "Authorization: Bearer $APP_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"usr_maya_chen","email":"maya.chen@example.com","name":"Maya Chen","plan":"Plus"}'
+```
+
+```html
+<button type="button" data-fh-open aria-label="Feedback">
+  <!-- your icon -->
+</button>
+<script src="https://feedback-hub-smoky.vercel.app/embed.js" data-session="SESSION"></script>
+```
+
+A tap on the button opens one window: submit feedback, public requests with voting, and the roadmap (Planned, In progress, and Released).
 
 ## Tests
 

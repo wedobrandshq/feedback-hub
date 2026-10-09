@@ -4,7 +4,11 @@ Source of truth for product behavior. Do not invent business logic. If implement
 
 ## Confirmed decision — 9 October 2026
 
-Willow’s phone does not include What’s new, Updates, the Popular requests list, or the This week step card. It keeps the marked Today’s walk card, View all requests, one roadmap, and Messages. That roadmap is the user’s status view: Planned, In progress, and Released. There is not a second roadmap screen.
+The host app only places a trigger. Feedback Hub hosts one window: submit feedback, the list of public requests with voting, and one roadmap with Planned, In progress, and Released. That window does not include Messages, What’s new, Updates, Popular requests, or the This week card. There is not a second feedback screen.
+
+Willow keeps the marked Today’s walk card. A hold on that card opens this same window. A tap on the card stays the host’s own action. The phone icon is the same trigger.
+
+The host server sends the user it already knows. Feedback Hub returns a signed session. The app secret stays on the host server and is not part of the snippet or the icon. Changing a user id in the browser does not make the window act as someone else.
 
 An admin status change writes the event and moves the request. It does not ask whether to notify, and it does not send an in-app notification. The admin Changelog stays the release note on a Released request. The admin Roadmap stays.
 

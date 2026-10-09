@@ -48,6 +48,57 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
     throw new DomainError("This user has not been identified for this app.", "not_found");
   }
 
+  return createSubmittedFeedback({
+    app,
+    user,
+    type: input.type,
+    body: input.body,
+    context: input.context,
+    attachment: input.attachment ?? null,
+  });
+}
+
+export async function submitFeedbackForActor(input: {
+  appId: string;
+  userId: string;
+  type: SubmitFeedbackType;
+  body: string;
+  context: SubmitFeedbackInput["context"];
+  attachment?: SubmitFeedbackInput["attachment"];
+}) {
+  if (!(SUBMIT_FEEDBACK_TYPES as readonly string[]).includes(input.type)) {
+    throw new DomainError("Choose what kind of feedback this is.", "validation");
+  }
+  if (input.body.trim().length === 0) {
+    throw new DomainError("Tell us a bit more before sending.", "validation");
+  }
+  if (input.body.length > BODY_MAX_LENGTH) {
+    throw new DomainError("Feedback needs to be 10,000 characters or less.", "validation");
+  }
+  const app = await prisma.app.findUnique({ where: { id: input.appId } });
+  const user = await prisma.user.findFirst({ where: { id: input.userId, appId: input.appId } });
+  if (!app || !user) {
+    throw new DomainError("This session is no longer valid.", "unauthorized");
+  }
+  return createSubmittedFeedback({
+    app,
+    user,
+    type: input.type,
+    body: input.body,
+    context: input.context,
+    attachment: input.attachment ?? null,
+  });
+}
+
+async function createSubmittedFeedback(input: {
+  app: { id: string; workspaceId: string };
+  user: { id: string; name: string | null };
+  type: SubmitFeedbackType;
+  body: string;
+  context: SubmitFeedbackInput["context"];
+  attachment: { fileName: string; bytes: Buffer } | null;
+}) {
+  const { app, user } = input;
   let storedAttachment: { fileName: string; contentType: string; bytes: Buffer } | null = null;
   if (input.attachment) {
     const contentType = validateScreenshot(input.attachment.bytes);

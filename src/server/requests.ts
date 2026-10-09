@@ -448,13 +448,17 @@ async function publicUser(appSecret: string, externalUserId: string) {
 
 export async function listPublicRequests(input: { appSecret: string; externalUserId: string }) {
   const { app, user } = await publicUser(input.appSecret, input.externalUserId);
+  return listPublicRequestsForActor({ appId: app.id, userId: user.id });
+}
+
+export async function listPublicRequestsForActor(input: { appId: string; userId: string }) {
   const rows = await prisma.request.findMany({
-    where: { appId: app.id, visibility: "public" },
+    where: { appId: input.appId, visibility: "public" },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: {
       _count: { select: { votes: true } },
-      votes: { where: { userId: user.id }, select: { id: true } },
+      votes: { where: { userId: input.userId }, select: { id: true } },
       updates: {
         where: { visibility: "public" },
         orderBy: { publishedAt: "desc" },
@@ -479,6 +483,16 @@ export async function listPublicRequests(input: { appSecret: string; externalUse
 
 export async function voteOnRequest(input: { appSecret: string; externalUserId: string; requestId: string }) {
   const { app, user } = await publicUser(input.appSecret, input.externalUserId);
+  return voteOnRequestForActor({ appId: app.id, userId: user.id, requestId: input.requestId });
+}
+
+export async function voteOnRequestForActor(input: { appId: string; userId: string; requestId: string }) {
+  const user = await prisma.user.findFirst({
+    where: { id: input.userId, appId: input.appId },
+    include: { app: true },
+  });
+  if (!user) throw new DomainError("User was not found.", "not_found");
+  const app = user.app;
   const request = await prisma.request.findFirst({
     where: { id: input.requestId, appId: app.id, visibility: "public" },
   });
@@ -504,6 +518,16 @@ export async function voteOnRequest(input: { appSecret: string; externalUserId: 
 
 export async function removeVote(input: { appSecret: string; externalUserId: string; requestId: string }) {
   const { app, user } = await publicUser(input.appSecret, input.externalUserId);
+  return removeVoteForActor({ appId: app.id, userId: user.id, requestId: input.requestId });
+}
+
+export async function removeVoteForActor(input: { appId: string; userId: string; requestId: string }) {
+  const user = await prisma.user.findFirst({
+    where: { id: input.userId, appId: input.appId },
+    include: { app: true },
+  });
+  if (!user) throw new DomainError("User was not found.", "not_found");
+  const app = user.app;
   const request = await prisma.request.findFirst({
     where: { id: input.requestId, appId: app.id, visibility: "public" },
   });
