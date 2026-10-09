@@ -6,13 +6,16 @@ import { FeedbackActions } from "@/components/admin/feedback-actions";
 import { CreateRequestForm, LinkRequestForm, UnlinkRequestForm } from "@/components/admin/request-forms";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { SuggestionPanel } from "@/components/admin/suggestion-panel";
 import { formatDateTime, userLabel } from "@/domain/feedback";
 import { requireAdmin } from "@/server/auth/admin";
 import { getAdminThreadForFeedback } from "@/server/conversations";
 import { getFeedbackDetail } from "@/server/feedback-queries";
 import { searchRequests } from "@/server/requests";
+import { ensureFeedbackSuggestion } from "@/server/suggestions";
 
 export const metadata = { title: "Feedback" };
+export const instant = false;
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
@@ -37,6 +40,7 @@ export default async function FeedbackDetailPage({
   const admin = await requireAdmin();
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const requestQuery = first(query.request) ?? "";
+  await ensureFeedbackSuggestion(id).catch(() => undefined);
   const [detail, thread] = await Promise.all([
     getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id }),
     getAdminThreadForFeedback({ workspaceId: admin.workspaceId, feedbackId: id }),
@@ -128,6 +132,19 @@ export default async function FeedbackDetailPage({
               </div>
             ) : (
               <div className="mt-3">
+                {feedback.suggestion ? (
+                  <SuggestionPanel
+                    feedbackId={feedback.id}
+                    suggestion={{
+                      status: feedback.suggestion.status,
+                      suggestedType: feedback.suggestion.suggestedType,
+                      topics: feedback.suggestion.topics,
+                      similarity: feedback.suggestion.similarity,
+                      model: feedback.suggestion.model,
+                      request: feedback.suggestion.request,
+                    }}
+                  />
+                ) : null}
                 <h3 className="text-sm font-medium">Create request</h3>
                 <CreateRequestForm feedbackId={feedback.id} />
                 <h3 className="mt-6 text-sm font-medium">Link to request</h3>

@@ -13,6 +13,7 @@ import {
   publishRequestUpdate,
   unlinkFeedbackFromRequest,
 } from "@/server/requests";
+import { acceptSuggestedRequest, ignoreSuggestion, refreshRequestSummary } from "@/server/suggestions";
 
 export type ActionState = { error: string | null };
 
@@ -48,6 +49,7 @@ export async function createRequestAction(_previous: ActionState, formData: Form
   } catch (error) {
     return fail(error);
   }
+  await refreshRequestSummary(requestId).catch(() => undefined);
   refresh(requestId);
   redirect(`/admin/requests/${requestId}`);
 }
@@ -64,10 +66,43 @@ export async function linkFeedbackAction(_previous: ActionState, formData: FormD
       feedbackId,
       requestId,
     });
+    await refreshRequestSummary(requestId).catch(() => undefined);
   } catch (error) {
     return fail(error);
   }
   refresh(requestId);
+  revalidatePath(`/admin/feedback/${feedbackId}`);
+  return { error: null };
+}
+
+export async function acceptSuggestionAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireAdmin();
+  const feedbackId = String(formData.get("feedbackId") ?? "");
+  let requestId = "";
+  try {
+    requestId = await acceptSuggestedRequest({
+      id: admin.id,
+      name: admin.name,
+      workspaceId: admin.workspaceId,
+      feedbackId,
+    });
+  } catch (error) {
+    return fail(error);
+  }
+  refresh(requestId);
+  revalidatePath(`/admin/feedback/${feedbackId}`);
+  return { error: null };
+}
+
+export async function ignoreSuggestionAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireAdmin();
+  const feedbackId = String(formData.get("feedbackId") ?? "");
+  try {
+    await ignoreSuggestion({ workspaceId: admin.workspaceId, feedbackId });
+  } catch (error) {
+    return fail(error);
+  }
+  revalidatePath("/admin/feedback");
   revalidatePath(`/admin/feedback/${feedbackId}`);
   return { error: null };
 }

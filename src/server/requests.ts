@@ -120,6 +120,10 @@ export async function createRequestFromFeedback(input: AdminActor & {
       entityId: feedback.id,
       extra: { requestId: request.id, requestTitle: title },
     });
+    await tx.feedbackSuggestion.updateMany({
+      where: { feedbackId: feedback.id, status: "pending" },
+      data: { status: "linked" },
+    });
     return request;
   });
 }
@@ -162,6 +166,10 @@ export async function linkFeedbackToRequest(input: AdminActor & { requestId: str
       entityType: "feedback",
       entityId: feedback.id,
       extra: { requestId: request.id, requestTitle: request.title },
+    });
+    await tx.feedbackSuggestion.updateMany({
+      where: { feedbackId: feedback.id, status: "pending" },
+      data: { status: "linked" },
     });
   });
 }
@@ -327,6 +335,7 @@ export async function getAdminRequest(input: { workspaceId: string; requestId: s
       },
       updates: { orderBy: { createdAt: "desc" } },
       changelog: true,
+      summary: true,
     },
   });
   if (!request) return null;

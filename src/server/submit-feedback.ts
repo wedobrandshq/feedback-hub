@@ -5,6 +5,7 @@ import { safeFileName, validateScreenshot } from "@/domain/images";
 import { deleteAttachment, writeAttachment } from "@/server/attachments";
 import { prisma } from "@/server/db";
 import { resolveAppBySecret } from "@/server/identify-user";
+import { ensureFeedbackSuggestion } from "@/server/suggestions";
 
 export type SubmitFeedbackInput = {
   appSecret: string;
@@ -59,7 +60,7 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
 
   const writtenKeys: string[] = [];
   try {
-    return await prisma.$transaction(async (tx) => {
+    const feedback = await prisma.$transaction(async (tx) => {
       const feedback = await tx.feedback.create({
         data: {
           appId: app.id,
@@ -164,6 +165,8 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
 
       return feedback;
     });
+    await ensureFeedbackSuggestion(feedback.id).catch(() => undefined);
+    return feedback;
   } catch (error) {
     await Promise.all(
       writtenKeys.map(async (key) => {

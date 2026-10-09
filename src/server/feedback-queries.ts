@@ -84,6 +84,7 @@ export async function getFeedbackDetail(input: { workspaceId: string; feedbackId
       app: true,
       attachments: { orderBy: { createdAt: "asc" } },
       requestLink: { include: { request: { select: { id: true, title: true, visibility: true } } } },
+      suggestion: { include: { request: { select: { id: true, title: true, visibility: true } } } },
     },
   });
   if (!feedback) return null;

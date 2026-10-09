@@ -17,6 +17,7 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. Status changes can send an in-app notice. The demo shows public requests, a simple roadmap, and a thin changelog.
 - Admin Home shows the last 30 days of feedback, new requests, conversations, and votes as separate numbers, plus trending requests and conversations that need a reply.
 - Users list and user detail for product context. Apps lists connected apps. Settings shows the signed-in owner and workspace.
+- New feedback can store a generated suggestion: a type, topics, and one existing request with the similarity the model returned. An admin can link that request, create a request, or ignore it. The original message stays as submitted. A request with linked feedback can show a short generated summary to admins. The Willow demo does not show suggestions, similarity, or that summary.
 - Events for feedback, conversations, requests, votes, updates, and in-app notifications.
 
 Email, push, Slack, Jira, surveys, public comments, and a web SDK are not built.

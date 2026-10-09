@@ -122,6 +122,14 @@ On the roadmap, a request can move among Under consideration, Planned, In progre
 
 The spec says the host app decides where Feedback Hub opens and does not name a gesture. This demo marks one region in code with `FeedbackHoldRegion`. A pointer that stays inside that region for 500 milliseconds opens the existing submit window over the host. Releasing sooner runs the host action. Leaving the region before 500 milliseconds does neither. The rest of the screen has no hold region. The window does not ask for email, device, or app version.
 
+## Suggestions
+
+Section 57 also names language and sentiment. This slice stores a suggested type, topics, and at most one existing request. Language, sentiment, clusters, trends, and translation are not stored. A suggestion is written only when a model provider is configured. The similarity number is the one the model returned, and only when that request id was in the list sent to the model. There is no local similarity score.
+
+The candidate list is the 40 most recently updated requests in the same app, private and public. Ignore does not write an event and does not change the feedback type, body, or links. Link and Create use the existing request actions, so they do not copy the suggested type onto the feedback. Linking does not publish the request. The suggestion’s stored request id stays the model’s match even when the admin creates a different request. After a link or a create, a pending suggestion is marked linked.
+
+The generated summary is stored on the request for admins. It is refreshed when the number of linked feedback items changes. It does not replace the request description or the feedback text. Public request payloads do not include it.
+
 ## What the user is shown
 
 The Willow Messages entry lists that user’s conversations in Willow. The unread badge is for replies from the team. Opening a thread marks those replies read. The demo still identifies Maya Chen on the server. A posted user id or app secret is ignored.

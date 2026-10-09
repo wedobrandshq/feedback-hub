@@ -17,6 +17,8 @@ async function clearProduct() {
   await prisma.changelogEntry.deleteMany();
   await prisma.requestUpdate.deleteMany();
   await prisma.vote.deleteMany();
+  await prisma.feedbackSuggestion.deleteMany();
+  await prisma.requestSummary.deleteMany();
   await prisma.feedbackRequest.deleteMany();
   await prisma.request.deleteMany();
   await prisma.message.deleteMany();

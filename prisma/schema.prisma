@@ -60,6 +60,12 @@ enum RequestVisibility {
   public
 }
 
+enum SuggestionStatus {
+  pending
+  ignored
+  linked
+}
+
 model Workspace {
   id        String      @id @default(cuid())
   name      String
@@ -143,6 +149,7 @@ model Feedback {
   attachments            FeedbackAttachment[]
   conversation           Conversation?
   requestLink            FeedbackRequest?
+  suggestion             FeedbackSuggestion?
 
   @@index([appId, createdAt])
   @@index([userId])
@@ -232,6 +239,8 @@ model Request {
   updates     RequestUpdate[]
   notifications Notification[]
   changelog   ChangelogEntry?
+  suggestions FeedbackSuggestion[]
+  summary     RequestSummary?
 
   @@index([appId, updatedAt])
   @@index([appId, visibility, status])
@@ -292,6 +301,36 @@ model Notification {
   @@index([userId, createdAt])
   @@index([appId, userId])
   @@map("notifications")
+}
+
+model FeedbackSuggestion {
+  id            String           @id @default(cuid())
+  feedbackId    String           @unique @map("feedback_id")
+  suggestedType FeedbackType?    @map("suggested_type")
+  topics        String[]
+  requestId     String?          @map("request_id")
+  similarity    Float?
+  model         String
+  status        SuggestionStatus @default(pending)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  feedback      Feedback         @relation(fields: [feedbackId], references: [id])
+  request       Request?         @relation(fields: [requestId], references: [id])
+
+  @@index([requestId])
+  @@map("feedback_suggestions")
+}
+
+model RequestSummary {
+  id            String   @id @default(cuid())
+  requestId     String   @unique @map("request_id")
+  body          String
+  model         String
+  feedbackCount Int      @map("feedback_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  request       Request  @relation(fields: [requestId], references: [id])
+
+  @@map("request_summaries")
 }
 
 model ChangelogEntry {
