@@ -19,6 +19,7 @@ export type FeedbackRow = {
   createdAt: Date;
   user: { name: string | null; email: string | null; externalUserId: string };
   app: { name: string };
+  requestLink: { request: { id: string; title: string } } | null;
 };
 
 export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
@@ -53,7 +54,9 @@ export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
             <TableCell>
               <TypeBadge type={row.type} />
             </TableCell>
-            <TableCell className="text-muted-foreground">—</TableCell>
+            <TableCell className="max-w-40 whitespace-normal text-muted-foreground">
+              {row.requestLink ? row.requestLink.request.title : "—"}
+            </TableCell>
             <TableCell>
               <StatusBadge status={row.status} />
             </TableCell>

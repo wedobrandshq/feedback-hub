@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/(demo)/actions";
+import { markDemoNotificationsRead, markDemoThreadRead, replyDemoMessage, submitDemoFeedback } from "@/app/(demo)/actions";
+import { DemoCatalogScreens } from "@/components/demo/demo-catalog-screens";
+import type { DemoCatalog } from "@/server/demo-catalog";
 import type { DemoMailbox } from "@/domain/conversation";
 import { DEMO_KIND_OPTIONS, formatDateTime } from "@/domain/feedback";
 import type { SubmitFeedbackType } from "@/domain/config";
@@ -10,21 +12,24 @@ import { FeedbackHoldRegion } from "@/host/feedback-hold-region";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-type HostScreen = "host" | "messages" | "thread";
+type HostScreen = "host" | "messages" | "thread" | "requests" | "request" | "roadmap" | "updates" | "changelog";
 type FeedbackStep = "kind" | "message" | "done";
 
 export function WillowFeedback({
   name,
   plan,
   mailbox,
+  catalog,
 }: {
   name: string;
   plan: string;
   mailbox: DemoMailbox;
+  catalog: DemoCatalog;
 }) {
   const [hostScreen, setHostScreen] = useState<HostScreen>("host");
   const [feedbackStep, setFeedbackStep] = useState<FeedbackStep | null>(null);
   const [walks, setWalks] = useState(0);
+  const [requestId, setRequestId] = useState<string | null>(null);
   const [kind, setKind] = useState<SubmitFeedbackType | null>(null);
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -110,11 +115,60 @@ export function WillowFeedback({
             </p>
             <p className="mt-3 text-sm text-[#6a7268]">Tap to log it. Hold to share feedback.</p>
           </FeedbackHoldRegion>
+          {catalog.requests.length > 0 ? (
+            <section className="mt-5">
+              <h3 className="text-xs font-medium tracking-[0.14em] text-[#6a7268] uppercase">Popular requests</h3>
+              <ul className="mt-2 space-y-1">
+                {[...catalog.requests]
+                  .sort((left, right) => right.voteCount - left.voteCount)
+                  .slice(0, 3)
+                  .map((request) => (
+                    <li key={request.id}>
+                      <button
+                        type="button"
+                        className="text-sm text-[#1c241c]"
+                        onClick={() => {
+                          setRequestId(request.id);
+                          setHostScreen("request");
+                        }}
+                      >
+                        {request.title} · {request.voteCount}
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          ) : null}
           <div className="mt-4 rounded-2xl border border-[#e2dcd0] bg-white/70 px-4 py-5" data-host-surface="">
             <p className="text-sm font-medium text-[#1c241c]">This week</p>
             <p className="mt-1 text-sm text-[#3d463d]">4,280 steps. Holding here stays in Willow.</p>
           </div>
-          <div className="mt-auto pt-8">
+          <div className="mt-auto space-y-2 pt-8">
+            <Button type="button" variant="outline" className="h-11 w-full bg-white" onClick={() => setHostScreen("requests")}>
+              View all requests
+            </Button>
+            <Button type="button" variant="outline" className="h-11 w-full bg-white" onClick={() => setHostScreen("roadmap")}>
+              What’s coming
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full justify-between bg-white"
+              onClick={() => {
+                setHostScreen("updates");
+                void markDemoNotificationsRead().then(() => router.refresh());
+              }}
+            >
+              <span>Updates</span>
+              {catalog.unreadCount > 0 ? (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#1f3d32] px-1.5 text-xs text-[#f4f1ea]">
+                  {catalog.unreadCount}
+                </span>
+              ) : null}
+            </Button>
+            <Button type="button" variant="outline" className="h-11 w-full bg-white" onClick={() => setHostScreen("changelog")}>
+              What’s new
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -137,6 +191,19 @@ export function WillowFeedback({
             </Button>
           </div>
         </div>
+      ) : null}
+
+      {hostScreen === "requests" || hostScreen === "request" || hostScreen === "roadmap" || hostScreen === "updates" || hostScreen === "changelog" ? (
+        <DemoCatalogScreens
+          screen={hostScreen}
+          catalog={catalog}
+          requestId={requestId}
+          onBack={() => setHostScreen(hostScreen === "request" ? "requests" : "host")}
+          onOpenRequest={(id) => {
+            setRequestId(id);
+            setHostScreen("request");
+          }}
+        />
       ) : null}
 
       {feedbackStep === "kind" ? (

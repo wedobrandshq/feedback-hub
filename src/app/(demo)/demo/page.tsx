@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { WillowFeedback } from "@/components/demo/willow-feedback";
 import { WILLOW_DEMO_USER } from "@/domain/willow-demo";
+import { getDemoCatalog } from "@/server/demo-catalog";
 import { getDemoMailbox } from "@/server/demo-mailbox";
 
 export const instant = false;
@@ -11,9 +12,14 @@ export const metadata = {
   description: "Share feedback inside Willow.",
 };
 
-export default async function DemoPage() {
+export default async function DemoPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await connection();
-  const mailbox = await getDemoMailbox();
+  await searchParams;
+  const [mailbox, catalog] = await Promise.all([getDemoMailbox(), getDemoCatalog()]);
   return (
     <div className="min-h-full bg-[#e4e0d6]">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-8 px-4 py-8 lg:flex-row lg:items-start lg:justify-center lg:gap-20 lg:py-14">
@@ -35,7 +41,7 @@ export default async function DemoPage() {
               <div className="h-6 w-28 rounded-full bg-[#1c1c1c]" />
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <WillowFeedback name={WILLOW_DEMO_USER.name} plan={WILLOW_DEMO_USER.plan} mailbox={mailbox} />
+              <WillowFeedback name={WILLOW_DEMO_USER.name} plan={WILLOW_DEMO_USER.plan} mailbox={mailbox} catalog={catalog} />
             </div>
             <div className="flex justify-center pb-3">
               <div className="h-1.5 w-28 rounded-full bg-[#1c1c1c]/80" />

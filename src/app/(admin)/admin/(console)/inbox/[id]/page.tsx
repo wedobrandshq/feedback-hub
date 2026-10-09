@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/admin/status-badge";
 import { TYPE_LABELS, formatDateTime, userLabel } from "@/domain/feedback";
 import { requireAdmin } from "@/server/auth/admin";
 import { getAdminConversation } from "@/server/conversations";
+import { linkedRequestForFeedback } from "@/server/requests";
 
 export const metadata = { title: "Conversation" };
 
@@ -28,6 +29,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
     conversationId: id,
   });
   if (!conversation) notFound();
+  const linked = await linkedRequestForFeedback(admin.workspaceId, conversation.feedback.id);
 
   return (
     <>
@@ -95,7 +97,15 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
           </section>
           <section>
             <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Request</h2>
-            <p className="mt-3 text-sm text-muted-foreground">No linked request.</p>
+            {linked ? (
+              <p className="mt-3 text-sm">
+                <Link href={`/admin/requests/${linked.id}`} className="font-medium">
+                  {linked.title}
+                </Link>
+              </p>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">No linked request.</p>
+            )}
           </section>
         </aside>
       </div>

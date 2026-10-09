@@ -14,9 +14,10 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Create a conversation and the first in-app message from that submission.
 - Admin Inbox and conversation detail: reply, close, and reopen. Reply also works on feedback detail.
 - Willow Messages: unread badge, thread, and a reply from that user.
-- Events for `feedback.created`, `feedback.reviewed`, `feedback.closed`, `conversation.created`, `message.sent`, and `conversation.closed`.
+- Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. Status changes can send an in-app notice. The demo shows public requests, a simple roadmap, and a thin changelog.
+- Events for feedback, conversations, requests, votes, updates, and in-app notifications.
 
-Requests, voting, roadmap, changelog, notifications, and the other admin sections are not in this slice. Those nav items explain that. Email delivery is not built.
+Email, push, Slack, Jira, surveys, public comments, and a web SDK are not built.
 
 ## Local setup
 
@@ -36,10 +37,13 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 | Path | What it is |
 | --- | --- |
-| `/demo` | Willow phone. Feedback and Messages. |
+| `/demo` | Willow phone. Feedback, public requests, roadmap, and updates. |
 | `/admin/login` | Admin sign-in |
 | `/admin/inbox` | Conversations that need attention |
 | `/admin/feedback` | Feedback list |
+| `/admin/requests` | Requests, with feedback and votes kept as separate counts |
+| `/admin/roadmap` | Public requests by status |
+| `/admin/changelog` | One entry per released request |
 
 `.env.example` matches a local database user `feedback` with password `feedback`. Change `DATABASE_URL` if your Postgres user is different. Create that role if you want the example URL as written:
 
@@ -68,7 +72,7 @@ The Willow demo is Maya Chen (`maya.chen@example.com`, plan Plus). Earn It start
 npm test
 ```
 
-Tests use `feedback_hub_test` and cover submit, identify (upsert by app + external user id), separation between Willow and Earn It, an admin reply, a user reply, and that Earn It cannot see a Willow conversation.
+Tests use `feedback_hub_test` and cover submit, identify, Willow and Earn It separation, replies, creating and linking a request, publish, one vote, status changes, updates, in-app notices, and that Earn It cannot vote on a Willow request.
 
 ## Hosted
 

@@ -23,6 +23,12 @@ const willowSecret = willowAppSecret();
 const earnItSecret = earnItAppSecret();
 
 async function clearFeedback() {
+  await prisma.notification.deleteMany();
+  await prisma.changelogEntry.deleteMany();
+  await prisma.requestUpdate.deleteMany();
+  await prisma.vote.deleteMany();
+  await prisma.feedbackRequest.deleteMany();
+  await prisma.request.deleteMany();
   await prisma.message.deleteMany();
   await prisma.conversation.deleteMany();
   await prisma.feedbackAttachment.deleteMany();

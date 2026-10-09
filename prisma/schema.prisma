@@ -46,6 +46,20 @@ enum ConversationStatus {
   closed
 }
 
+enum RequestStatus {
+  review
+  under_consideration
+  planned
+  in_progress
+  released
+  not_planned
+}
+
+enum RequestVisibility {
+  private
+  public
+}
+
 model Workspace {
   id        String      @id @default(cuid())
   name      String
@@ -73,6 +87,9 @@ model App {
   users          User[]
   feedback       Feedback[]
   conversations  Conversation[]
+  requests       Request[]
+  notifications  Notification[]
+  changelog      ChangelogEntry[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId])
@@ -97,6 +114,8 @@ model User {
   app            App            @relation(fields: [appId], references: [id])
   feedback       Feedback[]
   conversations  Conversation[]
+  votes          Vote[]
+  notifications  Notification[]
 
   @@unique([appId, externalUserId])
   @@index([appId])
@@ -123,6 +142,7 @@ model Feedback {
   user                   User                 @relation(fields: [userId], references: [id])
   attachments            FeedbackAttachment[]
   conversation           Conversation?
+  requestLink            FeedbackRequest?
 
   @@index([appId, createdAt])
   @@index([userId])
@@ -194,6 +214,98 @@ model Event {
   @@index([entityType, entityId, createdAt])
   @@index([appId, createdAt])
   @@map("events")
+}
+
+model Request {
+  id          String             @id @default(cuid())
+  appId       String             @map("app_id")
+  title       String
+  description String
+  status      RequestStatus      @default(review)
+  visibility  RequestVisibility  @default(private)
+  releasedAt  DateTime?          @map("released_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  app         App                @relation(fields: [appId], references: [id])
+  links       FeedbackRequest[]
+  votes       Vote[]
+  updates     RequestUpdate[]
+  notifications Notification[]
+  changelog   ChangelogEntry?
+
+  @@index([appId, updatedAt])
+  @@index([appId, visibility, status])
+  @@map("requests")
+}
+
+model FeedbackRequest {
+  id         String   @id @default(cuid())
+  requestId  String   @map("request_id")
+  feedbackId String   @unique @map("feedback_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  request    Request  @relation(fields: [requestId], references: [id])
+  feedback   Feedback @relation(fields: [feedbackId], references: [id])
+
+  @@index([requestId])
+  @@map("feedback_requests")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  requestId String   @map("request_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  request   Request  @relation(fields: [requestId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([requestId, userId])
+  @@index([requestId, createdAt])
+  @@map("votes")
+}
+
+model RequestUpdate {
+  id          String            @id @default(cuid())
+  requestId   String            @map("request_id")
+  body        String
+  visibility  RequestVisibility @default(public)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  publishedAt DateTime?         @map("published_at")
+  request     Request           @relation(fields: [requestId], references: [id])
+
+  @@index([requestId, createdAt])
+  @@map("request_updates")
+}
+
+model Notification {
+  id        String         @id @default(cuid())
+  appId     String         @map("app_id")
+  userId    String         @map("user_id")
+  requestId String?        @map("request_id")
+  body      String
+  channel   MessageChannel @default(in_app)
+  createdAt DateTime       @default(now()) @map("created_at")
+  readAt    DateTime?      @map("read_at")
+  app       App            @relation(fields: [appId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+  request   Request?       @relation(fields: [requestId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([appId, userId])
+  @@map("notifications")
+}
+
+model ChangelogEntry {
+  id          String   @id @default(cuid())
+  appId       String   @map("app_id")
+  requestId   String   @unique @map("request_id")
+  title       String
+  body        String
+  publishedAt DateTime @default(now()) @map("published_at")
+  app         App      @relation(fields: [appId], references: [id])
+  request     Request  @relation(fields: [requestId], references: [id])
+
+  @@index([appId, publishedAt])
+  @@map("changelog_entries")
 }
 
 model AdminUser {

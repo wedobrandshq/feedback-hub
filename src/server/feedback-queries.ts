@@ -6,6 +6,7 @@ import { prisma } from "@/server/db";
 const listInclude = {
   user: true,
   app: true,
+  requestLink: { include: { request: { select: { id: true, title: true } } } },
 } satisfies Prisma.FeedbackInclude;
 
 export async function listWorkspaceApps(workspaceId: string) {
@@ -82,6 +83,7 @@ export async function getFeedbackDetail(input: { workspaceId: string; feedbackId
       user: true,
       app: true,
       attachments: { orderBy: { createdAt: "asc" } },
+      requestLink: { include: { request: { select: { id: true, title: true, visibility: true } } } },
     },
   });
   if (!feedback) return null;

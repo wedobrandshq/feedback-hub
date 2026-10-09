@@ -7,6 +7,7 @@ import { willowAppSecret } from "@/domain/secrets";
 import { readDemoSubmission } from "@/domain/demo-submission";
 import { DomainError } from "@/domain/errors";
 import { markConversationReadByUser, replyAsUser } from "@/server/conversations";
+import { markNotificationsRead, removeVote, voteOnRequest } from "@/server/requests";
 import { identifyUser } from "@/server/identify-user";
 import { submitFeedback } from "@/server/submit-feedback";
 
@@ -72,6 +73,40 @@ export async function replyDemoMessage(formData: FormData): Promise<DemoSubmitRe
     }
     console.error(error);
     return { ok: false, error: "We couldn’t send your reply. Try again." };
+  }
+}
+
+export async function voteDemoRequest(formData: FormData): Promise<DemoSubmitResult> {
+  try {
+    const requestId = String(formData.get("requestId") ?? "");
+    const input = {
+      appSecret: willowAppSecret(),
+      externalUserId: WILLOW_DEMO_USER.externalUserId,
+      requestId,
+    };
+    if (formData.get("intent") === "remove") await removeVote(input);
+    else await voteOnRequest(input);
+    revalidatePath("/demo");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof DomainError && (error.code === "validation" || error.code === "conflict" || error.code === "not_found")) {
+      return { ok: false, error: error.message };
+    }
+    console.error(error);
+    return { ok: false, error: "We couldn’t save that vote. Try again." };
+  }
+}
+
+export async function markDemoNotificationsRead(): Promise<void> {
+  try {
+    await markNotificationsRead({
+      appSecret: willowAppSecret(),
+      externalUserId: WILLOW_DEMO_USER.externalUserId,
+    });
+    revalidatePath("/demo");
+  } catch (error) {
+    if (error instanceof DomainError) return;
+    throw error;
   }
 }
 

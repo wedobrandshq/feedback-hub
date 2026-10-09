@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/admin/activity-feed";
 import { ConversationThread } from "@/components/admin/conversation-thread";
 import { FeedbackActions } from "@/components/admin/feedback-actions";
+import { CreateRequestForm, LinkRequestForm, UnlinkRequestForm } from "@/components/admin/request-forms";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, userLabel } from "@/domain/feedback";
 import { requireAdmin } from "@/server/auth/admin";
 import { getAdminThreadForFeedback } from "@/server/conversations";
 import { getFeedbackDetail } from "@/server/feedback-queries";
+import { searchRequests } from "@/server/requests";
 
 export const metadata = { title: "Feedback" };
 
@@ -21,9 +23,20 @@ function ContextRow({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-export default async function FeedbackDetailPage({ params }: { params: Promise<{ id: string }> }) {
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function FeedbackDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const admin = await requireAdmin();
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const requestQuery = first(query.request) ?? "";
   const [detail, thread] = await Promise.all([
     getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id }),
     getAdminThreadForFeedback({ workspaceId: admin.workspaceId, feedbackId: id }),
@@ -31,6 +44,9 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
   if (!detail) notFound();
 
   const { feedback, events } = detail;
+  const matches = requestQuery
+    ? await searchRequests({ workspaceId: admin.workspaceId, appId: feedback.appId, query: requestQuery })
+    : [];
 
   return (
     <>
@@ -100,6 +116,25 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
           </p>
         </div>
         <aside className="space-y-8 lg:border-l lg:border-border lg:pl-6">
+          <section>
+            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Request</h2>
+            {feedback.requestLink ? (
+              <div className="mt-3">
+                <Link href={`/admin/requests/${feedback.requestLink.request.id}`} className="text-sm font-medium">
+                  {feedback.requestLink.request.title}
+                </Link>
+                <p className="mt-1 text-xs capitalize text-muted-foreground">{feedback.requestLink.request.visibility}</p>
+                <UnlinkRequestForm feedbackId={feedback.id} />
+              </div>
+            ) : (
+              <div className="mt-3">
+                <h3 className="text-sm font-medium">Create request</h3>
+                <CreateRequestForm feedbackId={feedback.id} />
+                <h3 className="mt-6 text-sm font-medium">Link to request</h3>
+                <LinkRequestForm feedbackId={feedback.id} matches={matches} />
+              </div>
+            )}
+          </section>
           <section>
             <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Status</h2>
             <div className="mt-3">

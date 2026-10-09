@@ -90,6 +90,16 @@ Newest activity is first. Activity is the conversation’s updated time, which m
 
 Reply on feedback detail and the composer on the conversation both call the same server rule. Link to Request and Create Request are not built. The conversation sidebar says there is no linked request. A separate user profile page is a later slice, so the user is shown on the conversation itself. Internal classification is not shown.
 
+## Requests
+
+A feedback item links to one request. Linking a second request is refused until the first link is removed. The original feedback text is not edited. Creating a request always stores visibility `private`, even though the form names visibility. Publish is the only way to make it public. There is no unpublish action. The initial status defaults to Review. Title and description are stored exactly, rejected when blank, and capped at 10,000 characters like other text.
+
+The admin list sorts by Updated, newest first, unless Feedback, Votes, or Created is chosen. Users on the list are unique authors of linked feedback. Votes on the list are the vote count. Unique voters are shown separately on the request. With the unique vote constraint those two vote numbers match, and they stay separate fields.
+
+A published request is visible in that app even while its status is Review or Under consideration. The demo does not show those two words. Roadmap in the demo is Planned, In progress, and Recently released. Voting is allowed on any public request in the same app. A private request, or a request from another app, is not found. Unlinking feedback whose status is `linked` sets that status back to `reviewed`. Closed feedback stays closed. One changelog entry is allowed per released request.
+
+`released_at` is set when the status becomes Released and is left in place if the status changes again. Status changes always write `request.status_changed` and do not notify anyone by themselves. Notify is offered on the status form and only sends when the new status is Planned, In progress, Released, or Not planned. Recipients are the linked feedback authors, the voters, and the conversation participants, deduplicated. The channel is in-app. The notice text is the request title plus “is now” and the status label. Opening Updates marks those notices read.
+
 ## Host entry
 
 The spec says the host app decides where Feedback Hub opens and does not name a gesture. This demo marks one region in code with `FeedbackHoldRegion`. A pointer that stays inside that region for 500 milliseconds opens the existing submit window over the host. Releasing sooner runs the host action. Leaving the region before 500 milliseconds does neither. The rest of the screen has no hold region. The window does not ask for email, device, or app version.

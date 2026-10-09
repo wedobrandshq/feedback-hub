@@ -133,5 +133,14 @@ export function activitySentence(event: {
   if (event.type === "message.sent") return `${name} sent a message`;
   if (event.type === "conversation.closed") return `${name} closed this conversation`;
   if (event.type === "conversation.reopened") return `${name} reopened this conversation`;
+  if (event.type === "feedback.linked") return `${name} linked this feedback to a request`;
+  if (event.type === "feedback.unlinked") return `${name} unlinked this feedback from a request`;
+  if (event.type === "request.created") return `${name} created this request`;
+  if (event.type === "request.published") return `${name} published this request`;
+  if (event.type === "request.status_changed") return `${name} changed the request status`;
+  if (event.type === "request.voted") return `${name} voted`;
+  if (event.type === "request.unvoted") return `${name} removed a vote`;
+  if (event.type === "request.update_published") return `${name} published an update`;
+  if (event.type === "notification.sent") return `${name} sent an in-app notification`;
   return name;
 }

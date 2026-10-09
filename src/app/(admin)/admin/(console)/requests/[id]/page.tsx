@@ -1,0 +1,200 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ActivityFeed } from "@/components/admin/activity-feed";
+import { PageHeader } from "@/components/admin/page-header";
+import {
+  ChangelogForm,
+  PublishRequestForm,
+  StatusForm,
+  UnlinkRequestForm,
+  UpdateForm,
+} from "@/components/admin/request-forms";
+import { formatDateTime, userLabel } from "@/domain/feedback";
+import { REQUEST_STATUS_LABELS } from "@/domain/request";
+import { requireAdmin } from "@/server/auth/admin";
+import { getAdminRequest } from "@/server/requests";
+
+export const metadata = { title: "Request" };
+
+const TABS = ["overview", "feedback", "conversations", "updates", "activity"] as const;
+type Tab = (typeof TABS)[number];
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function tabOf(value: string | undefined): Tab {
+  if (value && (TABS as readonly string[]).includes(value)) return value as Tab;
+  return "overview";
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
+    </div>
+  );
+}
+
+export default async function RequestDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const admin = await requireAdmin();
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const detail = await getAdminRequest({ workspaceId: admin.workspaceId, requestId: id });
+  if (!detail) notFound();
+  const { request, metrics, events } = detail;
+  const tab = tabOf(first(query.tab));
+  const conversations = request.links.flatMap((link) =>
+    link.feedback.conversation
+      ? [{ ...link.feedback.conversation, feedbackId: link.feedback.id, preview: link.feedback.body }]
+      : [],
+  );
+
+  return (
+    <>
+      <PageHeader
+        title={request.title}
+        description={`${request.app.name} · ${REQUEST_STATUS_LABELS[request.status]} · ${request.visibility}`}
+        actions={request.visibility === "private" ? <PublishRequestForm requestId={request.id} /> : undefined}
+      />
+      <nav aria-label="Request sections" className="flex gap-1 overflow-x-auto border-b border-border px-4 py-3 md:px-6">
+        {TABS.map((item) => (
+          <Link
+            key={item}
+            href={item === "overview" ? `/admin/requests/${request.id}` : `/admin/requests/${request.id}?tab=${item}`}
+            aria-current={tab === item ? "page" : undefined}
+            className={`rounded-md px-2.5 py-1.5 text-sm capitalize ${tab === item ? "bg-muted font-medium" : "text-muted-foreground"}`}
+          >
+            {item}
+          </Link>
+        ))}
+      </nav>
+      <div className="px-4 py-6 md:px-6">
+        {tab === "overview" ? (
+          <div className="space-y-8">
+            <dl className="grid grid-cols-2 gap-6 sm:grid-cols-5">
+              <Metric label="Votes" value={metrics.voteCount} />
+              <Metric label="Unique voters" value={metrics.uniqueVoters} />
+              <Metric label="Feedback" value={metrics.feedbackCount} />
+              <Metric label="Unique feedback users" value={metrics.uniqueFeedbackUsers} />
+              <Metric label="Conversations" value={metrics.conversationCount} />
+            </dl>
+            <section>
+              <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Description</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 whitespace-pre-wrap">{request.description}</p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Created {formatDateTime(request.createdAt)} · Updated {formatDateTime(request.updatedAt)}
+              </p>
+            </section>
+            <section className="max-w-md">
+              <StatusForm requestId={request.id} status={request.status} />
+            </section>
+            {request.status === "released" && !request.changelog ? (
+              <section className="max-w-md">
+                <ChangelogForm requestId={request.id} />
+              </section>
+            ) : null}
+            <section>
+              <h2 className="text-sm font-medium">Recent feedback</h2>
+              {request.links.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">No linked feedback yet.</p>
+              ) : (
+                <ul className="mt-2 space-y-2">
+                  {request.links.slice(0, 5).map((link) => (
+                    <li key={link.id}>
+                      <Link href={`/admin/feedback/${link.feedback.id}`} className="text-sm">
+                        {link.feedback.body}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">{formatDateTime(link.feedback.createdAt)}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section>
+              <h2 className="text-sm font-medium">Recent votes</h2>
+              {metrics.recentVotes.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">No votes yet.</p>
+              ) : (
+                <ul className="mt-2 space-y-1 text-sm">
+                  {metrics.recentVotes.map((vote) => (
+                    <li key={vote.id}>
+                      {userLabel(vote.user)} · {formatDateTime(vote.createdAt)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        ) : null}
+        {tab === "feedback" ? (
+          request.links.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No feedback is linked.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {request.links.map((link) => (
+                <li key={link.id} className="py-4">
+                  <Link href={`/admin/feedback/${link.feedback.id}`} className="text-sm font-medium">
+                    {link.feedback.body}
+                  </Link>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {userLabel(link.feedback.user)}
+                    {link.feedback.user.plan ? ` · ${link.feedback.user.plan}` : ""}
+                    {link.feedback.appVersionAtSubmission ? ` · ${link.feedback.appVersionAtSubmission}` : ""}
+                    {" · "}
+                    {formatDateTime(link.feedback.createdAt)}
+                    {link.feedback.conversation ? " · Conversation" : ""}
+                  </p>
+                  <UnlinkRequestForm feedbackId={link.feedback.id} />
+                </li>
+              ))}
+            </ul>
+          )
+        ) : null}
+        {tab === "conversations" ? (
+          conversations.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No conversations for the linked feedback.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {conversations.map((conversation) => (
+                <li key={conversation.id} className="py-4">
+                  <Link href={`/admin/inbox/${conversation.id}`} className="text-sm font-medium">
+                    {userLabel(conversation.user)}
+                  </Link>
+                  <p className="mt-1 text-sm text-muted-foreground">{conversation.preview}</p>
+                </li>
+              ))}
+            </ul>
+          )
+        ) : null}
+        {tab === "updates" ? (
+          <div className="max-w-xl space-y-6">
+            <UpdateForm requestId={request.id} />
+            {request.updates.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No updates yet.</p>
+            ) : (
+              <ul className="space-y-4">
+                {request.updates.map((update) => (
+                  <li key={update.id}>
+                    <p className="text-sm whitespace-pre-wrap">{update.body}</p>
+                    <p className="mt-1 text-xs text-muted-foreground capitalize">
+                      {update.visibility}
+                      {update.publishedAt ? ` · ${formatDateTime(update.publishedAt)}` : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : null}
+        {tab === "activity" ? <ActivityFeed events={events} /> : null}
+      </div>
+    </>
+  );
+}
