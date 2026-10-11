@@ -28,7 +28,7 @@ export default async function RoadmapPage() {
       {rows.length === 0 ? (
         <EmptyState title="Nothing on the roadmap" description="Publish a request and set a roadmap status to see it here." />
       ) : (
-        <div className="grid gap-8 px-4 py-6 md:px-6 lg:grid-cols-4">
+        <div className="grid gap-8 px-4 py-6 md:px-6 lg:grid-cols-3">
           {ADMIN_ROADMAP_STATUSES.map((status) => {
             const items = rows.filter((row) => row.status === status);
             return (

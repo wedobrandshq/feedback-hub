@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/app/(admin)/admin/login/actions";
 import { AppSelector } from "@/components/admin/app-selector";
+import { consoleRoleLabel } from "@/domain/console";
 import type { CurrentAdmin } from "@/server/auth/admin";
 
 const NAV = [
@@ -25,6 +26,7 @@ const NAV = [
     label: "System",
     items: [
       { href: "/admin/apps", label: "Apps" },
+      { href: "/admin/people", label: "People" },
       { href: "/admin/settings", label: "Settings" },
     ],
   },
@@ -86,7 +88,7 @@ export function AdminShell({
         </nav>
         <div className="mt-auto hidden border-t border-sidebar-border px-4 py-4 md:block">
           <p className="truncate text-sm font-medium">{admin.name}</p>
-          <p className="truncate text-xs text-muted-foreground">{admin.role === "owner" ? "Owner" : admin.role}</p>
+          <p className="truncate text-xs text-muted-foreground">{consoleRoleLabel(admin.role)}</p>
           <form action={logoutAction} className="mt-3">
             <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
               Sign out

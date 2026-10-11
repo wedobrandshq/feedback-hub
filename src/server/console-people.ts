@@ -1,0 +1,139 @@
+import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
+import {
+  cleanPassword,
+  cleanProfileEmail,
+  cleanProfileName,
+  isConsoleRole,
+  type ConsoleRole,
+} from "@/domain/console";
+import { DomainError } from "@/domain/errors";
+import { prisma } from "@/server/db";
+
+function assertOwner(role: string) {
+  if (role !== "owner") throw new DomainError("Only an owner can do that.", "unauthorized");
+}
+
+function asEmailConflict(error: unknown): never {
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    throw new DomainError("That email is already used.", "conflict");
+  }
+  throw error;
+}
+
+export async function listConsolePeople(workspaceId: string) {
+  return prisma.adminUser.findMany({
+    where: { workspaceId },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true, email: true, role: true },
+  });
+}
+
+export async function updateOwnProfile(input: {
+  adminId: string;
+  name: string;
+  email: string;
+  currentPassword: string;
+  nextPassword: string;
+}) {
+  const name = cleanProfileName(input.name);
+  const email = cleanProfileEmail(input.email);
+  const admin = await prisma.adminUser.findUnique({ where: { id: input.adminId } });
+  if (!admin) throw new DomainError("That person was not found.", "not_found");
+
+  const taken = await prisma.adminUser.findFirst({
+    where: { email, NOT: { id: admin.id } },
+    select: { id: true },
+  });
+  if (taken) throw new DomainError("That email is already used.", "conflict");
+
+  const data: { name: string; email: string; passwordHash?: string } = { name, email };
+  if (input.nextPassword) {
+    if (!input.currentPassword) {
+      throw new DomainError("Enter your current password to set a new one.", "validation");
+    }
+    const matches = await bcrypt.compare(input.currentPassword, admin.passwordHash);
+    if (!matches) throw new DomainError("Current password is wrong.", "unauthorized");
+    data.passwordHash = await bcrypt.hash(cleanPassword(input.nextPassword), 10);
+  }
+
+  try {
+    return await prisma.adminUser.update({
+      where: { id: admin.id },
+      data,
+      select: { id: true, name: true, email: true, role: true },
+    });
+  } catch (error) {
+    asEmailConflict(error);
+  }
+}
+
+export async function addConsolePerson(input: {
+  actorRole: string;
+  workspaceId: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}) {
+  assertOwner(input.actorRole);
+  if (!isConsoleRole(input.role)) throw new DomainError("Choose Owner or Admin.", "validation");
+  const name = cleanProfileName(input.name);
+  const email = cleanProfileEmail(input.email);
+  const passwordHash = await bcrypt.hash(cleanPassword(input.password), 10);
+  const taken = await prisma.adminUser.findFirst({ where: { email }, select: { id: true } });
+  if (taken) throw new DomainError("That email is already used.", "conflict");
+  try {
+    return await prisma.adminUser.create({
+      data: { workspaceId: input.workspaceId, name, email, passwordHash, role: input.role },
+      select: { id: true, name: true, email: true, role: true },
+    });
+  } catch (error) {
+    asEmailConflict(error);
+  }
+}
+
+async function personInWorkspace(workspaceId: string, personId: string) {
+  const person = await prisma.adminUser.findFirst({
+    where: { id: personId, workspaceId },
+  });
+  if (!person) throw new DomainError("That person was not found.", "not_found");
+  return person;
+}
+
+async function assertOwnerRemains(workspaceId: string, person: { role: string }, nextRole: ConsoleRole | null) {
+  const leavingOwner = person.role === "owner" && nextRole !== "owner";
+  if (!leavingOwner) return;
+  const owners = await prisma.adminUser.count({ where: { workspaceId, role: "owner" } });
+  if (owners <= 1) {
+    throw new DomainError("The workspace needs at least one owner.", "conflict");
+  }
+}
+
+export async function setConsoleRole(input: {
+  actorRole: string;
+  workspaceId: string;
+  personId: string;
+  role: string;
+}) {
+  assertOwner(input.actorRole);
+  if (!isConsoleRole(input.role)) throw new DomainError("Choose Owner or Admin.", "validation");
+  const person = await personInWorkspace(input.workspaceId, input.personId);
+  await assertOwnerRemains(input.workspaceId, person, input.role);
+  return prisma.adminUser.update({
+    where: { id: person.id },
+    data: { role: input.role },
+    select: { id: true, role: true },
+  });
+}
+
+export async function removeConsolePerson(input: {
+  actorRole: string;
+  workspaceId: string;
+  personId: string;
+}) {
+  assertOwner(input.actorRole);
+  const person = await personInWorkspace(input.workspaceId, input.personId);
+  await assertOwnerRemains(input.workspaceId, person, null);
+  await prisma.adminUser.delete({ where: { id: person.id } });
+}

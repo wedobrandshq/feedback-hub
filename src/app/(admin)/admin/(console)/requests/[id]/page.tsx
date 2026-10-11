@@ -7,7 +7,6 @@ import {
   PublishRequestForm,
   StatusForm,
   UnlinkRequestForm,
-  UpdateForm,
 } from "@/components/admin/request-forms";
 import { formatDateTime, userLabel } from "@/domain/feedback";
 import { REQUEST_STATUS_LABELS } from "@/domain/request";
@@ -19,7 +18,7 @@ export const metadata = { title: "Request" };
 export const instant = false;
 export const maxDuration = 60;
 
-const TABS = ["overview", "feedback", "conversations", "updates", "activity"] as const;
+const TABS = ["overview", "feedback", "conversations", "activity"] as const;
 type Tab = (typeof TABS)[number];
 
 function first(value: string | string[] | undefined) {
@@ -197,26 +196,6 @@ export default async function RequestDetailPage({
               ))}
             </ul>
           )
-        ) : null}
-        {tab === "updates" ? (
-          <div className="max-w-xl space-y-6">
-            <UpdateForm requestId={request.id} />
-            {request.updates.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No updates yet.</p>
-            ) : (
-              <ul className="space-y-4">
-                {request.updates.map((update) => (
-                  <li key={update.id}>
-                    <p className="text-sm whitespace-pre-wrap">{update.body}</p>
-                    <p className="mt-1 text-xs text-muted-foreground capitalize">
-                      {update.visibility}
-                      {update.publishedAt ? ` · ${formatDateTime(update.publishedAt)}` : ""}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         ) : null}
         {tab === "activity" ? <ActivityFeed events={events} /> : null}
       </div>

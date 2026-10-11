@@ -71,7 +71,8 @@ export default async function AdminHomePage() {
             </p>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Trending requests</h2>
+            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Most voted</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Votes in the last 30 days.</p>
             {home.trending.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No requests received a vote in the last 30 days.</p>
             ) : (

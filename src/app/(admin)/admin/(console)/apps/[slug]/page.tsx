@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { EditAppForm } from "@/components/admin/app-forms";
 import { InstallCodeBlock } from "@/components/admin/install-code";
 import { PageHeader } from "@/components/admin/page-header";
 import { hostServerInstall, viewInstall } from "@/domain/install-code";
@@ -16,7 +17,15 @@ export default async function AppInstallPage({ params }: { params: Promise<{ slu
   const [{ slug }, admin] = await Promise.all([params, requireAdmin()]);
   const app = await prisma.app.findFirst({
     where: { workspaceId: admin.workspaceId, slug },
-    select: { id: true, name: true, credentialHash: true, issuedCredential: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      platform: true,
+      status: true,
+      credentialHash: true,
+      issuedCredential: true,
+    },
   });
   if (!app) notFound();
 
@@ -31,6 +40,9 @@ export default async function AppInstallPage({ params }: { params: Promise<{ slu
         description="Install code for this app. The host server sends the user it already knows. A tap on the view opens the Feedback Hub window."
       />
       <div className="space-y-10 px-4 py-6 md:px-6">
+        {admin.role === "owner" ? (
+          <EditAppForm slug={app.slug} name={app.name} platform={app.platform} status={app.status} />
+        ) : null}
         <InstallCodeBlock
           id="server"
           title="Host server"

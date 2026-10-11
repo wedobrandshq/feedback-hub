@@ -25,6 +25,32 @@ export function parseInboxFilter(value: string | undefined): {
   return { filter: "all", error: "That inbox filter is not available." };
 }
 
+export function emptyInboxCopy(filter: InboxFilter, appName: string | null) {
+  if (filter === "needs_reply") {
+    return {
+      title: "You’re all caught up",
+      description: "No conversations currently need a reply.",
+    };
+  }
+  if (filter === "unread") {
+    return {
+      title: "No unread conversations",
+      description: "Nothing is waiting for you to read.",
+    };
+  }
+  if (filter === "closed") {
+    return {
+      title: "No closed conversations",
+      description: "Closed conversations will show up here.",
+    };
+  }
+  const source = appName ? ` from ${appName}` : "";
+  return {
+    title: "No conversations yet",
+    description: `Send test feedback${source} and the thread will show up here.`,
+  };
+}
+
 export function conversationNeedsReply(input: {
   status: ConversationStatusName;
   latestSenderType: SenderTypeName | null;

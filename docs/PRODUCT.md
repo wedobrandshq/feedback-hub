@@ -2,6 +2,20 @@
 
 Source of truth for product behavior. Do not invent business logic. If implementation reveals an ambiguity, document it. If a decision materially changes product behavior, update this specification.
 
+## Confirmed decision — 11 October 2026, console management
+
+Settings is the signed-in person’s own profile. They can change name, email, and password. Email is stored in lowercase and must be unique. Changing a password requires the current password and a new password of at least 8 characters. Name and email can change without the current password.
+
+People lists console access. An Owner can add a person with name, email, password, and role Owner or Admin, change a role, and remove a person. The workspace always keeps one Owner: the last Owner cannot be removed or demoted. An Admin can use the product console and edit their own profile. An Admin cannot add people, change roles, remove people, or create or edit apps.
+
+An Owner can add an app with a name and a platform (iOS, Android, Web, or Cross-platform). Creating the app generates its secret and its install page, with the same two blocks as the other apps. The host-server block contains that app’s secret. The view block does not. On the app page, an Owner can edit the name, platform, and status (active or inactive). The install code stays on that page. Inactive is stored on the app and does not change the hosted window. The Apps list has no Open button. The app name opens the app page. The header app selector remains the filter for the rest of the console. There are no toggles for voting, roadmap, messages, or notifications.
+
+The hosted window stays Feedback, Requests, and Roadmap for every app.
+
+A request page has no Updates tab and no Publish update form. The admin roadmap has three columns: Planned, In progress, and Released. Under consideration stays a status on the request and is not a roadmap column. An empty Inbox names the selected app. Home labels the 30-day vote list Most voted.
+
+This pass does not edit a request title, description, or changelog entry.
+
 ## Confirmed decision — 11 October 2026
 
 Admin → Apps → each app has its own page. That page shows copy-paste install code for that app only.

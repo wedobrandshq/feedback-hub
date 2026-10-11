@@ -5,7 +5,7 @@ import { InboxFilters } from "@/components/admin/inbox-filters";
 import { InboxTable } from "@/components/admin/inbox-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { INBOX_LIST_LIMIT } from "@/domain/config";
-import { parseInboxFilter, type InboxFilter } from "@/domain/conversation";
+import { emptyInboxCopy, parseInboxFilter } from "@/domain/conversation";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
 import { listInbox } from "@/server/conversations";
 
@@ -13,31 +13,6 @@ export const metadata = { title: "Inbox" };
 
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function emptyCopy(filter: InboxFilter) {
-  if (filter === "needs_reply") {
-    return {
-      title: "You’re all caught up",
-      description: "No conversations currently need a reply.",
-    };
-  }
-  if (filter === "unread") {
-    return {
-      title: "No unread conversations",
-      description: "Nothing is waiting for you to read.",
-    };
-  }
-  if (filter === "closed") {
-    return {
-      title: "No closed conversations",
-      description: "Closed conversations will show up here.",
-    };
-  }
-  return {
-    title: "No conversations yet",
-    description: "No conversations yet. Send test feedback from Willow and the thread will show up here.",
-  };
 }
 
 export default async function InboxPage({
@@ -55,7 +30,8 @@ export default async function InboxPage({
         appId: selected?.id ?? null,
         filter: parsed.filter,
       });
-  const empty = emptyCopy(parsed.filter);
+  const empty = emptyInboxCopy(parsed.filter, selected?.name ?? null);
+  const noneYet = emptyInboxCopy("all", selected?.name ?? null);
 
   return (
     <>
@@ -82,8 +58,8 @@ export default async function InboxPage({
         <InboxTable rows={result.rows} />
       ) : result && result.totalInScope === 0 ? (
         <EmptyState
-          title="No conversations yet"
-          description="No conversations yet. Send test feedback from Willow and the thread will show up here."
+          title={noneYet.title}
+          description={noneYet.description}
           action={
             <Link href="/demo" className={buttonVariants()}>
               Send test feedback

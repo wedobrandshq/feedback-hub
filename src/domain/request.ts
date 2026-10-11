@@ -27,7 +27,7 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatusName, string> = {
 export const REQUEST_SORTS = ["updated", "created", "feedback", "votes"] as const;
 export type RequestSortName = (typeof REQUEST_SORTS)[number];
 
-export const ADMIN_ROADMAP_STATUSES = ["under_consideration", "planned", "in_progress", "released"] as const;
+export const ADMIN_ROADMAP_STATUSES = ["planned", "in_progress", "released"] as const;
 
 export function isRequestStatus(value: string): value is RequestStatusName {
   return (REQUEST_STATUSES as readonly string[]).includes(value);

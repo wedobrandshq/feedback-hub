@@ -7,7 +7,6 @@ import {
   createRequestAction,
   linkFeedbackAction,
   publishRequestAction,
-  publishUpdateAction,
   unlinkFeedbackAction,
   type ActionState,
 } from "@/app/(admin)/admin/(console)/requests/actions";
@@ -139,19 +138,6 @@ export function RoadmapMoveForm({ requestId, status }: { requestId: string; stat
       </div>
       <Button type="submit" variant="outline" disabled={pending}>{pending ? "Moving…" : "Move"}</Button>
       {state.error ? <p className="w-full text-sm text-destructive" role="alert">{state.error}</p> : null}
-    </form>
-  );
-}
-
-export function UpdateForm({ requestId }: { requestId: string }) {
-  const [state, action, pending] = useActionState(publishUpdateAction, initial);
-  return (
-    <form action={action} className="space-y-3">
-      <input type="hidden" name="requestId" value={requestId} />
-      <label htmlFor="update-body" className="text-sm font-medium">Update</label>
-      <Textarea id="update-body" name="body" className="min-h-24" placeholder="What should interested people know?" />
-      {state.error ? <p className="text-sm text-destructive" role="alert">{state.error}</p> : null}
-      <Button type="submit" disabled={pending}>{pending ? "Publishing…" : "Publish update"}</Button>
     </form>
   );
 }

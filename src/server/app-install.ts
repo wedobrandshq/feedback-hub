@@ -20,6 +20,11 @@ function matchKnownSecret(credentialHash: string) {
   return knownSecrets().find((secret) => hashAppCredential(secret) === credentialHash) ?? null;
 }
 
+export function createAppSecret() {
+  const secret = randomBytes(32).toString("base64url");
+  return { secret, credentialHash: hashAppCredential(secret) };
+}
+
 export async function resolveAppSecret(app: {
   id: string;
   credentialHash: string;
@@ -31,13 +36,12 @@ export async function resolveAppSecret(app: {
     return app.issuedCredential;
   }
 
-  const secret = randomBytes(32).toString("base64url");
-  const credentialHash = hashAppCredential(secret);
+  const issued = createAppSecret();
   const updated = await prisma.app.updateMany({
     where: { id: app.id, credentialHash: app.credentialHash },
-    data: { credentialHash, issuedCredential: secret },
+    data: { credentialHash: issued.credentialHash, issuedCredential: issued.secret },
   });
-  if (updated.count === 1) return secret;
+  if (updated.count === 1) return issued.secret;
 
   const fresh = await prisma.app.findUniqueOrThrow({
     where: { id: app.id },

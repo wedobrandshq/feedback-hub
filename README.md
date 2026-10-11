@@ -15,8 +15,8 @@ Product rules live in [docs/PRODUCT.md](docs/PRODUCT.md). Choices this slice had
 - Admin Inbox and conversation detail: reply, close, and reopen. Reply also works on feedback detail.
 - Willow Messages: unread badge, thread, and a reply from that user.
 - Create a private request from feedback, link and unlink other feedback, and publish it. Willow can vote once. A status change moves the request and does not notify. The phone shows public requests and one roadmap. The admin Changelog stays the release note.
-- Admin Home shows the last 30 days of feedback, new requests, conversations, and votes as separate numbers, plus trending requests and conversations that need a reply.
-- Users list and user detail for product context. Apps lists connected apps. Settings shows the signed-in owner and workspace.
+- Admin Home shows the last 30 days of feedback, new requests, conversations, and votes as separate numbers, plus the most voted requests and conversations that need a reply.
+- Users list and user detail for product context. An owner can add an app and edit its name, platform, and status. Settings edits the signed-in person’s name, email, and password. People is where an owner adds console access.
 - New feedback can store a generated suggestion: a type, topics, and one existing request with the similarity the model returned. An admin can link that request, create a request, or ignore it. The original message stays as submitted. A request with linked feedback can show a short generated summary to admins. The Willow demo does not show suggestions, similarity, or that summary.
 - Events for feedback, conversations, requests, votes, updates, and in-app notifications.
 
@@ -41,11 +41,12 @@ The dev server listens on [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | Path | What it is |
 | --- | --- |
 | `/demo` | Willow phone. An icon opens the Feedback Hub window. |
-| `/admin` | Home: signals, trending requests, needs attention |
+| `/admin` | Home: signals, most voted, needs attention |
 | `/admin/login` | Admin sign-in |
 | `/admin/users` | Users and user detail |
-| `/admin/apps` | Connected apps |
-| `/admin/settings` | Signed-in owner and workspace |
+| `/admin/apps` | Apps. A name opens that app’s page. |
+| `/admin/people` | Console people. Owners add Owner or Admin. |
+| `/admin/settings` | The signed-in person’s name, email, and password |
 | `/admin/inbox` | Conversations that need attention |
 | `/admin/feedback` | Feedback list |
 | `/admin/requests` | Requests, with feedback and votes kept as separate counts |

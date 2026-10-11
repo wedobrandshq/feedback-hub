@@ -102,7 +102,7 @@ A published request is visible in that app even while its status is Review or Un
 
 ## Admin home
 
-Product Signals count the last 30 days: feedback created, requests created, conversations created, and votes cast. Feedback also shows the difference against the previous 30 days. Released counts requests whose `released_at` falls in the last 30 days. Trending requests are those with at least one vote in that window, ordered by that vote count. Each row shows the window’s vote count and the request’s feedback count separately. Private requests are included. Emerging Topics is not shown.
+Product Signals count the last 30 days: feedback created, requests created, conversations created, and votes cast. Feedback also shows the difference against the previous 30 days. Released counts requests whose `released_at` falls in the last 30 days. Most voted lists requests with at least one vote in that window, ordered by that vote count. Each row shows the window’s vote count and the request’s feedback count separately. Private requests are included. Emerging Topics is not shown.
 
 Needs Attention uses the same rule as Inbox: an open conversation whose latest message is from the user. The open-conversation count is the current set, not a 30-day count. The scan stops at 200 open conversations.
 
@@ -112,11 +112,11 @@ Search matches name, email, or external id. The plan filter lists plans already 
 
 ## Apps and settings
 
-The Apps list shows name, platform, status, and the latest event time. The name opens that app’s install page. Open selects that app and goes to Home. The selector does not hide apps on this screen. Icon, SDK status, and the section 47 toggles (public feedback, voting, roadmap, messages, notifications, SDK keys) are not shown. Settings shows the signed-in admin and the workspace only.
+The Apps list shows name, platform, status, and the latest event time. The name opens that app’s page. There is no Open button. The header selector filters the console and does not hide apps on this screen. An Owner can add an app and edit its name, platform, and status. Icon, SDK status, and the section 47 toggles (public feedback, voting, roadmap, messages, notifications, SDK keys) are not shown. Settings edits the signed-in person’s name, email, and password. People is console access, separate from product Users.
 
 ## Roadmap moves
 
-On the roadmap, a request can move among Under consideration, Planned, In progress, and Released. That uses the same status action as the request page: it writes `request.status_changed` and does not notify. Review and Not planned stay on the request page. The Willow phone has one roadmap, with Planned, In progress, and Released. What’s new and Updates are not on the phone.
+The admin roadmap columns are Planned, In progress, and Released. Under consideration stays a status on the request page and is not a column. Moving a status writes `request.status_changed` and does not notify. Review and Not planned stay on the request page. The request page has no Updates tab. The hosted window has one roadmap, with Planned, In progress, and Released.
 
 ## Host entry
 

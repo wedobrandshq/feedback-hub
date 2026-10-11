@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { DomainError } from "@/domain/errors";
 import {
+  ADMIN_ROADMAP_STATUSES,
   assertStoredText,
   isRequestStatus,
   type RequestSortName,
@@ -605,7 +606,7 @@ export async function listRoadmap(input: { workspaceId: string; appId: string | 
   return prisma.request.findMany({
     where: {
       visibility: "public",
-      status: { in: ["under_consideration", "planned", "in_progress", "released"] },
+      status: { in: [...ADMIN_ROADMAP_STATUSES] },
       app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
     },
     orderBy: { updatedAt: "desc" },
