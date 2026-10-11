@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ export default async function AppsPage() {
     <>
       <PageHeader
         title="Apps"
-        description="Connected applications in this workspace. Open one to read its feedback, requests, and roadmap."
+        description="Each app has its own install code. Open the name to copy it."
       />
       {apps.length === 0 ? (
         <EmptyState title="No apps yet" description="No feedback yet. Connect your first app or send test feedback." />
@@ -49,7 +50,11 @@ export default async function AppsPage() {
           <TableBody>
             {apps.map((app) => (
               <TableRow key={app.id}>
-                <TableCell className="font-medium">{app.name}</TableCell>
+                <TableCell>
+                  <Link href={`/admin/apps/${app.slug}`} className="font-medium underline-offset-4 hover:underline">
+                    {app.name}
+                  </Link>
+                </TableCell>
                 <TableCell>{platformLabel(app.platform)}</TableCell>
                 <TableCell className="capitalize">{app.status}</TableCell>
                 <TableCell className="text-muted-foreground">

@@ -77,6 +77,8 @@ The Willow demo is Maya Chen (`maya.chen@example.com`, plan Plus). Earn It start
 
 The host server identifies the user it already knows. The app secret stays in that server’s environment. The response `session` goes in the snippet. Do not put the secret, or a raw user id, on the icon.
 
+Each app’s install code, with that app’s own secret in the server call, is on its page under Admin → Apps.
+
 ```bash
 curl -s -X POST https://feedback-hub-smoky.vercel.app/api/embed/session \
   -H "Authorization: Bearer $APP_SECRET" \

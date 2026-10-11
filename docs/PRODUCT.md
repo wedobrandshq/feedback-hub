@@ -2,6 +2,16 @@
 
 Source of truth for product behavior. Do not invent business logic. If implementation reveals an ambiguity, document it. If a decision materially changes product behavior, update this specification.
 
+## Confirmed decision — 11 October 2026
+
+Admin → Apps → each app has its own page. That page shows copy-paste install code for that app only.
+
+The host-server block is a POST to `https://feedback-hub-smoky.vercel.app/api/embed/session` with `Authorization: Bearer` and that app’s secret, plus JSON `userId`, `email`, `name`, and `plan`. The secret is the configured server credential whose hash matches the app. If none match, Feedback Hub issues a new secret once, stores it on the app, updates the hash, and shows that secret. The next view of the page shows the same secret. Willow’s page does not include Earn It’s secret, and Earn It’s page does not include Willow’s.
+
+The view block is a button with `data-fh-open` and a script for `https://feedback-hub-smoky.vercel.app/embed.js` with `data-session="SESSION"`. The secret is not in that block.
+
+The hosted window stays submit feedback, public requests with voting, and the roadmap with Planned, In progress, and Released. Messages stay out of that window.
+
 ## Confirmed decision — 9 October 2026
 
 The host app only places a trigger. Feedback Hub hosts one window: submit feedback, the list of public requests with voting, and one roadmap with Planned, In progress, and Released. That window does not include Messages, What’s new, Updates, Popular requests, or the This week card. There is not a second feedback screen.

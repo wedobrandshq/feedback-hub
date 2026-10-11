@@ -16,6 +16,7 @@ export async function listAdminApps(workspaceId: string) {
   return apps.map((app) => ({
     id: app.id,
     name: app.name,
+    slug: app.slug,
     platform: app.platform,
     status: app.status,
     lastEventAt: lastEvent.get(app.id) ?? null,

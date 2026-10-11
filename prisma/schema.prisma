@@ -86,7 +86,8 @@ model App {
   icon           String?
   platform       Platform
   status         String    @default("active")
-  credentialHash String    @unique @map("credential_hash")
+  credentialHash   String    @unique @map("credential_hash")
+  issuedCredential String?   @map("issued_credential")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
   workspace      Workspace      @relation(fields: [workspaceId], references: [id])

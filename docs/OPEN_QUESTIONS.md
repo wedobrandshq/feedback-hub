@@ -112,7 +112,7 @@ Search matches name, email, or external id. The plan filter lists plans already 
 
 ## Apps and settings
 
-The Apps list shows name, platform, status, and the latest event time. Open selects that app and goes to Home. The selector does not hide apps on this screen. Icon, SDK status, integration instructions, and the section 47 toggles (public feedback, voting, roadmap, messages, notifications, SDK keys) are not shown. Settings shows the signed-in admin and the workspace only.
+The Apps list shows name, platform, status, and the latest event time. The name opens that app’s install page. Open selects that app and goes to Home. The selector does not hide apps on this screen. Icon, SDK status, and the section 47 toggles (public feedback, voting, roadmap, messages, notifications, SDK keys) are not shown. Settings shows the signed-in admin and the workspace only.
 
 ## Roadmap moves
 
