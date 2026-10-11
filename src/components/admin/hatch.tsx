@@ -45,13 +45,13 @@ export const hatchSecondary =
   "h-auto rounded-full border-2 border-[#0e0e1a] bg-white px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] hover:bg-[#fffcf2]";
 
 export const hatchField =
-  "h-10 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm text-[#0e0e1a] shadow-none outline-none focus-visible:border-[3px] focus-visible:border-[#0e0e1a] focus-visible:ring-0 focus-visible:shadow-none";
+  "h-10 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm text-[#0e0e1a] shadow-none outline-none focus-visible:border-2 focus-visible:border-[#0e0e1a] focus-visible:ring-0 focus-visible:shadow-[5px_5px_0_#0e0e1a]";
 
 export const hatchArea =
-  "rounded-2xl border-2 border-[#0e0e1a] bg-white text-sm text-[#0e0e1a] shadow-none outline-none focus-visible:border-[3px] focus-visible:border-[#0e0e1a] focus-visible:ring-0 focus-visible:shadow-none";
+  "rounded-2xl border-2 border-[#0e0e1a] bg-white text-sm text-[#0e0e1a] shadow-none outline-none focus-visible:border-2 focus-visible:border-[#0e0e1a] focus-visible:ring-0 focus-visible:shadow-[5px_5px_0_#0e0e1a]";
 
 export const hatchSelect =
-  "h-10 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm font-medium text-[#0e0e1a] shadow-none outline-none focus:border-[3px] focus:border-[#0e0e1a] focus:shadow-none focus:outline-none focus:ring-0 focus-visible:ring-0";
+  "h-10 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm font-medium text-[#0e0e1a] shadow-none outline-none focus:border-2 focus:border-[#0e0e1a] focus:shadow-[5px_5px_0_#0e0e1a] focus:outline-none focus:ring-0 focus-visible:border-2 focus-visible:ring-0 focus-visible:shadow-[5px_5px_0_#0e0e1a]";
 
 export const hatchHead =
   "h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]";
