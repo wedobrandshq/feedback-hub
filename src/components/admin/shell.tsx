@@ -54,7 +54,7 @@ export function AdminShell({
     <div className="flex min-h-full flex-col md:flex-row">
       <aside className="flex w-full shrink-0 flex-col border-b border-border bg-sidebar md:min-h-screen md:w-60 md:border-r md:border-b-0">
         <div className="px-4 py-4">
-          <p className="text-sm font-semibold tracking-tight">Feedback Hub</p>
+          <p className="product-name text-sm font-semibold tracking-tight">Feedback Hub</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{admin.workspaceName}</p>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:overflow-visible md:px-2 md:pb-4">
