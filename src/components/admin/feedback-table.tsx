@@ -26,7 +26,7 @@ export type FeedbackRow = {
 export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
   return (
     <div className="px-4 py-4 md:px-8">
-      <HatchPanel>
+      <HatchPanel clip>
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { setSelectedAppAction } from "@/app/(admin)/admin/(console)/actions";
+import { hatchSelect } from "@/components/admin/hatch";
 
 export function AppSelector({
   apps,
@@ -23,7 +24,7 @@ export function AppSelector({
         name="app"
         value={value}
         disabled={pending}
-        className="h-9 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a]"
+        className={hatchSelect}
         onChange={(event) => {
           const next = event.target.value;
           setValue(next);

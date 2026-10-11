@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { hatchChip } from "@/components/admin/hatch";
 import { formatDateTime } from "@/domain/feedback";
 import { REQUEST_SORTS, REQUEST_STATUS_LABELS, type RequestSortName } from "@/domain/request";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
@@ -71,8 +72,8 @@ export default async function RequestsPage({
               key={item}
               href={item === "updated" ? "/admin/requests" : `/admin/requests?sort=${item}`}
               aria-current={active ? "page" : undefined}
-              className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] ${
-                active ? "bg-[#c6ff4f] shadow-[3px_3px_0_#0e0e1a]" : "bg-[#fffcf2]"
+              className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] ${
+                active ? "bg-[#c6ff4f]" : "bg-[#fffcf2]"
               }`}
             >
               {sortLabel(item)}
@@ -81,7 +82,7 @@ export default async function RequestsPage({
         })}
       </nav>
       {rows.length === 0 ? (
-        <div className="mt-6 max-w-xl rounded-[16px] border-2 border-[#0e0e1a] bg-white px-6 py-10 shadow-[5px_5px_0_#0e0e1a]">
+        <div className="mt-6 max-w-xl rounded-[32px] border-2 border-[#0e0e1a] bg-white px-6 py-10 shadow-[5px_5px_0_#0e0e1a]">
           <p className="inline-block rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-2.5 py-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase shadow-[3px_3px_0_#0e0e1a] [font-family:var(--font-mono)]">
             Empty
           </p>
@@ -93,8 +94,8 @@ export default async function RequestsPage({
           </p>
         </div>
       ) : (
-        <div className="mt-6 rounded-[16px] shadow-[5px_5px_0_#0e0e1a]">
-          <div className="overflow-hidden rounded-[16px] border-2 border-[#0e0e1a] bg-white">
+        <div className="mt-6 rounded-[32px] shadow-[5px_5px_0_#0e0e1a]">
+          <div className="overflow-hidden rounded-[32px] border-2 border-[#0e0e1a] bg-white">
             <Table>
               <TableHeader>
                 <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
@@ -129,7 +130,7 @@ export default async function RequestsPage({
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.id} className="relative border-[#0e0e1a]/15 hover:bg-[#fffcf2]">
+                  <TableRow key={row.id} className="relative border-[#0e0e1a] hover:bg-[#fffcf2]">
                     <TableCell className="max-w-xs px-3 py-3.5 font-normal whitespace-normal">
                       <Link
                         href={`/admin/requests/${row.id}`}
@@ -142,7 +143,7 @@ export default async function RequestsPage({
                       ) : null}
                     </TableCell>
                     <TableCell className="px-3 py-3.5">
-                      <MonoLabel>{REQUEST_STATUS_LABELS[row.status]}</MonoLabel>
+                      <span className={hatchChip(row.status)}>{REQUEST_STATUS_LABELS[row.status]}</span>
                     </TableCell>
                     <TableCell className="px-3 py-3.5">
                       <MonoLabel>{row.visibility}</MonoLabel>

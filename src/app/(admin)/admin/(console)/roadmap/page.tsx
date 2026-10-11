@@ -31,10 +31,11 @@ export default async function RoadmapPage() {
         <EmptyState title="Nothing on the roadmap" description="Publish a request and set a roadmap status to see it here." />
       ) : (
         <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-3">
-          {ADMIN_ROADMAP_STATUSES.map((status) => {
+          {ADMIN_ROADMAP_STATUSES.map((status, index) => {
             const items = rows.filter((row) => row.status === status);
+            const wash = (["lilac", "mint", "sky"] as const)[index] ?? "white";
             return (
-              <HatchPanel key={status}>
+              <HatchPanel key={status} wash={wash}>
                 <section className="px-4 py-4">
                 <h2 className={hatchSticker}>
                   {REQUEST_STATUS_LABELS[status]}
@@ -44,7 +45,7 @@ export default async function RoadmapPage() {
                 ) : (
                   <ul className="mt-3">
                     {items.map((item) => (
-                      <li key={item.id} className="border-t border-[#0e0e1a]/15 py-3" data-roadmap={status}>
+                      <li key={item.id} className="border-t border-[#0e0e1a] py-3" data-roadmap={status}>
                         <Link href={`/admin/requests/${item.id}`} className={hatchRowTitle}>
                           {item.title}
                         </Link>

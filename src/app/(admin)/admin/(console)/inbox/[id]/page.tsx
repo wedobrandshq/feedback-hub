@@ -15,7 +15,7 @@ export const metadata = { title: "Conversation" };
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-3 border-t border-border py-2 text-sm first:border-t-0">
+    <div className="grid grid-cols-[7.5rem_1fr] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
       <dt className="text-muted-foreground">{label}</dt>
       <dd>{value || "—"}</dd>
     </div>

@@ -30,7 +30,7 @@ export default async function PeoplePage() {
         <HatchPanel>
         <ul>
           {people.map((person) => (
-            <li key={person.id} className="flex flex-col gap-3 border-b border-[#0e0e1a]/15 px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between" data-person={person.email}>
+            <li key={person.id} className="flex flex-col gap-3 border-b border-[#0e0e1a] px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between" data-person={person.email}>
               <div>
                 <p className={hatchRowTitle}>{person.name}</p>
                 <p className="text-sm text-[#5a5b70]">

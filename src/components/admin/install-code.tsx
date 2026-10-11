@@ -29,7 +29,7 @@ export function InstallCodeBlock({
   secret?: string;
 }) {
   return (
-    <section className="max-w-3xl rounded-[16px] border-2 border-[#0e0e1a] bg-white p-5 shadow-[5px_5px_0_#0e0e1a]">
+    <section className="max-w-3xl rounded-[32px] border-2 border-[#0e0e1a] bg-white p-5 shadow-[5px_5px_0_#0e0e1a]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">{title}</h2>

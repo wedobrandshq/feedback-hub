@@ -93,7 +93,7 @@ export default async function UsersPage({
       ) : null}
       {result.rows.length > 0 ? (
         <div className="px-4 pb-8 md:px-8">
-        <HatchPanel>
+        <HatchPanel clip>
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

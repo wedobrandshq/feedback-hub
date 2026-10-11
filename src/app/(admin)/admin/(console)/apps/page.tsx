@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CreateAppForm } from "@/components/admin/app-forms";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
-import { HatchPanel, hatchHead, hatchRowTitle, hatchSticker } from "@/components/admin/hatch";
+import { HatchPanel, hatchChip, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
 import {
   Table,
   TableBody,
@@ -45,7 +45,7 @@ export default async function AppsPage() {
         <EmptyState title="No apps yet" description="No feedback yet. Connect your first app or send test feedback." />
       ) : (
         <div className="px-4 pb-8 md:px-8">
-        <HatchPanel>
+        <HatchPanel clip>
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
@@ -57,7 +57,7 @@ export default async function AppsPage() {
           </TableHeader>
           <TableBody>
             {apps.map((app) => (
-              <TableRow key={app.id} className="border-[#0e0e1a]/15 hover:bg-[#fffcf2]">
+              <TableRow key={app.id} className="border-[#0e0e1a] hover:bg-[#fffcf2]">
                 <TableCell className="px-3 py-3.5">
                   <Link href={`/admin/apps/${app.slug}`} className={hatchRowTitle}>
                     {app.name}
@@ -65,7 +65,7 @@ export default async function AppsPage() {
                 </TableCell>
                 <TableCell className="px-3 py-3.5 text-sm">{appPlatformLabel(app.platform)}</TableCell>
                 <TableCell className="px-3 py-3.5">
-                  <span className={hatchSticker}>{app.status}</span>
+                  <span className={hatchChip(app.status)}>{app.status}</span>
                 </TableCell>
                 <TableCell className="px-3 py-3.5 text-sm text-[#5a5b70]">
                   {app.lastEventAt ? formatDateTime(app.lastEventAt) : "—"}

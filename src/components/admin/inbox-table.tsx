@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HatchPanel, hatchDataRow, hatchHead, hatchRowTitle, hatchSticker } from "@/components/admin/hatch";
+import { HatchPanel, hatchChip, hatchDataRow, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
 import {
   Table,
   TableBody,
@@ -12,15 +12,15 @@ import { feedbackPreview, formatDateTime, userLabel } from "@/domain/feedback";
 import type { InboxRow } from "@/server/conversations";
 
 function Attention({ row }: { row: InboxRow }) {
-  if (row.status === "closed") return <span className={hatchSticker}>Closed</span>;
-  if (row.needsReply) return <span className={hatchSticker}>Needs reply</span>;
-  return <span className={hatchSticker}>Open</span>;
+  if (row.status === "closed") return <span className={hatchChip("closed")}>Closed</span>;
+  if (row.needsReply) return <span className={hatchChip("needs_reply")}>Needs reply</span>;
+  return <span className={hatchChip("open")}>Open</span>;
 }
 
 export function InboxTable({ rows }: { rows: InboxRow[] }) {
   return (
     <div className="px-4 py-4 md:px-8">
-      <HatchPanel>
+      <HatchPanel clip>
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

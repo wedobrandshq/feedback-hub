@@ -58,7 +58,7 @@ export default async function AdminHomePage() {
         />
       ) : (
         <div className="space-y-8 px-4 py-6 md:px-8">
-          <HatchPanel>
+          <HatchPanel wash="lilac">
             <section className="px-5 py-5">
             <h2 className={hatchSticker}>Product signals</h2>
             <dl className="mt-5 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
@@ -73,7 +73,7 @@ export default async function AdminHomePage() {
             </p>
             </section>
           </HatchPanel>
-          <HatchPanel>
+          <HatchPanel wash="mint">
             <section className="px-5 py-5">
             <h2 className={hatchSticker}>Most voted</h2>
             <p className={`mt-4 ${hatchBody}`}>Votes in the last 30 days.</p>
@@ -82,7 +82,7 @@ export default async function AdminHomePage() {
             ) : (
               <ul className="mt-3">
                 {home.trending.map((request) => (
-                  <li key={request.id} className="flex flex-wrap items-baseline justify-between gap-3 border-t border-[#0e0e1a]/15 py-3">
+                  <li key={request.id} className="flex flex-wrap items-baseline justify-between gap-3 border-t border-[#0e0e1a] py-3">
                     <div>
                       <Link href={`/admin/requests/${request.id}`} className={hatchRowTitle}>
                         {request.title}
@@ -100,7 +100,7 @@ export default async function AdminHomePage() {
             )}
             </section>
           </HatchPanel>
-          <HatchPanel>
+          <HatchPanel wash="sky">
             <section className="px-5 py-5">
             <h2 className={hatchSticker}>Needs attention</h2>
             <p className={`mt-4 ${hatchBody}`}>
@@ -115,7 +115,7 @@ export default async function AdminHomePage() {
             ) : (
               <ul className="mt-3">
                 {home.attention.needsReply.map((row) => (
-                  <li key={row.id} className="border-t border-[#0e0e1a]/15 py-3">
+                  <li key={row.id} className="border-t border-[#0e0e1a] py-3">
                     <Link href={`/admin/inbox/${row.id}`} className={hatchRowTitle}>
                       {row.user}
                     </Link>

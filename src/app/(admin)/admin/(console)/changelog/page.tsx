@@ -23,7 +23,7 @@ export default async function ChangelogPage() {
           <HatchPanel>
             <ul>
               {rows.map((row) => (
-                <li key={row.id} className="border-b border-[#0e0e1a]/15 px-5 py-4 last:border-b-0">
+                <li key={row.id} className="border-b border-[#0e0e1a] px-5 py-4 last:border-b-0">
                   <Link href={`/admin/requests/${row.request.id}`} className={hatchRowTitle}>
                     {row.title}
                   </Link>
