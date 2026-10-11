@@ -12,6 +12,7 @@ export default async function SettingsPage() {
   return (
     <>
       <PageHeader
+        kicker="Account"
         title="Settings"
         description="Your name, email, and password. A new password needs your current one."
       />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/admin/activity-feed";
+import { hatchPill, hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import {
   ChangelogForm,
@@ -75,17 +76,18 @@ export default async function RequestDetailPage({
   return (
     <>
       <PageHeader
+        kicker="Request"
         title={request.title}
         description={`${request.app.name} · ${REQUEST_STATUS_LABELS[request.status]} · ${request.visibility}`}
         actions={request.visibility === "private" ? <PublishRequestForm requestId={request.id} /> : undefined}
       />
-      <nav aria-label="Request sections" className="flex gap-1 overflow-x-auto border-b border-border px-4 py-3 md:px-6">
+      <nav aria-label="Request sections" className="flex gap-2 overflow-x-auto px-4 pt-4 pb-2 md:px-8">
         {TABS.map((item) => (
           <Link
             key={item}
             href={item === "overview" ? `/admin/requests/${request.id}` : `/admin/requests/${request.id}?tab=${item}`}
             aria-current={tab === item ? "page" : undefined}
-            className={`rounded-md px-2.5 py-1.5 text-sm capitalize ${tab === item ? "bg-muted font-medium" : "text-muted-foreground"}`}
+            className={`${hatchPill(tab === item)} capitalize`}
           >
             {item}
           </Link>
@@ -102,7 +104,7 @@ export default async function RequestDetailPage({
               <Metric label="Conversations" value={metrics.conversationCount} />
             </dl>
             <section>
-              <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Description</h2>
+              <h2 className={hatchSticker}>Description</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 whitespace-pre-wrap">{request.description}</p>
               <p className="mt-3 text-xs text-muted-foreground">
                 Created {formatDateTime(request.createdAt)} · Updated {formatDateTime(request.updatedAt)}

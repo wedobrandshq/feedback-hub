@@ -8,6 +8,7 @@ import {
 } from "@/app/(admin)/admin/(console)/requests/actions";
 import { TYPE_LABELS } from "@/domain/feedback";
 import type { FeedbackTypeName } from "@/domain/config";
+import { hatchPrimary, hatchSecondary } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 
 const initial: ActionState = { error: null };
@@ -65,13 +66,13 @@ export function SuggestionPanel({
             <form action={linkAction}>
               <input type="hidden" name="feedbackId" value={feedbackId} />
               {linkState.error ? <p className="mb-2 text-sm text-destructive" role="alert">{linkState.error}</p> : null}
-              <Button type="submit" disabled={linkPending}>{linkPending ? "Linking…" : "Link"}</Button>
+              <Button type="submit" className={hatchPrimary} disabled={linkPending}>{linkPending ? "Linking…" : "Link"}</Button>
             </form>
           ) : null}
           <form action={ignoreAction}>
             <input type="hidden" name="feedbackId" value={feedbackId} />
             {ignoreState.error ? <p className="mb-2 text-sm text-destructive" role="alert">{ignoreState.error}</p> : null}
-            <Button type="submit" variant="outline" disabled={ignorePending}>
+            <Button type="submit" variant="outline" className={hatchSecondary} disabled={ignorePending}>
               {ignorePending ? "Ignoring…" : "Ignore"}
             </Button>
           </form>

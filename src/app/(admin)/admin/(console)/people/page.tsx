@@ -1,4 +1,5 @@
 import { AddPersonForm, PersonControls } from "@/components/admin/people-forms";
+import { HatchPanel, hatchRowTitle } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { consoleRoleLabel } from "@/domain/console";
 import { requireAdmin } from "@/server/auth/admin";
@@ -17,6 +18,7 @@ export default async function PeoplePage() {
   return (
     <>
       <PageHeader
+        kicker="Access"
         title="People"
         description={
           owner
@@ -24,13 +26,14 @@ export default async function PeoplePage() {
             : "People who can sign in to this console. An Admin can edit their own profile from Settings."
         }
       />
-      <div className="space-y-10 px-4 py-6 md:px-6">
-        <ul className="divide-y divide-border">
+      <div className="space-y-8 px-4 py-6 md:px-8">
+        <HatchPanel>
+        <ul>
           {people.map((person) => (
-            <li key={person.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between" data-person={person.email}>
+            <li key={person.id} className="flex flex-col gap-3 border-b border-[#0e0e1a]/15 px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between" data-person={person.email}>
               <div>
-                <p className="text-sm font-medium">{person.name}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className={hatchRowTitle}>{person.name}</p>
+                <p className="text-sm text-[#5a5b70]">
                   {person.email} · {consoleRoleLabel(person.role)}
                 </p>
               </div>
@@ -44,7 +47,14 @@ export default async function PeoplePage() {
             </li>
           ))}
         </ul>
-        {owner ? <AddPersonForm /> : null}
+        </HatchPanel>
+        {owner ? (
+          <HatchPanel>
+            <div className="px-5 py-5">
+              <AddPersonForm />
+            </div>
+          </HatchPanel>
+        ) : null}
       </div>
     </>
   );

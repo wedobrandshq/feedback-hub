@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { closeConversationAction, reopenConversationAction } from "@/app/(admin)/admin/(console)/actions";
 import type { ConversationStatusName } from "@/domain/conversation";
+import { hatchSecondary, hatchStrong } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -35,7 +36,7 @@ export function ConversationActions({
           <AlertDialog>
             <AlertDialogTrigger
               disabled={closePending}
-              render={<Button variant="outline" disabled={closePending} />}
+              render={<Button variant="outline" className={hatchSecondary} disabled={closePending} />}
             >
               Close
             </AlertDialogTrigger>
@@ -55,7 +56,7 @@ export function ConversationActions({
                 ) : null}
                 <AlertDialogFooter>
                   <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                  <Button type="submit" variant="destructive" disabled={closePending}>
+                  <Button type="submit" className={hatchStrong} disabled={closePending}>
                     {closePending ? "Closing…" : "Close"}
                   </Button>
                 </AlertDialogFooter>
@@ -65,7 +66,7 @@ export function ConversationActions({
         ) : (
           <form action={reopenAction}>
             <input type="hidden" name="conversationId" value={conversationId} />
-            <Button type="submit" variant="outline" disabled={reopenPending}>
+            <Button type="submit" variant="outline" className={hatchSecondary} disabled={reopenPending}>
               {reopenPending ? "Reopening…" : "Reopen"}
             </Button>
           </form>

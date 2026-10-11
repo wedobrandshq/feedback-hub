@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { hatchSecondary } from "@/components/admin/hatch";
 import { EmptyState } from "@/components/admin/empty-state";
 
 export default function ConversationNotFound() {
@@ -8,7 +8,7 @@ export default function ConversationNotFound() {
       title="Conversation not found"
       description="This conversation is not in the workspace."
       action={
-        <Link href="/admin/inbox" className={buttonVariants({ variant: "outline" })}>
+        <Link href="/admin/inbox" className={hatchSecondary}>
           Back to inbox
         </Link>
       }

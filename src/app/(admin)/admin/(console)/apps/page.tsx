@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CreateAppForm } from "@/components/admin/app-forms";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
+import { HatchPanel, hatchHead, hatchRowTitle, hatchSticker } from "@/components/admin/hatch";
 import {
   Table,
   TableBody,
@@ -27,43 +28,54 @@ export default async function AppsPage() {
   return (
     <>
       <PageHeader
+        kicker="Install"
         title="Apps"
         description="Each name opens that app’s install code. The header selector filters the rest of the console."
       />
       {owner ? (
-        <div className="border-b border-border px-4 py-6 md:px-6">
-          <CreateAppForm />
+        <div className="px-4 py-6 md:px-8">
+          <HatchPanel>
+            <div className="px-5 py-5">
+              <CreateAppForm />
+            </div>
+          </HatchPanel>
         </div>
       ) : null}
       {apps.length === 0 ? (
         <EmptyState title="No apps yet" description="No feedback yet. Connect your first app or send test feedback." />
       ) : (
+        <div className="px-4 pb-8 md:px-8">
+        <HatchPanel>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Platform</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Last event</TableHead>
+            <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
+              <TableHead className={hatchHead}>Name</TableHead>
+              <TableHead className={hatchHead}>Platform</TableHead>
+              <TableHead className={hatchHead}>Status</TableHead>
+              <TableHead className={hatchHead}>Last event</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {apps.map((app) => (
-              <TableRow key={app.id}>
-                <TableCell>
-                  <Link href={`/admin/apps/${app.slug}`} className="font-medium underline-offset-4 hover:underline">
+              <TableRow key={app.id} className="border-[#0e0e1a]/15 hover:bg-[#fffcf2]">
+                <TableCell className="px-3 py-3.5">
+                  <Link href={`/admin/apps/${app.slug}`} className={hatchRowTitle}>
                     {app.name}
                   </Link>
                 </TableCell>
-                <TableCell>{appPlatformLabel(app.platform)}</TableCell>
-                <TableCell className="capitalize">{app.status}</TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="px-3 py-3.5 text-sm">{appPlatformLabel(app.platform)}</TableCell>
+                <TableCell className="px-3 py-3.5">
+                  <span className={hatchSticker}>{app.status}</span>
+                </TableCell>
+                <TableCell className="px-3 py-3.5 text-sm text-[#5a5b70]">
                   {app.lastEventAt ? formatDateTime(app.lastEventAt) : "—"}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        </HatchPanel>
+        </div>
       )}
     </>
   );

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/admin/empty-state";
+import { hatchStrong } from "@/components/admin/hatch";
 import { InboxFilters } from "@/components/admin/inbox-filters";
 import { InboxTable } from "@/components/admin/inbox-table";
 import { PageHeader } from "@/components/admin/page-header";
@@ -36,6 +36,7 @@ export default async function InboxPage({
   return (
     <>
       <PageHeader
+        kicker="Messages"
         title="Inbox"
         description={
           selected
@@ -61,7 +62,7 @@ export default async function InboxPage({
           title={noneYet.title}
           description={noneYet.description}
           action={
-            <Link href="/demo" className={buttonVariants()}>
+            <Link href="/demo" className={hatchStrong}>
               Send test feedback
             </Link>
           }

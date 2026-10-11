@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { hatchSecondary } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 
 export function CopyButton({ code, label }: { code: string; label: string }) {
@@ -11,6 +12,7 @@ export function CopyButton({ code, label }: { code: string; label: string }) {
       type="button"
       variant="outline"
       size="sm"
+      className={hatchSecondary}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(code);

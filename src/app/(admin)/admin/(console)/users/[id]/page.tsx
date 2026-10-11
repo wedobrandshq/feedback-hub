@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/admin/activity-feed";
+import { hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge, TypeBadge } from "@/components/admin/status-badge";
 import { feedbackPreview, formatDateTime, userLabel } from "@/domain/feedback";
@@ -30,13 +31,14 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
   return (
     <>
       <PageHeader
+        kicker="User"
         title={userLabel(user)}
         description={`${user.app.name}${user.plan ? ` · ${user.plan}` : ""}`}
       />
       <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_18rem] md:px-6">
         <div className="space-y-10">
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Feedback</h2>
+            <h2 className={hatchSticker}>Feedback</h2>
             {user.feedback.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No feedback yet.</p>
             ) : (
@@ -57,7 +59,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Conversations</h2>
+            <h2 className={hatchSticker}>Conversations</h2>
             {user.conversations.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No conversations yet.</p>
             ) : (
@@ -74,7 +76,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Votes</h2>
+            <h2 className={hatchSticker}>Votes</h2>
             {user.votes.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No votes yet.</p>
             ) : (
@@ -91,14 +93,14 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Activity</h2>
+            <h2 className={hatchSticker}>Activity</h2>
             <div className="mt-4">
               <ActivityFeed events={events} />
             </div>
           </section>
         </div>
         <aside>
-          <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Context</h2>
+          <h2 className={hatchSticker}>Context</h2>
           <dl className="mt-3">
             <ContextRow label="Email" value={user.email} />
             <ContextRow label="User ID" value={user.externalUserId} />

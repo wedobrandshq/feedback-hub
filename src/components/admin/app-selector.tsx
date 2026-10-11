@@ -15,7 +15,7 @@ export function AppSelector({
 
   return (
     <form action={setSelectedAppAction} className="flex items-center gap-2">
-      <label htmlFor="app-selector" className="text-sm text-muted-foreground">
+      <label htmlFor="app-selector" className="text-sm font-medium text-[#0e0e1a]">
         App
       </label>
       <select
@@ -23,7 +23,7 @@ export function AppSelector({
         name="app"
         value={value}
         disabled={pending}
-        className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+        className="h-9 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a]"
         onChange={(event) => {
           const next = event.target.value;
           setValue(next);

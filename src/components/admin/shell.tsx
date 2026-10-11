@@ -99,19 +99,19 @@ export function AdminShell({
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-14 items-center justify-between gap-3 border-b border-border px-4 md:px-6">
-          <p className="truncate text-sm text-muted-foreground md:hidden">{admin.name}</p>
-          <p className="hidden text-sm text-muted-foreground md:block">{admin.workspaceName}</p>
+        <div className="flex h-14 items-center justify-between gap-3 border-b-2 border-[#0e0e1a] bg-[#fffcf2] px-4 md:px-6">
+          <p className="truncate text-sm font-medium text-[#0e0e1a] md:hidden">{admin.name}</p>
+          <p className="hidden truncate text-sm font-medium text-[#0e0e1a] md:block">{admin.workspaceName}</p>
           <div className="flex items-center gap-4">
             <form action={logoutAction} className="md:hidden">
-              <button type="submit" className="text-sm text-muted-foreground">
+              <button type="submit" className="text-sm font-normal text-[#5a5b70] hover:text-[#0e0e1a]">
                 Sign out
               </button>
             </form>
             <AppSelector apps={apps} selectedId={selectedId} />
           </div>
         </div>
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 bg-[#fffcf2] text-[#0e0e1a]">{children}</div>
       </div>
     </div>
   );

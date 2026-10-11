@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ConversationActions } from "@/components/admin/conversation-actions";
 import { ConversationThread } from "@/components/admin/conversation-thread";
 import { MessageComposer } from "@/components/admin/message-composer";
+import { hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { TYPE_LABELS, formatDateTime, userLabel } from "@/domain/feedback";
@@ -34,6 +35,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   return (
     <>
       <PageHeader
+        kicker="Conversation"
         title={userLabel(conversation.user)}
         description={`${conversation.app.name} · ${formatDateTime(conversation.updatedAt)}`}
         actions={
@@ -64,7 +66,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
         </div>
         <aside className="space-y-8 lg:border-l lg:border-border lg:pl-6">
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">User</h2>
+            <h2 className={hatchSticker}>User</h2>
             <dl className="mt-2">
               <ContextRow label="Name" value={userLabel(conversation.user)} />
               <ContextRow label="Email" value={conversation.user.email} />
@@ -74,7 +76,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
             </dl>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Feedback</h2>
+            <h2 className={hatchSticker}>Feedback</h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="text-sm">{TYPE_LABELS[conversation.feedback.type]}</span>
               <StatusBadge status={conversation.feedback.status} />
@@ -96,7 +98,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
             </p>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Request</h2>
+            <h2 className={hatchSticker}>Request</h2>
             {linked ? (
               <p className="mt-3 text-sm">
                 <Link href={`/admin/requests/${linked.id}`} className="font-medium">

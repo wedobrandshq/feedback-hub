@@ -36,6 +36,7 @@ export default async function AppInstallPage({ params }: { params: Promise<{ slu
   return (
     <>
       <PageHeader
+        kicker="Install"
         title={app.name}
         description="Install code for this app. The host server sends the user it already knows. A tap on the view opens the Feedback Hub window."
       />

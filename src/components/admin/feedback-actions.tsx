@@ -5,6 +5,7 @@ import { closeFeedbackAction, markReviewedAction } from "@/app/(admin)/admin/(co
 import type { FeedbackStatusName } from "@/domain/config";
 import type { ConversationStatusName } from "@/domain/conversation";
 import { MessageComposer } from "@/components/admin/message-composer";
+import { hatchSecondary, hatchStrong } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -40,24 +41,24 @@ export function FeedbackActions({
     <div className="flex flex-col items-start gap-2 md:items-end">
       <div className="flex flex-wrap gap-2">
         {canReply && conversation ? (
-          <Button type="button" variant="outline" onClick={() => setReplyOpen((open) => !open)}>
+          <Button type="button" variant="outline" className={hatchSecondary} onClick={() => setReplyOpen((open) => !open)}>
             Reply
           </Button>
         ) : (
-          <Button type="button" variant="outline" disabled>
+          <Button type="button" variant="outline" className={hatchSecondary} disabled>
             Reply
           </Button>
         )}
         <form action={reviewAction}>
           <input type="hidden" name="feedbackId" value={feedbackId} />
-          <Button type="submit" variant="outline" disabled={!canReview || reviewPending}>
+          <Button type="submit" variant="outline" className={hatchSecondary} disabled={!canReview || reviewPending}>
             {reviewPending ? "Saving…" : "Mark reviewed"}
           </Button>
         </form>
         <AlertDialog>
           <AlertDialogTrigger
             disabled={!canClose || closePending}
-            render={<Button variant="outline" disabled={!canClose || closePending} />}
+            render={<Button variant="outline" className={hatchSecondary} disabled={!canClose || closePending} />}
           >
             Close
           </AlertDialogTrigger>
@@ -77,7 +78,7 @@ export function FeedbackActions({
               ) : null}
               <AlertDialogFooter>
                 <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                <Button type="submit" variant="destructive" disabled={closePending}>
+                <Button type="submit" className={hatchStrong} disabled={closePending}>
                   {closePending ? "Closing…" : "Close"}
                 </Button>
               </AlertDialogFooter>

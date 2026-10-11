@@ -4,6 +4,7 @@ import { ActivityFeed } from "@/components/admin/activity-feed";
 import { ConversationThread } from "@/components/admin/conversation-thread";
 import { FeedbackActions } from "@/components/admin/feedback-actions";
 import { CreateRequestForm, LinkRequestForm, UnlinkRequestForm } from "@/components/admin/request-forms";
+import { hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { SuggestionPanel } from "@/components/admin/suggestion-panel";
@@ -56,6 +57,7 @@ export default async function FeedbackDetailPage({
   return (
     <>
       <PageHeader
+        kicker="Message"
         title="Feedback"
         description={`${feedback.app.name} · ${formatDateTime(feedback.createdAt)}`}
         actions={
@@ -70,11 +72,11 @@ export default async function FeedbackDetailPage({
       <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:px-6">
         <div className="min-w-0 space-y-8">
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Original feedback</h2>
+            <h2 className={hatchSticker}>Original feedback</h2>
             <p className="mt-3 text-base leading-7 whitespace-pre-wrap">{feedback.body}</p>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Conversation</h2>
+            <h2 className={hatchSticker}>Conversation</h2>
             {thread ? (
               <div className="mt-3 space-y-4">
                 <ConversationThread messages={thread.messages} />
@@ -89,7 +91,7 @@ export default async function FeedbackDetailPage({
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Screenshot</h2>
+            <h2 className={hatchSticker}>Screenshot</h2>
             {feedback.attachments.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No screenshot.</p>
             ) : (
@@ -109,7 +111,7 @@ export default async function FeedbackDetailPage({
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Activity</h2>
+            <h2 className={hatchSticker}>Activity</h2>
             <div className="mt-4">
               <ActivityFeed events={events} />
             </div>
@@ -122,7 +124,7 @@ export default async function FeedbackDetailPage({
         </div>
         <aside className="space-y-8 lg:border-l lg:border-border lg:pl-6">
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Request</h2>
+            <h2 className={hatchSticker}>Request</h2>
             {feedback.requestLink ? (
               <div className="mt-3">
                 <Link href={`/admin/requests/${feedback.requestLink.request.id}`} className="text-sm font-medium">
@@ -154,13 +156,13 @@ export default async function FeedbackDetailPage({
             )}
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">Status</h2>
+            <h2 className={hatchSticker}>Status</h2>
             <div className="mt-3">
               <StatusBadge status={feedback.status} />
             </div>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">User</h2>
+            <h2 className={hatchSticker}>User</h2>
             <dl className="mt-2">
               <ContextRow label="Name" value={userLabel(feedback.user)} />
               <ContextRow label="Email" value={feedback.user.email} />
@@ -170,7 +172,7 @@ export default async function FeedbackDetailPage({
             </dl>
           </section>
           <section>
-            <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">At submission</h2>
+            <h2 className={hatchSticker}>At submission</h2>
             <dl className="mt-2">
               <ContextRow label="App version" value={feedback.appVersionAtSubmission} />
               <ContextRow label="OS" value={feedback.osVersionAtSubmission} />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
+import { HatchPanel, hatchRowTitle, hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { RoadmapMoveForm } from "@/components/admin/request-forms";
 import { ADMIN_ROADMAP_STATUSES, REQUEST_STATUS_LABELS } from "@/domain/request";
@@ -18,6 +19,7 @@ export default async function RoadmapPage() {
   return (
     <>
       <PageHeader
+        kicker="Public"
         title="Roadmap"
         description={
           selected
@@ -28,30 +30,32 @@ export default async function RoadmapPage() {
       {rows.length === 0 ? (
         <EmptyState title="Nothing on the roadmap" description="Publish a request and set a roadmap status to see it here." />
       ) : (
-        <div className="grid gap-8 px-4 py-6 md:px-6 lg:grid-cols-3">
+        <div className="grid gap-6 px-4 py-6 md:px-8 lg:grid-cols-3">
           {ADMIN_ROADMAP_STATUSES.map((status) => {
             const items = rows.filter((row) => row.status === status);
             return (
-              <section key={status}>
-                <h2 className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
+              <HatchPanel key={status}>
+                <section className="px-4 py-4">
+                <h2 className={hatchSticker}>
                   {REQUEST_STATUS_LABELS[status]}
                 </h2>
                 {items.length === 0 ? (
-                  <p className="mt-3 text-sm text-muted-foreground">None</p>
+                  <p className="mt-4 text-sm text-[#5a5b70]">None</p>
                 ) : (
-                  <ul className="mt-1">
+                  <ul className="mt-3">
                     {items.map((item) => (
-                      <li key={item.id} className="border-t border-border py-3" data-roadmap={status}>
-                        <Link href={`/admin/requests/${item.id}`} className="text-sm font-medium">
+                      <li key={item.id} className="border-t border-[#0e0e1a]/15 py-3" data-roadmap={status}>
+                        <Link href={`/admin/requests/${item.id}`} className={hatchRowTitle}>
                           {item.title}
                         </Link>
-                        {!selected ? <p className="text-xs text-muted-foreground">{item.app.name}</p> : null}
+                        {!selected ? <p className="text-xs text-[#5a5b70]">{item.app.name}</p> : null}
                         <RoadmapMoveForm requestId={item.id} status={item.status} />
                       </li>
                     ))}
                   </ul>
                 )}
-              </section>
+                </section>
+              </HatchPanel>
             );
           })}
         </div>

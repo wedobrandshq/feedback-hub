@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/admin/empty-state";
+import { hatchPrimary, hatchSecondary } from "@/components/admin/hatch";
 import { FeedbackTable } from "@/components/admin/feedback-table";
 import { FilterBar } from "@/components/admin/filter-bar";
 import { PageHeader } from "@/components/admin/page-header";
@@ -41,6 +41,7 @@ export default async function FeedbackPage({
   return (
     <>
       <PageHeader
+        kicker="Messages"
         title="Feedback"
         description={
           selected
@@ -64,7 +65,7 @@ export default async function FeedbackPage({
           title="No feedback yet"
           description="No feedback yet. Connect your first app or send test feedback."
           action={
-            <Link href="/demo" className={buttonVariants()}>
+            <Link href="/demo" className={hatchPrimary}>
               Send test feedback
             </Link>
           }
@@ -74,7 +75,7 @@ export default async function FeedbackPage({
           title="No matching feedback"
           description="Nothing matches these filters. Clear them to see every message in this app."
           action={
-            <Link href="/admin/feedback" className={buttonVariants({ variant: "outline" })}>
+            <Link href="/admin/feedback" className={hatchSecondary}>
               Clear filters
             </Link>
           }
