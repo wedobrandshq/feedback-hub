@@ -41,7 +41,7 @@ export default async function FeedbackPage({
   return (
     <>
       <PageHeader
-        kicker="Messages"
+        kicker="Feedback"
         title="Feedback"
         description={
           selected
