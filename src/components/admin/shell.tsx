@@ -52,18 +52,20 @@ export function AdminShell({
 }) {
   return (
     <div className="flex min-h-full flex-col md:flex-row">
-      <aside className="flex w-full shrink-0 flex-col border-b border-border bg-sidebar md:min-h-screen md:w-60 md:border-r md:border-b-0">
-        <div className="px-4 py-4">
-          <p className="product-name text-sm font-semibold tracking-tight">Feedback Hub</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{admin.workspaceName}</p>
+      <aside className="flex w-full shrink-0 flex-col border-b-2 border-[#0e0e1a] bg-[#fffcf2] text-[#0e0e1a] md:min-h-screen md:w-60 md:border-r-2 md:border-b-0">
+        <div className="px-4 pt-5 pb-4">
+          <p className="product-name text-[1.35rem] leading-none font-extrabold tracking-[-0.045em] text-[#0e0e1a]">
+            Feedback Hub
+          </p>
+          <p className="mt-2 truncate text-sm leading-5 font-normal text-[#5a5b70]">{admin.workspaceName}</p>
         </div>
-        <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:overflow-visible md:px-2 md:pb-4">
+        <nav className="flex gap-2 overflow-x-auto px-3 pt-1 pr-3 pb-3 md:flex-col md:gap-0 md:overflow-visible md:px-3 md:pb-4">
           {NAV.map((group) => (
-            <div key={group.label} className="md:mt-4 md:first:mt-0">
-              <p className="hidden px-2 pb-1 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase md:block">
+            <div key={group.label} className="md:mt-5 md:first:mt-0">
+              <p className="hidden px-1 pb-2 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase md:block [font-family:var(--font-mono)]">
                 {group.label}
               </p>
-              <ul className="flex md:flex-col">
+              <ul className="flex gap-2 md:flex-col md:gap-1.5">
                 {group.items.map((item) => {
                   const active = isActive(pathname, item.href);
                   return (
@@ -71,10 +73,10 @@ export function AdminShell({
                       <Link
                         href={item.href}
                         aria-current={active ? "page" : undefined}
-                        className={`block rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap ${
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-[17px] leading-[26px] font-medium whitespace-nowrap text-[#0e0e1a] ${
                           active
-                            ? "bg-muted font-medium text-foreground"
-                            : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                            ? "border-2 border-[#0e0e1a] bg-[#c6ff4f] shadow-[3px_3px_0_#0e0e1a]"
+                            : "border-2 border-transparent"
                         }`}
                       >
                         {item.label}
@@ -86,11 +88,11 @@ export function AdminShell({
             </div>
           ))}
         </nav>
-        <div className="mt-auto hidden border-t border-sidebar-border px-4 py-4 md:block">
-          <p className="truncate text-sm font-medium">{admin.name}</p>
-          <p className="truncate text-xs text-muted-foreground">{consoleRoleLabel(admin.role)}</p>
+        <div className="mt-auto hidden border-t-2 border-[#0e0e1a] px-4 py-4 md:block">
+          <p className="truncate text-base leading-6 font-medium text-[#0e0e1a]">{admin.name}</p>
+          <p className="truncate text-xs leading-4 font-normal text-[#5a5b70]">{consoleRoleLabel(admin.role)}</p>
           <form action={logoutAction} className="mt-3">
-            <button type="submit" className="text-sm text-muted-foreground hover:text-foreground">
+            <button type="submit" className="text-sm leading-5 font-normal text-[#5a5b70] hover:text-[#0e0e1a]">
               Sign out
             </button>
           </form>
