@@ -7,10 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { hatchChip, hatchLift } from "@/components/admin/hatch";
+import { Button } from "@/components/ui/button";
+import { hatchChip, hatchLift, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
 import { formatDateTime } from "@/domain/feedback";
-import { REQUEST_SORTS, REQUEST_STATUS_LABELS, type RequestSortName } from "@/domain/request";
+import {
+  isRequestStatus,
+  REQUEST_SORTS,
+  REQUEST_STATUSES,
+  REQUEST_STATUS_LABELS,
+  type RequestSortName,
+} from "@/domain/request";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
 import { listAdminRequests } from "@/server/requests";
 
@@ -32,6 +39,14 @@ function sortLabel(item: RequestSortName) {
   return "Updated";
 }
 
+function requestsHref(sort: RequestSortName, status: string) {
+  const params = new URLSearchParams();
+  if (sort !== "updated") params.set("sort", sort);
+  if (status) params.set("status", status);
+  const query = params.toString();
+  return query ? `/admin/requests?${query}` : "/admin/requests";
+}
+
 function MonoLabel({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-block text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
@@ -48,10 +63,13 @@ export default async function RequestsPage({
   const admin = await requireAdmin();
   const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
   const sort = sortOf(first(params.sort));
+  const rawStatus = first(params.status) ?? "";
+  const status = isRequestStatus(rawStatus) ? rawStatus : "";
   const rows = await listAdminRequests({
     workspaceId: admin.workspaceId,
     appId: selected?.id ?? null,
     sort,
+    status: status || null,
   });
 
   return (
@@ -71,7 +89,7 @@ export default async function RequestsPage({
           return (
             <Link
               key={item}
-              href={item === "updated" ? "/admin/requests" : `/admin/requests?sort=${item}`}
+              href={requestsHref(item, status)}
               aria-current={active ? "page" : undefined}
               className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] ${hatchLift} ${
                 active ? "bg-[#c6ff4f]" : "bg-[#fffcf2]"
@@ -82,17 +100,44 @@ export default async function RequestsPage({
           );
         })}
       </nav>
+      <form action="/admin/requests" method="get" className="mt-4 flex flex-wrap items-end gap-3">
+        {sort !== "updated" ? <input type="hidden" name="sort" value={sort} /> : null}
+        <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
+          <WithMarker kind="status">Status</WithMarker>
+          <select key={status || "all"} name="status" defaultValue={status} className={`${hatchSelect} w-full sm:w-auto`}>
+            <option value="">All statuses</option>
+            {REQUEST_STATUSES.map((value) => (
+              <option key={value} value={value}>
+                {REQUEST_STATUS_LABELS[value]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button type="submit" className={hatchPrimary}>Apply</Button>
+        {status ? (
+          <Link href={requestsHref(sort, "")} className={hatchSecondary}>
+            Clear
+          </Link>
+        ) : null}
+      </form>
       {rows.length === 0 ? (
         <div className="mt-6 max-w-xl rounded-[32px] border-2 border-[#0e0e1a] bg-white px-6 py-10 shadow-[5px_5px_0_#0e0e1a]">
           <p className="inline-block rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-2.5 py-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase shadow-[3px_3px_0_#0e0e1a] [font-family:var(--font-mono)]">
             Empty
           </p>
           <h2 className="mt-4 text-2xl leading-none font-extrabold tracking-[-0.04em] text-[#0e0e1a] [font-family:var(--font-display)]">
-            No requests yet
+            {status ? "No matching requests" : "No requests yet"}
           </h2>
           <p className="mt-3 max-w-md text-base leading-6 font-normal text-[#5a5b70]">
-            No requests yet. Create a Request from user feedback instead of creating speculative roadmap items.
+            {status
+              ? `Nothing matches ${REQUEST_STATUS_LABELS[status]}. Clear the status filter to see every request.`
+              : "No requests yet. Create a Request from user feedback instead of creating speculative roadmap items."}
           </p>
+          {status ? (
+            <Link href={requestsHref(sort, "")} className={`${hatchSecondary} mt-5 inline-flex`}>
+              Clear filter
+            </Link>
+          ) : null}
         </div>
       ) : (
         <div className="mt-6 rounded-[32px] shadow-[5px_5px_0_#0e0e1a]">

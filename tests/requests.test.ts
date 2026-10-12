@@ -8,6 +8,7 @@ import {
   createChangelogEntry,
   createRequestFromFeedback,
   linkFeedbackToRequest,
+  listAdminRequests,
   listPublicRequests,
   publishRequest,
   publishRequestUpdate,
@@ -190,6 +191,45 @@ describe("requests", () => {
       voteOnRequest({ appSecret: earnItSecret, externalUserId: "sam", requestId: request.id }),
     ).rejects.toBeInstanceOf(DomainError);
     expect(await listPublicRequests({ appSecret: earnItSecret, externalUserId: "sam" })).toEqual([]);
+  });
+
+  it("filters the admin request list by status", async () => {
+    const admin = await actor();
+    const reviewFeedback = await willowFeedback("Keep the evening reminder.");
+    const plannedFeedback = await willowFeedback("Add a weekly recap.");
+    const review = await createRequestFromFeedback({
+      ...admin,
+      feedbackId: reviewFeedback.id,
+      title: "Evening reminder",
+      description: "A quieter nudge.",
+      status: "review",
+    });
+    const planned = await createRequestFromFeedback({
+      ...admin,
+      feedbackId: plannedFeedback.id,
+      title: "Weekly recap",
+      description: "A Sunday summary.",
+      status: "planned",
+    });
+
+    const all = await listAdminRequests({ workspaceId: admin.workspaceId, appId: null, sort: "updated" });
+    expect(all.map((row) => row.id).sort()).toEqual([review.id, planned.id].sort());
+
+    const plannedOnly = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "updated",
+      status: "planned",
+    });
+    expect(plannedOnly.map((row) => row.id)).toEqual([planned.id]);
+
+    const released = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "updated",
+      status: "released",
+    });
+    expect(released).toEqual([]);
   });
 
   it("publishes an update and a changelog entry only after release", async () => {

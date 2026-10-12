@@ -272,9 +272,11 @@ export async function listAdminRequests(input: {
   workspaceId: string;
   appId: string | null;
   sort: RequestSortName;
+  status?: RequestStatusName | null;
 }) {
   const where: Prisma.RequestWhereInput = {
     app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
+    ...(input.status ? { status: input.status } : {}),
   };
   const rows = await prisma.request.findMany({
     where,
