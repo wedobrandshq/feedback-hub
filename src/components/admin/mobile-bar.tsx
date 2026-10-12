@@ -77,41 +77,41 @@ export function MobileBar({
   }, [present, open]);
 
   return (
-    <div className="sticky top-0 z-30 bg-[#fffcf2] md:hidden">
-      <div className="flex items-center gap-2 px-3 py-3">
-        <button
-          type="button"
-          className="inline-flex size-10 shrink-0 items-center justify-center text-[#0e0e1a]"
-          aria-expanded={open}
-          aria-controls="admin-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? <CloseIcon /> : <MenuIcon />}
-        </button>
-        <Wordmark />
-        <div className="ml-auto min-w-0">
-          <AppSelector apps={apps} selectedId={selectedId} id="app-selector-mobile" />
+    <div className="sticky top-0 z-30 md:hidden">
+      <div className="relative bg-[#fffcf2]">
+        <div className="flex items-center gap-2 px-3 py-3">
+          <button
+            type="button"
+            className="inline-flex size-10 shrink-0 items-center justify-center text-[#0e0e1a]"
+            aria-expanded={open}
+            aria-controls="admin-menu"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <CloseIcon /> : <MenuIcon />}
+          </button>
+          <Wordmark />
+          <div className="ml-auto min-w-0">
+            <AppSelector apps={apps} selectedId={selectedId} id="app-selector-mobile" />
+          </div>
         </div>
-      </div>
-      {present ? (
-        <div
-          id="admin-menu"
-          data-open={shown ? "true" : "false"}
-          className={`grid transition-[grid-template-rows,opacity,translate] duration-200 ease-out motion-reduce:transition-none ${
-            shown
-              ? "[grid-template-rows:1fr] opacity-100 [translate:0_0]"
-              : "[grid-template-rows:0fr] opacity-0 [translate:0_-8px]"
-          }`}
-        >
-          <div className="min-h-0 overflow-hidden">
-            <div className="max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-b-2 border-[#0e0e1a]">
+        {present ? (
+          <div
+            id="admin-menu"
+            data-open={shown ? "true" : "false"}
+            className={`absolute inset-x-0 top-full overflow-hidden bg-[#fffcf2] transition-[height,opacity,translate] duration-200 ease-out motion-reduce:transition-none ${
+              shown
+                ? "h-[calc(100dvh_-_100%)] opacity-100 [translate:0_0]"
+                : "h-0 opacity-0 [translate:0_-8px]"
+            }`}
+          >
+            <div className="h-full overflow-y-auto border-b-2 border-[#0e0e1a]">
               <AdminNav onNavigate={() => setOpen(false)} />
               <AccountBlock admin={admin} />
             </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }
