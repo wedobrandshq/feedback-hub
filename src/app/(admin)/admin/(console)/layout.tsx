@@ -1,12 +1,21 @@
 import { Suspense } from "react";
 import { AdminShell } from "@/components/admin/shell";
-import { requireAdmin } from "@/server/auth/admin";
+import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
+import { listWorkspaceApps } from "@/server/feedback-queries";
 
 export const instant = false;
 
 async function ConsoleFrame({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
-  return <AdminShell admin={admin}>{children}</AdminShell>;
+  const [apps, selected] = await Promise.all([
+    listWorkspaceApps(admin.workspaceId),
+    getSelectedApp(admin.workspaceId),
+  ]);
+  return (
+    <AdminShell admin={admin} apps={apps} selectedId={selected?.id ?? null}>
+      {children}
+    </AdminShell>
+  );
 }
 
 export default function ConsoleLayout({ children }: { children: React.ReactNode }) {
