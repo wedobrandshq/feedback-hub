@@ -35,11 +35,7 @@ export default async function AppsPage() {
       />
       {owner ? (
         <div className="px-4 py-6 md:px-8">
-          <HatchPanel>
-            <div className="px-5 py-5">
-              <CreateAppForm />
-            </div>
-          </HatchPanel>
+          <CreateAppForm />
         </div>
       ) : null}
       {apps.length === 0 ? (

@@ -27,6 +27,7 @@ export default async function PeoplePage() {
         }
       />
       <div className="space-y-8 px-4 py-6 md:px-8">
+        {owner ? <AddPersonForm /> : null}
         <HatchPanel>
         <ul>
           {people.map((person) => (
@@ -48,13 +49,6 @@ export default async function PeoplePage() {
           ))}
         </ul>
         </HatchPanel>
-        {owner ? (
-          <HatchPanel>
-            <div className="px-5 py-5">
-              <AddPersonForm />
-            </div>
-          </HatchPanel>
-        ) : null}
       </div>
     </>
   );
