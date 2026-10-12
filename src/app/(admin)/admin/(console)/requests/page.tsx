@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { hatchChip } from "@/components/admin/hatch";
+import { hatchChip, hatchLift } from "@/components/admin/hatch";
 import { formatDateTime } from "@/domain/feedback";
 import { REQUEST_SORTS, REQUEST_STATUS_LABELS, type RequestSortName } from "@/domain/request";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
@@ -72,7 +72,7 @@ export default async function RequestsPage({
               key={item}
               href={item === "updated" ? "/admin/requests" : `/admin/requests?sort=${item}`}
               aria-current={active ? "page" : undefined}
-              className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] ${
+              className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] ${hatchLift} ${
                 active ? "bg-[#c6ff4f]" : "bg-[#fffcf2]"
               }`}
             >

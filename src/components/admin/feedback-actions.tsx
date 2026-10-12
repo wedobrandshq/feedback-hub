@@ -77,7 +77,7 @@ export function FeedbackActions({
                 </p>
               ) : null}
               <AlertDialogFooter>
-                <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                <AlertDialogCancel type="button" className={hatchSecondary}>Cancel</AlertDialogCancel>
                 <Button type="submit" className={hatchStrong} disabled={closePending}>
                   {closePending ? "Closing…" : "Close"}
                 </Button>

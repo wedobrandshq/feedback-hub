@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/app/(admin)/admin/login/actions";
 import { AppSelector } from "@/components/admin/app-selector";
+import { hatchLift } from "@/components/admin/hatch";
 import { consoleRoleLabel } from "@/domain/console";
 import type { CurrentAdmin } from "@/server/auth/admin";
 
@@ -73,10 +74,10 @@ export function AdminShell({
                       <Link
                         href={item.href}
                         aria-current={active ? "page" : undefined}
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-[17px] leading-[26px] font-medium whitespace-nowrap text-[#0e0e1a] ${
+                        className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[17px] leading-[26px] font-medium whitespace-nowrap text-[#0e0e1a] ${hatchLift} ${
                           active
-                            ? "border-2 border-[#0e0e1a] bg-[#c6ff4f] shadow-[3px_3px_0_#0e0e1a]"
-                            : "border-2 border-transparent"
+                            ? "border-[#0e0e1a] bg-[#c6ff4f] shadow-[3px_3px_0_#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a]"
+                            : "border-transparent hover:border-[#0e0e1a] hover:bg-white hover:shadow-[2px_2px_0_#0e0e1a]"
                         }`}
                       >
                         {item.label}
@@ -92,7 +93,7 @@ export function AdminShell({
           <p className="truncate text-base leading-6 font-medium text-[#0e0e1a]">{admin.name}</p>
           <p className="truncate text-xs leading-4 font-normal text-[#5a5b70]">{consoleRoleLabel(admin.role)}</p>
           <form action={logoutAction} className="mt-3">
-            <button type="submit" className="text-sm leading-5 font-normal text-[#5a5b70] hover:text-[#0e0e1a]">
+            <button type="submit" className={`rounded-full border-2 border-transparent px-3 py-1 text-sm leading-5 font-normal text-[#5a5b70] hover:border-[#0e0e1a] hover:bg-white hover:text-[#0e0e1a] hover:shadow-[2px_2px_0_#0e0e1a] ${hatchLift}`}>
               Sign out
             </button>
           </form>
@@ -104,7 +105,7 @@ export function AdminShell({
           <p className="hidden truncate text-sm font-medium text-[#0e0e1a] md:block">{admin.workspaceName}</p>
           <div className="flex items-center gap-4">
             <form action={logoutAction} className="md:hidden">
-              <button type="submit" className="text-sm font-normal text-[#5a5b70] hover:text-[#0e0e1a]">
+              <button type="submit" className={`rounded-full border-2 border-transparent px-3 py-1 text-sm font-normal text-[#5a5b70] hover:border-[#0e0e1a] hover:bg-white hover:text-[#0e0e1a] hover:shadow-[2px_2px_0_#0e0e1a] ${hatchLift}`}>
                 Sign out
               </button>
             </form>

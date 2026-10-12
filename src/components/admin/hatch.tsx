@@ -35,8 +35,11 @@ export const hatchBody = "text-base leading-6 font-normal text-[#5a5b70]";
 
 export const hatchRowTitle = "text-base leading-6 font-medium text-[#0e0e1a]";
 
+export const hatchLift =
+  "transition-[translate,box-shadow] duration-200 ease-out hover:[translate:-2px_-2px] focus-visible:[translate:-2px_-2px] active:translate-none active:not-aria-[haspopup]:translate-none";
+
 const hatchButton =
-  "shadow-none transition-[translate,box-shadow] duration-200 ease-out hover:[translate:-2px_-2px] focus-visible:[translate:-2px_-2px] active:not-aria-[haspopup]:translate-none active:shadow-none focus-visible:border-2 focus-visible:ring-0";
+  `shadow-none ${hatchLift} active:shadow-none focus-visible:border-2 focus-visible:ring-0`;
 
 export const hatchPrimary =
   `h-auto rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-6 py-2 text-[15px] leading-5 font-extrabold text-[#0e0e1a] [font-family:var(--font-display)] hover:bg-[#c6ff4f] focus-visible:border-[#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] focus-visible:shadow-[3px_3px_0_#0e0e1a] ${hatchButton}`;
@@ -62,7 +65,7 @@ export const hatchHead =
 export const hatchDataRow = "relative border-[#0e0e1a] hover:bg-[#fffcf2]";
 
 export function hatchPill(active: boolean) {
-  return `inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] ${
+  return `inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] ${hatchLift} ${
     active ? "bg-[#c6ff4f]" : "bg-white"
   }`;
 }
