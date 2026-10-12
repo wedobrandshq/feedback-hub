@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createAppAction, updateAppAction, type AppFormState } from "@/app/(admin)/admin/(console)/apps/actions";
 import { APP_PLATFORMS, APP_STATUSES } from "@/domain/app";
 import { hatchField, hatchPrimary, hatchSelect } from "@/components/admin/hatch";
@@ -12,32 +12,46 @@ const initial: AppFormState = { error: null, saved: false };
 
 export function CreateAppForm() {
   const [state, action, pending] = useActionState(createAppAction, initial);
+  const [open, setOpen] = useState(false);
   return (
-    <form action={action} className="max-w-md space-y-4">
-      <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add an app</h2>
-      <div className="space-y-1.5">
-        <Label htmlFor="new-app-name">Name</Label>
-        <Input id="new-app-name" name="name" required className={hatchField} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="new-app-platform">Platform</Label>
-        <select id="new-app-platform" name="platform" defaultValue="iOS" className={`${hatchSelect} w-full`}>
-          {APP_PLATFORMS.map((platform) => (
-            <option key={platform.value} value={platform.value}>
-              {platform.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.error}
-        </p>
-      ) : null}
-      <Button type="submit" className={hatchPrimary} disabled={pending}>
-        {pending ? "Adding…" : "Add app"}
+    <div className="max-w-md">
+      <Button
+        type="button"
+        className={hatchPrimary}
+        aria-expanded={open}
+        aria-controls="add-app-form"
+        onClick={() => setOpen((current) => !current)}
+      >
+        Add app
       </Button>
-    </form>
+      {open ? (
+        <form id="add-app-form" action={action} className="mt-4 space-y-4">
+          <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add an app</h2>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-app-name">Name</Label>
+            <Input id="new-app-name" name="name" required className={hatchField} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-app-platform">Platform</Label>
+            <select id="new-app-platform" name="platform" defaultValue="iOS" className={`${hatchSelect} w-full`}>
+              {APP_PLATFORMS.map((platform) => (
+                <option key={platform.value} value={platform.value}>
+                  {platform.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {state.error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {state.error}
+            </p>
+          ) : null}
+          <Button type="submit" className={hatchPrimary} disabled={pending}>
+            {pending ? "Adding…" : "Add app"}
+          </Button>
+        </form>
+      ) : null}
+    </div>
   );
 }
 

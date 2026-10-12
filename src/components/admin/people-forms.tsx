@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   addPersonAction,
   removePersonAction,
@@ -17,41 +17,55 @@ const initial: PeopleState = { error: null, saved: false };
 
 export function AddPersonForm() {
   const [state, action, pending] = useActionState(addPersonAction, initial);
+  const [open, setOpen] = useState(false);
   return (
-    <form action={action} className="max-w-md space-y-4">
-      <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add a person</h2>
-      <div className="space-y-1.5">
-        <Label htmlFor="person-name">Name</Label>
-        <Input id="person-name" name="name" autoComplete="off" required className={hatchField} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="person-email">Email</Label>
-        <Input id="person-email" name="email" type="email" autoComplete="off" required className={hatchField} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="person-password">Password</Label>
-        <Input id="person-password" name="password" type="password" autoComplete="new-password" required className={hatchField} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="person-role">Role</Label>
-        <select id="person-role" name="role" defaultValue="admin" className={hatchSelect}>
-          {CONSOLE_ROLES.map((role) => (
-            <option key={role} value={role}>
-              {consoleRoleLabel(role)}
-            </option>
-          ))}
-        </select>
-      </div>
-      {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.error}
-        </p>
-      ) : null}
-      {state.saved ? <p className="text-sm text-muted-foreground">Added.</p> : null}
-      <Button type="submit" className={hatchPrimary} disabled={pending}>
-        {pending ? "Adding…" : "Add person"}
+    <div className="max-w-md">
+      <Button
+        type="button"
+        className={hatchPrimary}
+        aria-expanded={open}
+        aria-controls="add-person-form"
+        onClick={() => setOpen((current) => !current)}
+      >
+        Add person
       </Button>
-    </form>
+      {open ? (
+        <form id="add-person-form" action={action} className="mt-4 space-y-4">
+          <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add a person</h2>
+          <div className="space-y-1.5">
+            <Label htmlFor="person-name">Name</Label>
+            <Input id="person-name" name="name" autoComplete="off" required className={hatchField} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="person-email">Email</Label>
+            <Input id="person-email" name="email" type="email" autoComplete="off" required className={hatchField} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="person-password">Password</Label>
+            <Input id="person-password" name="password" type="password" autoComplete="new-password" required className={hatchField} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="person-role">Role</Label>
+            <select id="person-role" name="role" defaultValue="admin" className={hatchSelect}>
+              {CONSOLE_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {consoleRoleLabel(role)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {state.error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {state.error}
+            </p>
+          ) : null}
+          {state.saved ? <p className="text-sm text-muted-foreground">Added.</p> : null}
+          <Button type="submit" className={hatchPrimary} disabled={pending}>
+            {pending ? "Adding…" : "Add person"}
+          </Button>
+        </form>
+      ) : null}
+    </div>
   );
 }
 
