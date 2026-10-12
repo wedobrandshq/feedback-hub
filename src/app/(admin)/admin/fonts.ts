@@ -13,7 +13,7 @@ export const bodyFont = Outfit({
 
 export const monoFont = Space_Mono({
   subsets: ["latin"],
-  weight: "700",
+  weight: ["400", "700"],
   variable: "--font-mono",
 });
 

@@ -4,7 +4,7 @@ export const hatchSticker =
   "inline-flex items-center gap-1 rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-2.5 py-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase shadow-[3px_3px_0_#0e0e1a] [font-family:var(--font-mono)]";
 
 const hatchChipBase =
-  "inline-flex items-center gap-1 rounded-full border-2 border-[#0e0e1a] px-2.5 py-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase shadow-[3px_3px_0_#0e0e1a] [font-family:var(--font-mono)]";
+  "inline-flex items-center gap-1 rounded-full border-2 border-[#0e0e1a] px-3 py-1.5 text-[11.5px] leading-[1.55] font-normal tracking-normal text-[#0e0e1a] normal-case shadow-[2px_2px_0_#0e0e1a] [font-family:var(--font-mono)]";
 
 const CHIP_BACKGROUNDS: Record<string, string> = {
   idea: "bg-[#6fd9ff]",
