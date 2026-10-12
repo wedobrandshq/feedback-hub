@@ -48,7 +48,7 @@ export function CreateAppForm() {
             </p>
           ) : null}
           <Button type="submit" className={hatchPrimary} disabled={pending}>
-            {pending ? "Adding…" : "Add app"}
+            {pending ? "Submitting…" : "Submit"}
           </Button>
         </form>
       </Disclose>

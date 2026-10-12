@@ -56,20 +56,30 @@ export function AddPersonForm({ apps }: { apps: { id: string; name: string }[] }
               className={hatchField}
             />
           </div>
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium text-[#0e0e1a]">Apps</legend>
-            <div className="space-y-2 pt-1.5">
+          <div className="space-y-2">
+            <Label>Apps</Label>
+            <div className="space-y-2">
               {apps.map((app) => (
-                <label key={app.id} className="flex items-center gap-2 text-sm font-normal text-[#0e0e1a]">
-                  <input type="checkbox" name="appIds" value={app.id} className="size-4 accent-[#0e0e1a]" />
+                <label key={app.id} className="flex cursor-pointer items-center gap-2.5 text-sm font-normal leading-6 text-[#0e0e1a]">
+                  <span className="relative grid size-5 shrink-0 place-items-center">
+                    <input
+                      type="checkbox"
+                      name="appIds"
+                      value={app.id}
+                      className="peer col-start-1 row-start-1 size-5 appearance-none rounded-md border-2 border-[#0e0e1a] bg-white checked:bg-[#c6ff4f] focus-visible:shadow-[3px_3px_0_#0e0e1a] focus-visible:outline-none"
+                    />
+                    <svg viewBox="0 0 16 16" aria-hidden className="pointer-events-none col-start-1 row-start-1 hidden size-3.5 peer-checked:block">
+                      <path d="M3.2 8.2 6.4 11.2 12.8 4.6" fill="none" stroke="#0e0e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
                   {app.name}
                 </label>
               ))}
             </div>
-          </fieldset>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="person-role">Role</Label>
-            <select id="person-role" name="role" defaultValue="admin" className={hatchSelect}>
+            <select id="person-role" name="role" defaultValue="admin" className={`${hatchSelect} w-full`}>
               {CONSOLE_ROLES.map((role) => (
                 <option key={role} value={role}>
                   {consoleRoleLabel(role)}
@@ -84,7 +94,7 @@ export function AddPersonForm({ apps }: { apps: { id: string; name: string }[] }
           ) : null}
           {state.saved ? <p className="text-sm text-muted-foreground">Added.</p> : null}
           <Button type="submit" className={hatchPrimary} disabled={pending}>
-            {pending ? "Adding…" : "Add person"}
+            {pending ? "Submitting…" : "Submit"}
           </Button>
         </form>
       </Disclose>
