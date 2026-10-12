@@ -5,7 +5,7 @@ import { FeedbackTable } from "@/components/admin/feedback-table";
 import { FilterBar } from "@/components/admin/filter-bar";
 import { PageHeader } from "@/components/admin/page-header";
 import { FEEDBACK_LIST_LIMIT } from "@/domain/config";
-import { parseFeedbackFilters } from "@/domain/feedback";
+import { parseFeedbackFilters, parseFeedbackSort } from "@/domain/feedback";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
 import { listFeedback } from "@/server/feedback-queries";
 
@@ -30,12 +30,15 @@ export default async function FeedbackPage({
     to: first(params.to) ?? "",
   };
   const filters = parseFeedbackFilters(raw);
+  const sort = parseFeedbackSort(first(params.sort), first(params.dir));
   const result = filters.error
     ? null
     : await listFeedback({
         workspaceId: admin.workspaceId,
         appId: selected?.id ?? null,
         filters,
+        sort: sort.sort,
+        dir: sort.dir,
       });
 
   return (
@@ -49,17 +52,19 @@ export default async function FeedbackPage({
             : "Original messages from every app, kept exactly as people sent them."
         }
       />
-      <FilterBar q={raw.q} type={raw.type} status={raw.status} from={raw.from} to={raw.to} />
+      <FilterBar q={raw.q} type={raw.type} status={raw.status} from={raw.from} to={raw.to} sort={sort.sort} dir={sort.dir} />
       {filters.error ? (
         <p className="px-4 py-3 text-sm text-destructive md:px-6" role="alert">
           {filters.error}
         </p>
       ) : null}
       {result && result.truncated ? (
-        <p className="px-4 pt-3 text-xs text-muted-foreground md:px-6">Showing the latest {FEEDBACK_LIST_LIMIT}.</p>
+        <p className="px-4 pt-3 text-xs text-muted-foreground md:px-6">
+          Showing {FEEDBACK_LIST_LIMIT} of {result.matched}.
+        </p>
       ) : null}
       {result && result.rows.length > 0 ? (
-        <FeedbackTable rows={result.rows} />
+        <FeedbackTable rows={result.rows} sort={sort.sort} dir={sort.dir} filters={raw} />
       ) : result && result.totalInScope === 0 ? (
         <EmptyState
           title="No feedback yet"

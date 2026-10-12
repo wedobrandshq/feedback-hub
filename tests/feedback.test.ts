@@ -205,6 +205,81 @@ describe("submit feedback", () => {
   });
 });
 
+describe("feedback list sort", () => {
+  it("sorts by message text and reverses, and keeps a type filter", async () => {
+    await identifyUser({ appSecret: willowSecret, externalUserId: "sorter", name: "Sort Person" });
+    const later = await submitFeedback({
+      appSecret: willowSecret,
+      externalUserId: "sorter",
+      type: "idea",
+      body: "Zebra chart",
+      context: {},
+    });
+    const earlier = await submitFeedback({
+      appSecret: willowSecret,
+      externalUserId: "sorter",
+      type: "bug",
+      body: "Apple chart",
+      context: {},
+    });
+    const willow = await prisma.app.findFirstOrThrow({ where: { slug: "willow" } });
+    const filters = { type: null, status: null, search: null, from: null, to: null, error: null };
+
+    const ascending = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters,
+      sort: "feedback",
+      dir: "asc",
+    });
+    expect(ascending.rows.map((row) => row.id)).toEqual([earlier.id, later.id]);
+
+    const descending = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters,
+      sort: "feedback",
+      dir: "desc",
+    });
+    expect(descending.rows.map((row) => row.id)).toEqual([later.id, earlier.id]);
+
+    const bugs = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters: { ...filters, type: "bug" },
+      sort: "created",
+      dir: "asc",
+    });
+    expect(bugs.rows.map((row) => row.id)).toEqual([earlier.id]);
+
+    const byRequest = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters,
+      sort: "request",
+      dir: "asc",
+    });
+    expect(byRequest.rows).toHaveLength(2);
+
+    const newest = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters,
+      sort: "created",
+      dir: "desc",
+    });
+    const oldest = await listFeedback({
+      workspaceId: willow.workspaceId,
+      appId: willow.id,
+      filters,
+      sort: "created",
+      dir: "asc",
+    });
+    expect(newest.rows.map((row) => row.id)).toEqual([earlier.id, later.id]);
+    expect(oldest.rows.map((row) => row.id)).toEqual([later.id, earlier.id]);
+  });
+});
+
 describe("app separation", () => {
   it("does not show Willow feedback inside Earn It", async () => {
     await identifyUser({ appSecret: willowSecret, externalUserId: "shared", name: "Willow Maya" });

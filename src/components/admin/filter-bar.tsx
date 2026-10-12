@@ -12,17 +12,27 @@ export function FilterBar({
   status,
   from,
   to,
+  sort,
+  dir,
 }: {
   q: string;
   type: string;
   status: string;
   from: string;
   to: string;
+  sort: string;
+  dir: string;
 }) {
   return (
     <div className="px-4 pt-4 md:px-8">
       <HatchPanel>
         <form action="/admin/feedback" method="get" className="flex flex-wrap items-end gap-3 px-4 py-4">
+          {sort !== "created" || dir !== "desc" ? (
+            <>
+              <input type="hidden" name="sort" value={sort} />
+              <input type="hidden" name="dir" value={dir} />
+            </>
+          ) : null}
           <label className="flex w-full min-w-0 flex-1 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:min-w-48">
             Search
             <Input name="q" defaultValue={q} placeholder="Message, name, or email" className={hatchField} />

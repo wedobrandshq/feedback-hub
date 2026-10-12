@@ -10,7 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { feedbackPreview, formatDate, userLabel } from "@/domain/feedback";
+import {
+  feedbackPreview,
+  formatDate,
+  nextFeedbackSort,
+  userLabel,
+  type FeedbackSort,
+  type FeedbackSortDir,
+} from "@/domain/feedback";
 import type { FeedbackStatusName, FeedbackTypeName } from "@/domain/config";
 
 export type FeedbackRow = {
@@ -24,24 +31,75 @@ export type FeedbackRow = {
   requestLink: { request: { id: string; title: string } } | null;
 };
 
-export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
+const COLUMNS: { sort: FeedbackSort; label: string; marker?: "type" | "status" }[] = [
+  { sort: "feedback", label: "Feedback" },
+  { sort: "user", label: "User" },
+  { sort: "app", label: "App" },
+  { sort: "type", label: "Type", marker: "type" },
+  { sort: "request", label: "Request" },
+  { sort: "status", label: "Status", marker: "status" },
+  { sort: "created", label: "Created" },
+];
+
+function feedbackHref(
+  filters: { q: string; type: string; status: string; from: string; to: string },
+  current: { sort: FeedbackSort; dir: FeedbackSortDir },
+  column: FeedbackSort,
+) {
+  const next = nextFeedbackSort(current, column);
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.type) params.set("type", filters.type);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.from) params.set("from", filters.from);
+  if (filters.to) params.set("to", filters.to);
+  if (!(next.sort === "created" && next.dir === "desc")) {
+    params.set("sort", next.sort);
+    params.set("dir", next.dir);
+  }
+  const query = params.toString();
+  return query ? `/admin/feedback?${query}` : "/admin/feedback";
+}
+
+export function FeedbackTable({
+  rows,
+  sort,
+  dir,
+  filters,
+}: {
+  rows: FeedbackRow[];
+  sort: FeedbackSort;
+  dir: FeedbackSortDir;
+  filters: { q: string; type: string; status: string; from: string; to: string };
+}) {
   return (
     <div className="px-4 py-4 md:px-8">
       <HatchPanel clip>
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
-              <TableHead className={hatchHead}>Feedback</TableHead>
-              <TableHead className={hatchHead}>User</TableHead>
-              <TableHead className={hatchHead}>App</TableHead>
-              <TableHead className={hatchHead}>
-                <WithMarker kind="type">Type</WithMarker>
-              </TableHead>
-              <TableHead className={hatchHead}>Request</TableHead>
-              <TableHead className={hatchHead}>
-                <WithMarker kind="status">Status</WithMarker>
-              </TableHead>
-              <TableHead className={hatchHead}>Created</TableHead>
+              {COLUMNS.map((column) => {
+                const active = sort === column.sort;
+                return (
+                  <TableHead
+                    key={column.sort}
+                    className={hatchHead}
+                    aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <Link
+                      href={feedbackHref(filters, { sort, dir }, column.sort)}
+                      className="inline-flex items-center gap-1 text-[#0e0e1a]"
+                    >
+                      {column.marker ? <WithMarker kind={column.marker}>{column.label}</WithMarker> : column.label}
+                      {active ? (
+                        <span aria-hidden className="text-[10px] leading-none">
+                          {dir === "asc" ? "↑" : "↓"}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>

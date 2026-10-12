@@ -62,6 +62,30 @@ export function formatDateTime(date: Date) {
   }).format(date);
 }
 
+export const FEEDBACK_SORTS = ["feedback", "user", "app", "type", "request", "status", "created"] as const;
+export type FeedbackSort = (typeof FEEDBACK_SORTS)[number];
+export type FeedbackSortDir = "asc" | "desc";
+
+export function parseFeedbackSort(sort: string | undefined, dir: string | undefined): {
+  sort: FeedbackSort;
+  dir: FeedbackSortDir;
+} {
+  if (!sort || !(FEEDBACK_SORTS as readonly string[]).includes(sort)) {
+    return { sort: "created", dir: "desc" };
+  }
+  const column = sort as FeedbackSort;
+  if (dir === "asc" || dir === "desc") return { sort: column, dir };
+  return { sort: column, dir: "asc" };
+}
+
+export function nextFeedbackSort(
+  current: { sort: FeedbackSort; dir: FeedbackSortDir },
+  column: FeedbackSort,
+): { sort: FeedbackSort; dir: FeedbackSortDir } {
+  if (current.sort !== column) return { sort: column, dir: "asc" };
+  return { sort: column, dir: current.dir === "asc" ? "desc" : "asc" };
+}
+
 export type FeedbackListFilters = {
   type: FeedbackTypeName | null;
   status: FeedbackStatusName | null;

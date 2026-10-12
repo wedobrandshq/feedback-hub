@@ -1,7 +1,18 @@
 import type { Prisma } from "@prisma/client";
 import { FEEDBACK_LIST_LIMIT } from "@/domain/config";
-import type { FeedbackListFilters } from "@/domain/feedback";
+import type { FeedbackListFilters, FeedbackSort, FeedbackSortDir } from "@/domain/feedback";
 import { prisma } from "@/server/db";
+
+function feedbackOrder(sort: FeedbackSort, dir: FeedbackSortDir): Prisma.FeedbackOrderByWithRelationInput[] {
+  const tie = { id: "asc" as const };
+  if (sort === "feedback") return [{ body: dir }, tie];
+  if (sort === "user") return [{ user: { name: dir } }, { user: { email: dir } }, tie];
+  if (sort === "app") return [{ app: { name: dir } }, tie];
+  if (sort === "type") return [{ type: dir }, tie];
+  if (sort === "request") return [{ requestLink: { request: { title: dir } } }, tie];
+  if (sort === "status") return [{ status: dir }, tie];
+  return [{ createdAt: dir }, tie];
+}
 
 const listInclude = {
   user: true,
@@ -21,6 +32,8 @@ export async function listFeedback(input: {
   workspaceId: string;
   appId: string | null;
   filters: FeedbackListFilters;
+  sort?: FeedbackSort;
+  dir?: FeedbackSortDir;
 }) {
   const appScope: Prisma.FeedbackWhereInput = {
     deletedAt: null,
@@ -59,7 +72,7 @@ export async function listFeedback(input: {
     prisma.feedback.findMany({
       where,
       include: listInclude,
-      orderBy: { createdAt: "desc" },
+      orderBy: feedbackOrder(input.sort ?? "created", input.dir ?? "desc"),
       take: FEEDBACK_LIST_LIMIT,
     }),
   ]);
