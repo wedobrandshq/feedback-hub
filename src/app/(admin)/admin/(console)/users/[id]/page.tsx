@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/admin/activity-feed";
+import { PreviewList } from "@/components/admin/show-more";
 import { hatchSticker } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge, TypeBadge } from "@/components/admin/status-badge";
@@ -42,7 +43,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             {user.feedback.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No feedback yet.</p>
             ) : (
-              <ul className="mt-3 divide-y divide-border">
+              <PreviewList>
                 {user.feedback.map((item) => (
                   <li key={item.id} className="py-3">
                     <Link href={`/admin/feedback/${item.id}`} className="text-sm font-medium">
@@ -55,7 +56,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                     </div>
                   </li>
                 ))}
-              </ul>
+              </PreviewList>
             )}
           </section>
           <section>
@@ -63,7 +64,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             {user.conversations.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No conversations yet.</p>
             ) : (
-              <ul className="mt-3 divide-y divide-border">
+              <PreviewList>
                 {user.conversations.map((item) => (
                   <li key={item.id} className="py-3">
                     <Link href={`/admin/inbox/${item.id}`} className="text-sm font-medium capitalize">
@@ -72,7 +73,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                     <p className="mt-1 text-sm text-muted-foreground">{feedbackPreview(item.feedback.body)}</p>
                   </li>
                 ))}
-              </ul>
+              </PreviewList>
             )}
           </section>
           <section>
@@ -80,7 +81,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             {user.votes.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No votes yet.</p>
             ) : (
-              <ul className="mt-3 divide-y divide-border">
+              <PreviewList>
                 {user.votes.map((vote) => (
                   <li key={vote.id} className="py-3">
                     <Link href={`/admin/requests/${vote.request.id}`} className="text-sm font-medium">
@@ -89,7 +90,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                     <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(vote.createdAt)}</p>
                   </li>
                 ))}
-              </ul>
+              </PreviewList>
             )}
           </section>
           <section>

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { activitySentence, formatDateTime } from "@/domain/feedback";
-
-const PREVIEW = 3;
+import { LIST_PREVIEW, ShowMoreButton } from "@/components/admin/show-more";
 
 export function ActivityFeed({
   events,
@@ -15,7 +14,7 @@ export function ActivityFeed({
     return <p className="text-sm text-muted-foreground">No activity yet.</p>;
   }
 
-  const shown = open ? events : events.slice(0, PREVIEW);
+  const shown = open ? events : events.slice(0, LIST_PREVIEW);
   const hidden = events.length - shown.length;
 
   return (
@@ -31,15 +30,8 @@ export function ActivityFeed({
           </li>
         ))}
       </ol>
-      {events.length > PREVIEW ? (
-        <button
-          type="button"
-          className="mt-3 text-sm text-[#5a5b70] hover:text-[#0e0e1a]"
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? "Show less" : `Show ${hidden} more`}
-        </button>
+      {events.length > LIST_PREVIEW ? (
+        <ShowMoreButton open={open} hidden={hidden} onToggle={() => setOpen((value) => !value)} />
       ) : null}
     </div>
   );
