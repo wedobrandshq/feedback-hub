@@ -22,6 +22,12 @@ function CloseIcon() {
   );
 }
 
+const MOTION_MS = 200;
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function MobileBar({
   admin,
   apps,
@@ -33,10 +39,42 @@ export function MobileBar({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [present, setPresent] = useState(false);
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (open) setPresent(true);
+  }, [open]);
+
+  useEffect(() => {
+    if (open || shown || !present) return;
+    const delay = prefersReducedMotion() ? 0 : MOTION_MS;
+    const timer = window.setTimeout(() => setPresent(false), delay);
+    return () => window.clearTimeout(timer);
+  }, [open, shown, present]);
+
+  useEffect(() => {
+    if (!present || !open) {
+      setShown(false);
+      return;
+    }
+    if (prefersReducedMotion()) {
+      setShown(true);
+      return;
+    }
+    let second = 0;
+    const first = window.requestAnimationFrame(() => {
+      second = window.requestAnimationFrame(() => setShown(true));
+    });
+    return () => {
+      window.cancelAnimationFrame(first);
+      window.cancelAnimationFrame(second);
+    };
+  }, [present, open]);
 
   return (
     <div className="sticky top-0 z-30 bg-[#fffcf2] md:hidden">
@@ -56,10 +94,22 @@ export function MobileBar({
           <AppSelector apps={apps} selectedId={selectedId} id="app-selector-mobile" />
         </div>
       </div>
-      {open ? (
-        <div id="admin-menu" className="max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-b-2 border-[#0e0e1a]">
-          <AdminNav onNavigate={() => setOpen(false)} />
-          <AccountBlock admin={admin} />
+      {present ? (
+        <div
+          id="admin-menu"
+          data-open={shown ? "true" : "false"}
+          className={`grid transition-[grid-template-rows,opacity,translate] duration-200 ease-out motion-reduce:transition-none ${
+            shown
+              ? "[grid-template-rows:1fr] opacity-100 [translate:0_0]"
+              : "[grid-template-rows:0fr] opacity-0 [translate:0_-8px]"
+          }`}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-b-2 border-[#0e0e1a]">
+              <AdminNav onNavigate={() => setOpen(false)} />
+              <AccountBlock admin={admin} />
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
