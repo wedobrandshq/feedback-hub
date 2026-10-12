@@ -4,6 +4,7 @@ import {
   ADMIN_ROADMAP_STATUSES,
   assertStoredText,
   isRequestStatus,
+  type RequestSortDir,
   type RequestSortName,
   type RequestStatusName,
 } from "@/domain/request";
@@ -261,34 +262,14 @@ export async function requestMetrics(requestId: string) {
   };
 }
 
-function sortOrder(sort: RequestSortName): Prisma.RequestOrderByWithRelationInput {
-  if (sort === "created") return { createdAt: "desc" };
-  if (sort === "feedback") return { links: { _count: "desc" } };
-  if (sort === "votes") return { votes: { _count: "desc" } };
-  return { updatedAt: "desc" };
-}
+const adminRequestInclude = {
+  app: { select: { name: true } },
+  _count: { select: { links: true, votes: true } },
+  links: { select: { feedback: { select: { userId: true, conversation: { select: { id: true } } } } } },
+} satisfies Prisma.RequestInclude;
 
-export async function listAdminRequests(input: {
-  workspaceId: string;
-  appId: string | null;
-  sort: RequestSortName;
-  status?: RequestStatusName | null;
-}) {
-  const where: Prisma.RequestWhereInput = {
-    app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
-    ...(input.status ? { status: input.status } : {}),
-  };
-  const rows = await prisma.request.findMany({
-    where,
-    orderBy: sortOrder(input.sort),
-    take: REQUEST_LIST_LIMIT,
-    include: {
-      app: { select: { name: true } },
-      _count: { select: { links: true, votes: true } },
-      links: { select: { feedback: { select: { userId: true, conversation: { select: { id: true } } } } } },
-    },
-  });
-  return rows.map((row) => ({
+function toAdminRequestRow(row: Prisma.RequestGetPayload<{ include: typeof adminRequestInclude }>) {
+  return {
     id: row.id,
     title: row.title,
     status: row.status,
@@ -300,7 +281,52 @@ export async function listAdminRequests(input: {
     uniqueFeedbackUsers: new Set(row.links.map((link) => link.feedback.userId)).size,
     voteCount: row._count.votes,
     conversationCount: row.links.filter((link) => link.feedback.conversation).length,
-  }));
+  };
+}
+
+function requestOrder(sort: RequestSortName, dir: RequestSortDir): Prisma.RequestOrderByWithRelationInput[] {
+  const tie = { id: "asc" as const };
+  if (sort === "request") return [{ title: dir }, tie];
+  if (sort === "status") return [{ status: dir }, tie];
+  if (sort === "visibility") return [{ visibility: dir }, tie];
+  if (sort === "feedback") return [{ links: { _count: dir } }, tie];
+  if (sort === "votes") return [{ votes: { _count: dir } }, tie];
+  if (sort === "created") return [{ createdAt: dir }, tie];
+  return [{ updatedAt: dir }, tie];
+}
+
+export async function listAdminRequests(input: {
+  workspaceId: string;
+  appId: string | null;
+  sort: RequestSortName;
+  dir?: RequestSortDir;
+  status?: RequestStatusName | null;
+}) {
+  const dir = input.dir ?? "desc";
+  const where: Prisma.RequestWhereInput = {
+    app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
+    ...(input.status ? { status: input.status } : {}),
+  };
+  if (input.sort === "users" || input.sort === "conversations") {
+    const rows = await prisma.request.findMany({ where, include: adminRequestInclude });
+    const mapped = rows.map(toAdminRequestRow);
+    const key = input.sort === "users" ? "uniqueFeedbackUsers" : "conversationCount";
+    mapped.sort((left, right) => {
+      if (left[key] !== right[key]) {
+        const delta = left[key] - right[key];
+        return dir === "asc" ? delta : -delta;
+      }
+      return left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+    });
+    return mapped.slice(0, REQUEST_LIST_LIMIT);
+  }
+  const rows = await prisma.request.findMany({
+    where,
+    orderBy: requestOrder(input.sort, dir),
+    take: REQUEST_LIST_LIMIT,
+    include: adminRequestInclude,
+  });
+  return rows.map(toAdminRequestRow);
 }
 
 export async function searchRequests(input: { workspaceId: string; appId: string; query: string }) {

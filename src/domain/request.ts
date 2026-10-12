@@ -24,8 +24,39 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatusName, string> = {
   not_planned: "Not planned",
 };
 
-export const REQUEST_SORTS = ["updated", "created", "feedback", "votes"] as const;
+export const REQUEST_SORTS = [
+  "request",
+  "status",
+  "visibility",
+  "feedback",
+  "users",
+  "votes",
+  "conversations",
+  "created",
+  "updated",
+] as const;
 export type RequestSortName = (typeof REQUEST_SORTS)[number];
+export type RequestSortDir = "asc" | "desc";
+
+export function parseRequestSort(sort: string | undefined, dir: string | undefined): {
+  sort: RequestSortName;
+  dir: RequestSortDir;
+} {
+  if (!sort || !(REQUEST_SORTS as readonly string[]).includes(sort)) {
+    return { sort: "updated", dir: "desc" };
+  }
+  const column = sort as RequestSortName;
+  if (dir === "asc" || dir === "desc") return { sort: column, dir };
+  return { sort: column, dir: "asc" };
+}
+
+export function nextRequestSort(
+  current: { sort: RequestSortName; dir: RequestSortDir },
+  column: RequestSortName,
+): { sort: RequestSortName; dir: RequestSortDir } {
+  if (current.sort !== column) return { sort: column, dir: "asc" };
+  return { sort: column, dir: current.dir === "asc" ? "desc" : "asc" };
+}
 
 export const ADMIN_ROADMAP_STATUSES = ["planned", "in_progress", "released"] as const;
 

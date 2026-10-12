@@ -232,6 +232,67 @@ describe("requests", () => {
     expect(released).toEqual([]);
   });
 
+  it("sorts the admin request list by created and reverses, and keeps a status filter", async () => {
+    const admin = await actor();
+    const olderFeedback = await willowFeedback("Keep the evening reminder.");
+    const newerFeedback = await willowFeedback("Add a weekly recap.");
+    const older = await createRequestFromFeedback({
+      ...admin,
+      feedbackId: olderFeedback.id,
+      title: "Zulu reminder",
+      description: "A quieter nudge.",
+      status: "review",
+    });
+    const newer = await createRequestFromFeedback({
+      ...admin,
+      feedbackId: newerFeedback.id,
+      title: "Alpha recap",
+      description: "A Sunday summary.",
+      status: "planned",
+    });
+    await prisma.request.update({
+      where: { id: older.id },
+      data: { createdAt: new Date("2026-01-02T00:00:00.000Z") },
+    });
+    await prisma.request.update({
+      where: { id: newer.id },
+      data: { createdAt: new Date("2026-06-02T00:00:00.000Z") },
+    });
+
+    const oldestFirst = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "created",
+      dir: "asc",
+    });
+    expect(oldestFirst.map((row) => row.id)).toEqual([older.id, newer.id]);
+
+    const newestFirst = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "created",
+      dir: "desc",
+    });
+    expect(newestFirst.map((row) => row.id)).toEqual([newer.id, older.id]);
+
+    const byTitle = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "request",
+      dir: "asc",
+    });
+    expect(byTitle.map((row) => row.title)).toEqual(["Alpha recap", "Zulu reminder"]);
+
+    const plannedOldest = await listAdminRequests({
+      workspaceId: admin.workspaceId,
+      appId: null,
+      sort: "created",
+      dir: "asc",
+      status: "planned",
+    });
+    expect(plannedOldest.map((row) => row.id)).toEqual([newer.id]);
+  });
+
   it("publishes an update and a changelog entry only after release", async () => {
     const feedback = await willowFeedback("Weekly mood summary.");
     const admin = await actor();

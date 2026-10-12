@@ -8,14 +8,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { hatchChip, hatchLift, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
+import { hatchChip, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
 import { formatDateTime } from "@/domain/feedback";
 import {
   isRequestStatus,
-  REQUEST_SORTS,
+  nextRequestSort,
+  parseRequestSort,
   REQUEST_STATUSES,
   REQUEST_STATUS_LABELS,
+  type RequestSortDir,
   type RequestSortName,
 } from "@/domain/request";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
@@ -27,21 +29,24 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function sortOf(value: string | undefined): RequestSortName {
-  if (value && (REQUEST_SORTS as readonly string[]).includes(value)) return value as RequestSortName;
-  return "updated";
-}
+const COLUMNS: { sort: RequestSortName; label: string; marker?: "status" }[] = [
+  { sort: "request", label: "Request" },
+  { sort: "status", label: "Status", marker: "status" },
+  { sort: "visibility", label: "Visibility" },
+  { sort: "feedback", label: "Feedback" },
+  { sort: "users", label: "Users" },
+  { sort: "votes", label: "Votes" },
+  { sort: "conversations", label: "Conversations" },
+  { sort: "created", label: "Created" },
+  { sort: "updated", label: "Updated" },
+];
 
-function sortLabel(item: RequestSortName) {
-  if (item === "feedback") return "Feedback";
-  if (item === "votes") return "Votes";
-  if (item === "created") return "Created";
-  return "Updated";
-}
-
-function requestsHref(sort: RequestSortName, status: string) {
+function requestsHref(sort: RequestSortName, dir: RequestSortDir, status: string) {
   const params = new URLSearchParams();
-  if (sort !== "updated") params.set("sort", sort);
+  if (!(sort === "updated" && dir === "desc")) {
+    params.set("sort", sort);
+    params.set("dir", dir);
+  }
   if (status) params.set("status", status);
   const query = params.toString();
   return query ? `/admin/requests?${query}` : "/admin/requests";
@@ -62,13 +67,14 @@ export default async function RequestsPage({
 }) {
   const admin = await requireAdmin();
   const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
-  const sort = sortOf(first(params.sort));
+  const { sort, dir } = parseRequestSort(first(params.sort), first(params.dir));
   const rawStatus = first(params.status) ?? "";
   const status = isRequestStatus(rawStatus) ? rawStatus : "";
   const rows = await listAdminRequests({
     workspaceId: admin.workspaceId,
     appId: selected?.id ?? null,
     sort,
+    dir,
     status: status || null,
   });
 
@@ -83,25 +89,13 @@ export default async function RequestsPage({
       <p className="mt-3 max-w-xl text-base leading-6 font-normal text-[#5a5b70]">
         {selected ? `Product requests from ${selected.name}.` : "Product requests across every app."}
       </p>
-      <nav aria-label="Sort requests" className="mt-6 flex gap-2 overflow-x-auto pt-1 pr-2 pb-2 pl-0.5">
-        {REQUEST_SORTS.map((item) => {
-          const active = sort === item;
-          return (
-            <Link
-              key={item}
-              href={requestsHref(item, status)}
-              aria-current={active ? "page" : undefined}
-              className={`inline-flex shrink-0 items-center rounded-full border-2 border-[#0e0e1a] px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] shadow-[3px_3px_0_#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] ${hatchLift} ${
-                active ? "bg-[#c6ff4f]" : "bg-[#fffcf2]"
-              }`}
-            >
-              {sortLabel(item)}
-            </Link>
-          );
-        })}
-      </nav>
-      <form action="/admin/requests" method="get" className="mt-4 flex flex-wrap items-end gap-3">
-        {sort !== "updated" ? <input type="hidden" name="sort" value={sort} /> : null}
+      <form action="/admin/requests" method="get" className="mt-6 flex flex-wrap items-end gap-3">
+        {sort === "updated" && dir === "desc" ? null : (
+          <>
+            <input type="hidden" name="sort" value={sort} />
+            <input type="hidden" name="dir" value={dir} />
+          </>
+        )}
         <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
           <WithMarker kind="status">Status</WithMarker>
           <select key={status || "all"} name="status" defaultValue={status} className={`${hatchSelect} w-full sm:w-auto`}>
@@ -115,7 +109,7 @@ export default async function RequestsPage({
         </label>
         <Button type="submit" className={hatchPrimary}>Apply</Button>
         {status ? (
-          <Link href={requestsHref(sort, "")} className={hatchSecondary}>
+          <Link href={requestsHref(sort, dir, "")} className={hatchSecondary}>
             Clear
           </Link>
         ) : null}
@@ -134,7 +128,7 @@ export default async function RequestsPage({
               : "No requests yet. Create a Request from user feedback instead of creating speculative roadmap items."}
           </p>
           {status ? (
-            <Link href={requestsHref(sort, "")} className={`${hatchSecondary} mt-5 inline-flex`}>
+            <Link href={requestsHref(sort, dir, "")} className={`${hatchSecondary} mt-5 inline-flex`}>
               Clear filter
             </Link>
           ) : null}
@@ -145,33 +139,29 @@ export default async function RequestsPage({
             <Table>
               <TableHeader>
                 <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Request
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    <WithMarker kind="status">Status</WithMarker>
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Visibility
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Feedback
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Users
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Votes
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Conversations
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Created
-                  </TableHead>
-                  <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Updated
-                  </TableHead>
+                  {COLUMNS.map((column) => {
+                    const active = sort === column.sort;
+                    const next = nextRequestSort({ sort, dir }, column.sort);
+                    return (
+                      <TableHead
+                        key={column.sort}
+                        className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]"
+                        aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+                      >
+                        <Link
+                          href={requestsHref(next.sort, next.dir, status)}
+                          className="inline-flex items-center gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase no-underline [font-family:var(--font-mono)] hover:text-[#0e0e1a]"
+                        >
+                          {column.marker ? <WithMarker kind={column.marker}>{column.label}</WithMarker> : column.label}
+                          {active ? (
+                            <span aria-hidden className="text-[10px] leading-none font-normal tracking-normal normal-case">
+                              {dir === "asc" ? "↑" : "↓"}
+                            </span>
+                          ) : null}
+                        </Link>
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               </TableHeader>
               <TableBody>
