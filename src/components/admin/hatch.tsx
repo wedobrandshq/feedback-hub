@@ -36,16 +36,16 @@ export const hatchBody = "text-base leading-6 font-normal text-[#5a5b70]";
 export const hatchRowTitle = "text-base leading-6 font-medium text-[#0e0e1a]";
 
 const hatchButton =
-  "shadow-none transition-none active:not-aria-[haspopup]:translate-none focus-visible:border-2 focus-visible:ring-0";
+  "shadow-none transition-[translate,box-shadow] duration-200 ease-out hover:[translate:-2px_-2px] focus-visible:[translate:-2px_-2px] active:not-aria-[haspopup]:translate-none active:shadow-none focus-visible:border-2 focus-visible:ring-0";
 
 export const hatchPrimary =
-  `h-auto rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-6 py-2 text-[15px] leading-5 font-extrabold text-[#0e0e1a] [font-family:var(--font-display)] hover:bg-[#c6ff4f] focus-visible:border-[#0e0e1a] hover:shadow-[5px_5px_0_#0e0e1a] focus-visible:shadow-[5px_5px_0_#0e0e1a] ${hatchButton}`;
+  `h-auto rounded-full border-2 border-[#0e0e1a] bg-[#c6ff4f] px-6 py-2 text-[15px] leading-5 font-extrabold text-[#0e0e1a] [font-family:var(--font-display)] hover:bg-[#c6ff4f] focus-visible:border-[#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] focus-visible:shadow-[3px_3px_0_#0e0e1a] ${hatchButton}`;
 
 export const hatchStrong =
-  `h-auto rounded-full border-2 border-[#0e0e1a] bg-[#2f6bff] px-6 py-2 text-[15px] leading-5 font-extrabold text-white [font-family:var(--font-display)] hover:bg-[#2f6bff] focus-visible:border-[#0e0e1a] hover:shadow-[5px_5px_0_#0e0e1a] focus-visible:shadow-[5px_5px_0_#0e0e1a] ${hatchButton}`;
+  `h-auto rounded-full border-2 border-[#0e0e1a] bg-[#2f6bff] px-6 py-2 text-[15px] leading-5 font-extrabold text-white [font-family:var(--font-display)] hover:bg-[#2f6bff] focus-visible:border-[#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] focus-visible:shadow-[3px_3px_0_#0e0e1a] ${hatchButton}`;
 
 export const hatchSecondary =
-  `h-auto rounded-full border-2 border-[#0e0e1a] bg-white px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] hover:bg-white hover:text-[#0e0e1a] focus-visible:border-[#0e0e1a] hover:shadow-[3px_3px_0_#0e0e1a] focus-visible:shadow-[3px_3px_0_#0e0e1a] ${hatchButton}`;
+  `h-auto rounded-full border-2 border-[#0e0e1a] bg-white px-3.5 py-1.5 text-sm leading-5 font-medium text-[#0e0e1a] hover:bg-white hover:text-[#0e0e1a] focus-visible:border-[#0e0e1a] hover:shadow-[2px_2px_0_#0e0e1a] focus-visible:shadow-[2px_2px_0_#0e0e1a] ${hatchButton}`;
 
 export const hatchField =
   "h-10 rounded-full border-2 border-[#0e0e1a] bg-white px-3 text-sm text-[#0e0e1a] shadow-none outline-none focus-visible:border-2 focus-visible:border-[#0e0e1a] focus-visible:ring-0 focus-visible:shadow-[5px_5px_0_#0e0e1a]";
