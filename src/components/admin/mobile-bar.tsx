@@ -105,9 +105,13 @@ export function MobileBar({
                 : "h-0 opacity-0 [translate:0_-8px]"
             }`}
           >
-            <div className="h-full overflow-y-auto border-b-2 border-[#0e0e1a]">
-              <AdminNav onNavigate={() => setOpen(false)} />
-              <AccountBlock admin={admin} />
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <AdminNav onNavigate={() => setOpen(false)} />
+              </div>
+              <div className="shrink-0 pb-[env(safe-area-inset-bottom)]">
+                <AccountBlock admin={admin} />
+              </div>
             </div>
           </div>
         ) : null}
