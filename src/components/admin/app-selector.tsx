@@ -15,13 +15,11 @@ export function AppSelector({
   const [pending, setPending] = useState(false);
 
   return (
-    <form action={setSelectedAppAction} className="flex items-center gap-2">
-      <label htmlFor="app-selector" className="text-sm font-medium text-[#0e0e1a]">
-        App
-      </label>
+    <form action={setSelectedAppAction}>
       <select
         id="app-selector"
         name="app"
+        aria-label="App"
         value={value}
         disabled={pending}
         className={hatchSelect}

@@ -21,9 +21,9 @@ export const maxDuration = 60;
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
+    <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd>{value || "—"}</dd>
+      <dd className="min-w-0 break-words">{value || "—"}</dd>
     </div>
   );
 }
@@ -69,7 +69,7 @@ export default async function FeedbackDetailPage({
           />
         }
       />
-      <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:px-6">
+      <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_28rem] lg:px-6">
         <div className="min-w-0 space-y-8">
           <section>
             <h2 className={hatchSticker}>Original feedback</h2>

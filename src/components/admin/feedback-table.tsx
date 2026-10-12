@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HatchPanel, hatchDataRow, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { StatusBadge, TypeBadge } from "@/components/admin/status-badge";
 import {
   Table,
@@ -33,9 +34,13 @@ export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
               <TableHead className={hatchHead}>Feedback</TableHead>
               <TableHead className={hatchHead}>User</TableHead>
               <TableHead className={hatchHead}>App</TableHead>
-              <TableHead className={hatchHead}>Type</TableHead>
+              <TableHead className={hatchHead}>
+                <WithMarker kind="type">Type</WithMarker>
+              </TableHead>
               <TableHead className={hatchHead}>Request</TableHead>
-              <TableHead className={hatchHead}>Status</TableHead>
+              <TableHead className={hatchHead}>
+                <WithMarker kind="status">Status</WithMarker>
+              </TableHead>
               <TableHead className={hatchHead}>Created</TableHead>
             </TableRow>
           </TableHeader>

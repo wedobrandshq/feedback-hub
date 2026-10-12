@@ -12,6 +12,7 @@ import {
   removeConsolePerson,
   setConsoleRole,
   updateOwnProfile,
+  updateWorkspaceName,
 } from "@/server/console-people";
 import { createWorkspaceApp, updateWorkspaceApp } from "@/server/workspace-apps";
 
@@ -174,6 +175,37 @@ it("keeps the last owner and lets an owner add an admin", async () => {
   const stillOwner = await prisma.adminUser.findUniqueOrThrow({ where: { id: owner.id } });
   if (stillOwner.role !== "owner") throw new Error("original owner changed");
   await prisma.adminUser.delete({ where: { id: second!.id } });
+});
+
+it("lets only an owner rename the company", async () => {
+  const owner = await prisma.adminUser.findFirstOrThrow({ where: { role: "owner" } });
+  const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: owner.workspaceId } });
+  const denied = await messageOf(() =>
+    updateWorkspaceName({
+      actorRole: "admin",
+      workspaceId: owner.workspaceId,
+      name: "Nope LLC",
+    }),
+  );
+  if (denied !== "Only an owner can do that.") throw new Error("admin renamed the company");
+  const blank = await messageOf(() =>
+    updateWorkspaceName({
+      actorRole: "owner",
+      workspaceId: owner.workspaceId,
+      name: "   ",
+    }),
+  );
+  if (blank !== "Company name is required.") throw new Error("blank company name");
+  try {
+    const renamed = await updateWorkspaceName({
+      actorRole: "owner",
+      workspaceId: owner.workspaceId,
+      name: "North Steps LLC",
+    });
+    if (renamed.name !== "North Steps LLC") throw new Error("company name was not saved");
+  } finally {
+    await prisma.workspace.update({ where: { id: workspace.id }, data: { name: workspace.name } });
+  }
 });
 
 it("creates an app secret for that app and lets an owner edit it", async () => {

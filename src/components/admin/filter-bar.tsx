@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FEEDBACK_STATUSES, FEEDBACK_TYPES } from "@/domain/config";
 import { STATUS_LABELS, TYPE_LABELS } from "@/domain/feedback";
 import { HatchPanel, hatchField, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -27,7 +28,7 @@ export function FilterBar({
             <Input name="q" defaultValue={q} placeholder="Message, name, or email" className={hatchField} />
           </label>
           <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
-            Type
+            <WithMarker kind="type">Type</WithMarker>
             <select name="type" defaultValue={type} className={hatchSelect}>
               <option value="">All types</option>
               {FEEDBACK_TYPES.map((value) => (
@@ -38,7 +39,7 @@ export function FilterBar({
             </select>
           </label>
           <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
-            Status
+            <WithMarker kind="status">Status</WithMarker>
             <select name="status" defaultValue={status} className={hatchSelect}>
               <option value="">All statuses</option>
               {FEEDBACK_STATUSES.map((value) => (

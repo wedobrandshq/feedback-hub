@@ -3,6 +3,7 @@ import { CreateAppForm } from "@/components/admin/app-forms";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
 import { HatchPanel, hatchChip, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import {
   Table,
   TableBody,
@@ -51,7 +52,9 @@ export default async function AppsPage() {
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
               <TableHead className={hatchHead}>Name</TableHead>
               <TableHead className={hatchHead}>Platform</TableHead>
-              <TableHead className={hatchHead}>Status</TableHead>
+              <TableHead className={hatchHead}>
+                <WithMarker kind="status">Status</WithMarker>
+              </TableHead>
               <TableHead className={hatchHead}>Last event</TableHead>
             </TableRow>
           </TableHeader>
@@ -65,7 +68,9 @@ export default async function AppsPage() {
                 </TableCell>
                 <TableCell className="px-3 py-3.5 text-sm">{appPlatformLabel(app.platform)}</TableCell>
                 <TableCell className="px-3 py-3.5">
-                  <span className={hatchChip(app.status)}>{app.status}</span>
+                  <span className={hatchChip(app.status)}>
+                    <WithMarker kind="status">{app.status}</WithMarker>
+                  </span>
                 </TableCell>
                 <TableCell className="px-3 py-3.5 text-sm text-[#5a5b70]">
                   {app.lastEventAt ? formatDateTime(app.lastEventAt) : "—"}

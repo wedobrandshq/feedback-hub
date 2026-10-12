@@ -4,6 +4,7 @@ import { ConversationActions } from "@/components/admin/conversation-actions";
 import { ConversationThread } from "@/components/admin/conversation-thread";
 import { MessageComposer } from "@/components/admin/message-composer";
 import { hatchSticker } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { TYPE_LABELS, formatDateTime, userLabel } from "@/domain/feedback";
@@ -15,9 +16,9 @@ export const metadata = { title: "Conversation" };
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
+    <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd>{value || "—"}</dd>
+      <dd className="min-w-0 break-words">{value || "—"}</dd>
     </div>
   );
 }
@@ -46,7 +47,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
           />
         }
       />
-      <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-6">
+      <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_28rem] lg:px-6">
         <div className="min-w-0 space-y-8">
           <section aria-label="Messages">
             <ConversationThread messages={conversation.messages} />
@@ -78,7 +79,9 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
           <section>
             <h2 className={hatchSticker}>Feedback</h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-sm">{TYPE_LABELS[conversation.feedback.type]}</span>
+              <span className="text-sm">
+                <WithMarker kind="type">{TYPE_LABELS[conversation.feedback.type]}</WithMarker>
+              </span>
               <StatusBadge status={conversation.feedback.status} />
             </div>
             <p className="mt-3 text-sm leading-6 whitespace-pre-wrap">{conversation.feedback.body}</p>

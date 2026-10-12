@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
 import { HatchPanel, hatchBody, hatchRowTitle, hatchSticker, hatchStrong } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { PageHeader } from "@/components/admin/page-header";
 import { feedbackDeltaSentence } from "@/domain/admin";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
@@ -102,7 +103,9 @@ export default async function AdminHomePage() {
           </HatchPanel>
           <HatchPanel wash="sky">
             <section className="px-5 py-5">
-            <h2 className={hatchSticker}>Needs attention</h2>
+            <h2 className={hatchSticker}>
+              <WithMarker kind="attention">Needs attention</WithMarker>
+            </h2>
             <p className={`mt-4 ${hatchBody}`}>
               <span data-signal="needs-reply">{home.attention.needsReplyCount}</span>
               {" need a reply · "}

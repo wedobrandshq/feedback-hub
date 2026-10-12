@@ -4,6 +4,7 @@ import {
   cleanPassword,
   cleanProfileEmail,
   cleanProfileName,
+  cleanWorkspaceName,
   isConsoleRole,
   type ConsoleRole,
 } from "@/domain/console";
@@ -66,6 +67,20 @@ export async function updateOwnProfile(input: {
   } catch (error) {
     asEmailConflict(error);
   }
+}
+
+export async function updateWorkspaceName(input: {
+  actorRole: string;
+  workspaceId: string;
+  name: string;
+}) {
+  assertOwner(input.actorRole);
+  const name = cleanWorkspaceName(input.name);
+  return prisma.workspace.update({
+    where: { id: input.workspaceId },
+    data: { name },
+    select: { id: true, name: true },
+  });
 }
 
 export async function addConsolePerson(input: {

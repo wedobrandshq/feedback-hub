@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HatchPanel, hatchChip, hatchDataRow, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import {
   Table,
   TableBody,
@@ -12,9 +13,25 @@ import { feedbackPreview, formatDateTime, userLabel } from "@/domain/feedback";
 import type { InboxRow } from "@/server/conversations";
 
 function Attention({ row }: { row: InboxRow }) {
-  if (row.status === "closed") return <span className={hatchChip("closed")}>Closed</span>;
-  if (row.needsReply) return <span className={hatchChip("needs_reply")}>Needs reply</span>;
-  return <span className={hatchChip("open")}>Open</span>;
+  if (row.status === "closed") {
+    return (
+      <span className={hatchChip("closed")}>
+        <WithMarker kind="attention">Closed</WithMarker>
+      </span>
+    );
+  }
+  if (row.needsReply) {
+    return (
+      <span className={hatchChip("needs_reply")}>
+        <WithMarker kind="attention">Needs reply</WithMarker>
+      </span>
+    );
+  }
+  return (
+    <span className={hatchChip("open")}>
+      <WithMarker kind="attention">Open</WithMarker>
+    </span>
+  );
 }
 
 export function InboxTable({ rows }: { rows: InboxRow[] }) {
@@ -27,7 +44,9 @@ export function InboxTable({ rows }: { rows: InboxRow[] }) {
               <TableHead className={hatchHead}>Conversation</TableHead>
               <TableHead className={hatchHead}>User</TableHead>
               <TableHead className={hatchHead}>App</TableHead>
-              <TableHead className={hatchHead}>Attention</TableHead>
+              <TableHead className={hatchHead}>
+                <WithMarker kind="attention">Attention</WithMarker>
+              </TableHead>
               <TableHead className={hatchHead}>Updated</TableHead>
             </TableRow>
           </TableHeader>

@@ -5,6 +5,7 @@ export type ConsoleRole = (typeof CONSOLE_ROLES)[number];
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const PROFILE_NAME_MAX = 80;
+export const WORKSPACE_NAME_MAX = 80;
 
 export function consoleRoleLabel(role: string) {
   if (role === "owner") return "Owner";
@@ -14,6 +15,15 @@ export function consoleRoleLabel(role: string) {
 
 export function isConsoleRole(value: string): value is ConsoleRole {
   return (CONSOLE_ROLES as readonly string[]).includes(value);
+}
+
+export function cleanWorkspaceName(value: string) {
+  const name = value.trim();
+  if (!name) throw new DomainError("Company name is required.", "validation");
+  if (name.length > WORKSPACE_NAME_MAX) {
+    throw new DomainError(`Company name needs to be ${WORKSPACE_NAME_MAX} characters or less.`, "validation");
+  }
+  return name;
 }
 
 export function cleanProfileName(value: string) {

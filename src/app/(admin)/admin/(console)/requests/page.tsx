@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { hatchChip, hatchLift } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { formatDateTime } from "@/domain/feedback";
 import { REQUEST_SORTS, REQUEST_STATUS_LABELS, type RequestSortName } from "@/domain/request";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
@@ -103,7 +104,7 @@ export default async function RequestsPage({
                     Request
                   </TableHead>
                   <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
-                    Status
+                    <WithMarker kind="status">Status</WithMarker>
                   </TableHead>
                   <TableHead className="h-11 px-3 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase [font-family:var(--font-mono)]">
                     Visibility
@@ -143,7 +144,9 @@ export default async function RequestsPage({
                       ) : null}
                     </TableCell>
                     <TableCell className="px-3 py-3.5">
-                      <span className={hatchChip(row.status)}>{REQUEST_STATUS_LABELS[row.status]}</span>
+                      <span className={hatchChip(row.status)}>
+                        <WithMarker kind="status">{REQUEST_STATUS_LABELS[row.status]}</WithMarker>
+                      </span>
                     </TableCell>
                     <TableCell className="px-3 py-3.5">
                       <MonoLabel>{row.visibility}</MonoLabel>

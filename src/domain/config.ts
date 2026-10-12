@@ -6,7 +6,7 @@ export const DEMO_CONVERSATION_LIMIT = 50;
 
 export const SEEDED_ADMIN_NAME = "Alex Rivera";
 
-export const WORKSPACE_NAME = "Healthy Steps";
+export const WORKSPACE_NAME = "Healthy Steps LLC";
 export const WORKSPACE_SLUG = "healthy-steps";
 
 export const SUBMIT_FEEDBACK_TYPES = ["idea", "bug", "improvement", "other"] as const;

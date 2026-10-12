@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
 import { HatchPanel, hatchRowTitle, hatchSticker } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { PageHeader } from "@/components/admin/page-header";
 import { RoadmapMoveForm } from "@/components/admin/request-forms";
 import { ADMIN_ROADMAP_STATUSES, REQUEST_STATUS_LABELS } from "@/domain/request";
@@ -38,7 +39,7 @@ export default async function RoadmapPage() {
               <HatchPanel key={status} wash={wash}>
                 <section className="px-4 py-4">
                 <h2 className={hatchSticker}>
-                  {REQUEST_STATUS_LABELS[status]}
+                  <WithMarker kind="status">{REQUEST_STATUS_LABELS[status]}</WithMarker>
                 </h2>
                 {items.length === 0 ? (
                   <p className="mt-4 text-sm text-[#5a5b70]">None</p>

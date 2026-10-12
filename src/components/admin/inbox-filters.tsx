@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { hatchPill } from "@/components/admin/hatch";
+import { WithMarker } from "@/components/admin/markers";
 import { INBOX_FILTERS, INBOX_FILTER_LABELS, type InboxFilter } from "@/domain/conversation";
 
 export function InboxFilters({ current }: { current: InboxFilter }) {
@@ -15,7 +16,11 @@ export function InboxFilters({ current }: { current: InboxFilter }) {
             aria-current={active ? "page" : undefined}
             className={hatchPill(active)}
           >
-            {INBOX_FILTER_LABELS[filter]}
+            {filter === "needs_reply" ? (
+              <WithMarker kind="attention">{INBOX_FILTER_LABELS[filter]}</WithMarker>
+            ) : (
+              INBOX_FILTER_LABELS[filter]
+            )}
           </Link>
         );
       })}

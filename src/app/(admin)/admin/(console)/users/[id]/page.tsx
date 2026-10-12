@@ -14,9 +14,9 @@ export const metadata = { title: "User" };
 
 function ContextRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="grid grid-cols-[8rem_1fr] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
+    <div className="grid grid-cols-[8rem_minmax(0,1fr)] gap-3 border-t border-[#0e0e1a] py-2 text-sm first:border-t-0">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd>{value || "—"}</dd>
+      <dd className="min-w-0 break-words">{value || "—"}</dd>
     </div>
   );
 }
@@ -35,7 +35,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
         title={userLabel(user)}
         description={`${user.app.name}${user.plan ? ` · ${user.plan}` : ""}`}
       />
-      <div className="grid gap-10 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_18rem] md:px-6">
+      <div className="grid gap-10 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_28rem]">
         <div className="space-y-10">
           <section>
             <h2 className={hatchSticker}>Feedback</h2>
