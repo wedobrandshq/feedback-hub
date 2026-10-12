@@ -88,11 +88,11 @@ export function FeedbackTable({
                   >
                     <Link
                       href={feedbackHref(filters, { sort, dir }, column.sort)}
-                      className="inline-flex items-center gap-1 text-[#0e0e1a]"
+                      className="inline-flex items-center gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase no-underline [font-family:var(--font-mono)] hover:text-[#0e0e1a]"
                     >
                       {column.marker ? <WithMarker kind={column.marker}>{column.label}</WithMarker> : column.label}
                       {active ? (
-                        <span aria-hidden className="text-[10px] leading-none">
+                        <span aria-hidden className="text-[10px] leading-none font-normal tracking-normal normal-case">
                           {dir === "asc" ? "↑" : "↓"}
                         </span>
                       ) : null}
