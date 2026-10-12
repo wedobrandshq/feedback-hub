@@ -1,12 +1,13 @@
 import { BODY_MAX_LENGTH } from "@/domain/config";
 import { DomainError } from "@/domain/errors";
 
-export const INBOX_FILTERS = ["all", "unread", "needs_reply", "closed"] as const;
+export const INBOX_FILTERS = ["all", "unread", "open", "needs_reply", "closed"] as const;
 export type InboxFilter = (typeof INBOX_FILTERS)[number];
 
 export const INBOX_FILTER_LABELS: Record<InboxFilter, string> = {
   all: "All",
   unread: "Unread",
+  open: "Open",
   needs_reply: "Needs reply",
   closed: "Closed",
 };
@@ -36,6 +37,12 @@ export function emptyInboxCopy(filter: InboxFilter, appName: string | null) {
     return {
       title: "No unread conversations",
       description: "Nothing is waiting for you to read.",
+    };
+  }
+  if (filter === "open") {
+    return {
+      title: "No open conversations",
+      description: "Open conversations, including ones waiting on you and ones waiting on the user, will show up here.",
     };
   }
   if (filter === "closed") {

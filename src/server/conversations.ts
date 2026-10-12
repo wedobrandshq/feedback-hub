@@ -126,6 +126,7 @@ export async function listInbox(input: {
   const where: Prisma.ConversationWhereInput = {
     ...appScope,
     ...(ids ? { id: { in: ids } } : {}),
+    ...(input.filter === "open" ? { status: "open" } : {}),
     ...(input.filter === "closed" ? { status: "closed" } : {}),
     ...(input.filter === "unread"
       ? { messages: { some: { senderType: "user", readAt: null } } }

@@ -6,7 +6,7 @@ import { readDemoReply } from "@/domain/demo-reply";
 import { readDemoSubmission } from "@/domain/demo-submission";
 import { DomainError } from "@/domain/errors";
 import { attachmentRoot } from "@/server/attachments";
-import { listConversationsForUser, listInbox, replyAsAdmin, replyAsUser } from "@/server/conversations";
+import { closeConversation, listConversationsForUser, listInbox, replyAsAdmin, replyAsUser } from "@/server/conversations";
 import { prisma } from "@/server/db";
 import { closeFeedback, markFeedbackReviewed } from "@/server/feedback-status";
 import { listFeedback } from "@/server/feedback-queries";
@@ -381,6 +381,45 @@ describe("conversations", () => {
       }),
     ).rejects.toMatchObject({ code: "not_found" });
     expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(2);
+  });
+
+  it("lists open conversations whether they wait on the admin or the user", async () => {
+    const waitingOnAdmin = await willowThread("The chart is blank.");
+    const waitingOnUser = await willowThread("The reminder never fires.");
+    await replyAsAdmin({
+      workspaceId: waitingOnUser.app.workspaceId,
+      actorId: waitingOnUser.admin.id,
+      actorName: waitingOnUser.admin.name,
+      conversationId: waitingOnUser.conversation.id,
+      body: "Which reminder is missing?",
+    });
+    const closed = await willowThread("The old export failed.");
+    await closeConversation({
+      workspaceId: closed.app.workspaceId,
+      actorId: closed.admin.id,
+      actorName: closed.admin.name,
+      conversationId: closed.conversation.id,
+    });
+
+    const open = await listInbox({
+      workspaceId: waitingOnAdmin.app.workspaceId,
+      appId: waitingOnAdmin.app.id,
+      filter: "open",
+    });
+    expect(open.rows.map((row) => row.id).sort()).toEqual(
+      [waitingOnAdmin.conversation.id, waitingOnUser.conversation.id].sort(),
+    );
+    expect(open.rows.find((row) => row.id === waitingOnAdmin.conversation.id)?.needsReply).toBe(true);
+    expect(open.rows.find((row) => row.id === waitingOnUser.conversation.id)?.needsReply).toBe(false);
+
+    const needsReply = await listInbox({
+      workspaceId: waitingOnAdmin.app.workspaceId,
+      appId: waitingOnAdmin.app.id,
+      filter: "needs_reply",
+    });
+    expect(needsReply.rows.map((row) => row.id)).toContain(waitingOnAdmin.conversation.id);
+    expect(needsReply.rows.map((row) => row.id)).not.toContain(waitingOnUser.conversation.id);
+    expect(needsReply.rows.map((row) => row.id)).not.toContain(closed.conversation.id);
   });
 
   it("stores a reply from the same user", async () => {
