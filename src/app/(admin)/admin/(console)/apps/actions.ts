@@ -19,6 +19,7 @@ export async function createAppAction(_previous: AppFormState, formData: FormDat
   try {
     const app = await createWorkspaceApp({
       actorRole: admin.role,
+      actorId: admin.id,
       workspaceId: admin.workspaceId,
       name: String(formData.get("name") ?? ""),
       platform: String(formData.get("platform") ?? ""),

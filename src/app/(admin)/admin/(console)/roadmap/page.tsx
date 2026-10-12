@@ -14,8 +14,8 @@ export const metadata = { title: "Roadmap" };
 
 export default async function RoadmapPage() {
   const admin = await requireAdmin();
-  const selected = await getSelectedApp(admin.workspaceId);
-  const rows = await listRoadmap({ workspaceId: admin.workspaceId, appId: selected?.id ?? null });
+  const selected = await getSelectedApp(admin.workspaceId, admin.id);
+  const rows = await listRoadmap({ workspaceId: admin.workspaceId, appId: selected?.id ?? null, adminId: admin.id });
 
   return (
     <>

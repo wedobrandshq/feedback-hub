@@ -97,6 +97,7 @@ model App {
   requests       Request[]
   notifications  Notification[]
   changelog      ChangelogEntry[]
+  adminAccess    AdminAppAccess[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId])
@@ -358,7 +359,19 @@ model AdminUser {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  appAccess    AdminAppAccess[]
 
   @@index([workspaceId])
   @@map("admin_users")
+}
+
+model AdminAppAccess {
+  adminUserId String    @map("admin_user_id")
+  appId       String    @map("app_id")
+  admin       AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  app         App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, appId])
+  @@index([appId])
+  @@map("admin_app_access")
 }

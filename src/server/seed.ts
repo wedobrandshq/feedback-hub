@@ -53,7 +53,7 @@ export async function seedDatabase() {
   });
 
   const passwordHash = await bcrypt.hash(seededAdminPassword(), 10);
-  await prisma.adminUser.upsert({
+  const admin = await prisma.adminUser.upsert({
     where: { email: seededAdminEmail() },
     create: {
       workspaceId: workspace.id,
@@ -68,6 +68,15 @@ export async function seedDatabase() {
       passwordHash,
       role: "owner",
     },
+  });
+
+  const apps = await prisma.app.findMany({
+    where: { workspaceId: workspace.id },
+    select: { id: true },
+  });
+  await prisma.adminAppAccess.createMany({
+    data: apps.map((app) => ({ adminUserId: admin.id, appId: app.id })),
+    skipDuplicates: true,
   });
 
   await identifyUser({

@@ -23,7 +23,7 @@ export const metadata = { title: "Apps" };
 
 export default async function AppsPage() {
   const admin = await requireAdmin();
-  const apps = await listAdminApps(admin.workspaceId);
+  const apps = await listAdminApps(admin.workspaceId, admin.id);
   const owner = admin.role === "owner";
 
   return (

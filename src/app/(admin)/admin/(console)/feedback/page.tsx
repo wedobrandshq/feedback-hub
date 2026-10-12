@@ -21,7 +21,7 @@ export default async function FeedbackPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const admin = await requireAdmin();
-  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
+  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId, admin.id)]);
   const raw = {
     q: first(params.q) ?? "",
     type: first(params.type) ?? "",
@@ -36,6 +36,7 @@ export default async function FeedbackPage({
     : await listFeedback({
         workspaceId: admin.workspaceId,
         appId: selected?.id ?? null,
+        adminId: admin.id,
         filters,
         sort: sort.sort,
         dir: sort.dir,

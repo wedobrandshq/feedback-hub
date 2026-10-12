@@ -58,13 +58,13 @@ export default async function UsersPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const admin = await requireAdmin();
-  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
+  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId, admin.id)]);
   const q = first(params.q) ?? "";
   const plan = first(params.plan) ?? "";
   const activity = parseUserActivity(first(params.activity));
   const { sort, dir } = parseUserSort(first(params.sort), first(params.dir));
   const appId = selected?.id ?? null;
-  const plans = await listUserPlans({ workspaceId: admin.workspaceId, appId });
+  const plans = await listUserPlans({ workspaceId: admin.workspaceId, appId, adminId: admin.id });
   const planFilter = plan && plans.includes(plan) ? plan : "";
   const filters = { q, plan: planFilter, activity: activity ?? "" };
   const result = await listAdminUsers({
@@ -75,6 +75,7 @@ export default async function UsersPage({
     activity,
     sort,
     dir,
+    adminId: admin.id,
   });
 
   return (

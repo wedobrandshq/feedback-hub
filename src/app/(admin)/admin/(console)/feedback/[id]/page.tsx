@@ -44,8 +44,8 @@ export default async function FeedbackDetailPage({
   const requestQuery = first(query.request) ?? "";
   await ensureFeedbackSuggestion(id).catch(() => undefined);
   const [detail, thread] = await Promise.all([
-    getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id }),
-    getAdminThreadForFeedback({ workspaceId: admin.workspaceId, feedbackId: id }),
+    getFeedbackDetail({ workspaceId: admin.workspaceId, feedbackId: id, adminId: admin.id }),
+    getAdminThreadForFeedback({ workspaceId: admin.workspaceId, feedbackId: id, adminId: admin.id }),
   ]);
   if (!detail) notFound();
 

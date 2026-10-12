@@ -6,15 +6,16 @@ import {
   type UserSort,
   type UserSortDir,
 } from "@/domain/admin";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 
-function appScope(workspaceId: string, appId: string | null) {
-  return { workspaceId, ...(appId ? { id: appId } : {}) };
+function appScope(workspaceId: string, appId: string | null, adminId?: string) {
+  return visibleApps({ workspaceId, appId, adminId });
 }
 
-export async function listUserPlans(input: { workspaceId: string; appId: string | null }) {
+export async function listUserPlans(input: { workspaceId: string; appId: string | null; adminId?: string }) {
   const rows = await prisma.user.findMany({
-    where: { app: appScope(input.workspaceId, input.appId), plan: { not: null } },
+    where: { app: appScope(input.workspaceId, input.appId, input.adminId), plan: { not: null } },
     distinct: ["plan"],
     select: { plan: true },
     orderBy: { plan: "asc" },
@@ -66,6 +67,7 @@ export async function listAdminUsers(input: {
   activity: UserActivityName | null;
   sort?: UserSort;
   dir?: UserSortDir;
+  adminId?: string;
   now?: Date;
 }) {
   const { since } = adminWindow(input.now);
@@ -73,7 +75,7 @@ export async function listAdminUsers(input: {
   const dir = input.dir ?? "desc";
   const search = input.search?.trim() ? input.search.trim().slice(0, 200) : null;
   const where = {
-    app: appScope(input.workspaceId, input.appId),
+    app: appScope(input.workspaceId, input.appId, input.adminId),
     ...(input.plan ? { plan: input.plan } : {}),
     ...(input.activity === "recent" ? { lastSeenAt: { gte: since } } : {}),
     ...(input.activity === "quiet" ? { lastSeenAt: { lt: since } } : {}),
@@ -88,7 +90,7 @@ export async function listAdminUsers(input: {
       : {}),
   };
 
-  const totalInScope = await prisma.user.count({ where: { app: appScope(input.workspaceId, input.appId) } });
+  const totalInScope = await prisma.user.count({ where: { app: appScope(input.workspaceId, input.appId, input.adminId) } });
   if (sort === "feedback") {
     const rows = await prisma.user.findMany({ where, include: adminUserInclude });
     const mapped = rows.map(toAdminUserRow);
@@ -117,9 +119,9 @@ export async function listAdminUsers(input: {
   };
 }
 
-export async function getAdminUser(input: { workspaceId: string; userId: string }) {
+export async function getAdminUser(input: { workspaceId: string; userId: string; adminId?: string }) {
   const user = await prisma.user.findFirst({
-    where: { id: input.userId, app: { workspaceId: input.workspaceId } },
+    where: { id: input.userId, app: visibleApps({ workspaceId: input.workspaceId, adminId: input.adminId }) },
     include: {
       app: { select: { id: true, name: true } },
       feedback: {

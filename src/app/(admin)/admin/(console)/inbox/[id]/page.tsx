@@ -29,6 +29,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const conversation = await getAdminConversation({
     workspaceId: admin.workspaceId,
     conversationId: id,
+    adminId: admin.id,
   });
   if (!conversation) notFound();
   const linked = await linkedRequestForFeedback(admin.workspaceId, conversation.feedback.id);

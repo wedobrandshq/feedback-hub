@@ -22,6 +22,14 @@ function asEmailConflict(error: unknown): never {
   throw error;
 }
 
+export async function listWorkspaceAppChoices(workspaceId: string) {
+  return prisma.app.findMany({
+    where: { workspaceId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+}
+
 export async function listConsolePeople(workspaceId: string) {
   return prisma.adminUser.findMany({
     where: { workspaceId },
@@ -89,18 +97,39 @@ export async function addConsolePerson(input: {
   name: string;
   email: string;
   password: string;
+  passwordConfirm: string;
   role: string;
+  appIds: string[];
 }) {
   assertOwner(input.actorRole);
+  if (input.password !== input.passwordConfirm) {
+    throw new DomainError("Passwords do not match.", "validation");
+  }
   if (!isConsoleRole(input.role)) throw new DomainError("Choose Owner or Admin.", "validation");
   const name = cleanProfileName(input.name);
   const email = cleanProfileEmail(input.email);
   const passwordHash = await bcrypt.hash(cleanPassword(input.password), 10);
+  const appIds = [...new Set(input.appIds.map((id) => id.trim()).filter(Boolean))];
+  if (appIds.length === 0) throw new DomainError("Choose at least one app.", "validation");
+  const apps = await prisma.app.findMany({
+    where: { workspaceId: input.workspaceId, id: { in: appIds } },
+    select: { id: true },
+  });
+  if (apps.length !== appIds.length) {
+    throw new DomainError("Choose an app from this workspace.", "validation");
+  }
   const taken = await prisma.adminUser.findFirst({ where: { email }, select: { id: true } });
   if (taken) throw new DomainError("That email is already used.", "conflict");
   try {
     return await prisma.adminUser.create({
-      data: { workspaceId: input.workspaceId, name, email, passwordHash, role: input.role },
+      data: {
+        workspaceId: input.workspaceId,
+        name,
+        email,
+        passwordHash,
+        role: input.role,
+        appAccess: { create: apps.map((app) => ({ appId: app.id })) },
+      },
       select: { id: true, name: true, email: true, role: true },
     });
   } catch (error) {

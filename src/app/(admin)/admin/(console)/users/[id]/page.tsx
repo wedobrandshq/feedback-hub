@@ -24,7 +24,7 @@ function ContextRow({ label, value }: { label: string; value: string | null }) {
 export default async function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin();
   const { id } = await params;
-  const detail = await getAdminUser({ workspaceId: admin.workspaceId, userId: id });
+  const detail = await getAdminUser({ workspaceId: admin.workspaceId, userId: id, adminId: admin.id });
   if (!detail) notFound();
   const { user, events } = detail;
 

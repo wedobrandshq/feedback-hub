@@ -10,8 +10,8 @@ export const metadata = { title: "Changelog" };
 
 export default async function ChangelogPage() {
   const admin = await requireAdmin();
-  const selected = await getSelectedApp(admin.workspaceId);
-  const rows = await listAdminChangelog({ workspaceId: admin.workspaceId, appId: selected?.id ?? null });
+  const selected = await getSelectedApp(admin.workspaceId, admin.id);
+  const rows = await listAdminChangelog({ workspaceId: admin.workspaceId, appId: selected?.id ?? null, adminId: admin.id });
 
   return (
     <>

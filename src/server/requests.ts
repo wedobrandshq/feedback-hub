@@ -10,6 +10,7 @@ import {
 } from "@/domain/request";
 import { userLabel } from "@/domain/feedback";
 import { resolveAppBySecret } from "@/server/identify-user";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 
 const REQUEST_LIST_LIMIT = 200;
@@ -298,13 +299,14 @@ function requestOrder(sort: RequestSortName, dir: RequestSortDir): Prisma.Reques
 export async function listAdminRequests(input: {
   workspaceId: string;
   appId: string | null;
+  adminId?: string;
   sort: RequestSortName;
   dir?: RequestSortDir;
   status?: RequestStatusName | null;
 }) {
   const dir = input.dir ?? "desc";
   const where: Prisma.RequestWhereInput = {
-    app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
+    app: visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId }),
     ...(input.status ? { status: input.status } : {}),
   };
   if (input.sort === "users" || input.sort === "conversations") {
@@ -344,9 +346,9 @@ export async function searchRequests(input: { workspaceId: string; appId: string
   });
 }
 
-export async function getAdminRequest(input: { workspaceId: string; requestId: string }) {
+export async function getAdminRequest(input: { workspaceId: string; requestId: string; adminId?: string }) {
   const request = await prisma.request.findFirst({
-    where: { id: input.requestId, app: { workspaceId: input.workspaceId } },
+    where: { id: input.requestId, app: visibleApps({ workspaceId: input.workspaceId, adminId: input.adminId }) },
     include: {
       app: true,
       links: {
@@ -622,20 +624,20 @@ export async function listPublicChangelog(input: { appSecret: string }) {
   }));
 }
 
-export async function listAdminChangelog(input: { workspaceId: string; appId: string | null }) {
+export async function listAdminChangelog(input: { workspaceId: string; appId: string | null; adminId?: string }) {
   return prisma.changelogEntry.findMany({
-    where: { app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) } },
+    where: { app: visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId }) },
     orderBy: { publishedAt: "desc" },
     include: { app: { select: { name: true } }, request: { select: { id: true, title: true } } },
   });
 }
 
-export async function listRoadmap(input: { workspaceId: string; appId: string | null }) {
+export async function listRoadmap(input: { workspaceId: string; appId: string | null; adminId?: string }) {
   return prisma.request.findMany({
     where: {
       visibility: "public",
       status: { in: [...ADMIN_ROADMAP_STATUSES] },
-      app: { workspaceId: input.workspaceId, ...(input.appId ? { id: input.appId } : {}) },
+      app: visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId }),
     },
     orderBy: { updatedAt: "desc" },
     include: { app: { select: { name: true } } },

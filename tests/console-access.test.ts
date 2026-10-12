@@ -14,6 +14,7 @@ import {
   updateOwnProfile,
   updateWorkspaceName,
 } from "@/server/console-people";
+import { listWorkspaceApps } from "@/server/feedback-queries";
 import { createWorkspaceApp, updateWorkspaceApp } from "@/server/workspace-apps";
 
 beforeAll(async () => {
@@ -22,12 +23,37 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await prisma.adminUser.deleteMany({
-    where: { email: { in: ["ada-console@example.com", "second-owner@example.com", "taken-console@example.com"] } },
+    where: {
+      email: {
+        in: [
+          "ada-console@example.com",
+          "second-owner@example.com",
+          "taken-console@example.com",
+          "limited-console@example.com",
+        ],
+      },
+    },
   });
   await prisma.app.deleteMany({ where: { slug: { startsWith: "north-path" } } });
   await seedDatabase();
   await prisma.$disconnect();
 });
+
+async function grantPerson(input: {
+  actorRole: string;
+  workspaceId: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}) {
+  const apps = await prisma.app.findMany({ where: { workspaceId: input.workspaceId }, select: { id: true } });
+  return addConsolePerson({
+    ...input,
+    passwordConfirm: input.password,
+    appIds: apps.map((app) => app.id),
+  });
+}
 
 async function messageOf(run: () => Promise<unknown>) {
   try {
@@ -40,7 +66,7 @@ async function messageOf(run: () => Promise<unknown>) {
 
 it("lets the signed-in person change name, email, and password", async () => {
   const owner = await prisma.adminUser.findFirstOrThrow({ where: { email: "owner@healthysteps.example" } });
-  const taken = await addConsolePerson({
+  const taken = await grantPerson({
     actorRole: "owner",
     workspaceId: owner.workspaceId,
     name: "Taken",
@@ -126,7 +152,7 @@ it("keeps the last owner and lets an owner add an admin", async () => {
   );
   if (removed !== "The workspace needs at least one owner.") throw new Error("last owner was removed");
 
-  const added = await addConsolePerson({
+  const added = await grantPerson({
     actorRole: "owner",
     workspaceId: owner.workspaceId,
     name: "Ada Admin",
@@ -137,7 +163,7 @@ it("keeps the last owner and lets an owner add an admin", async () => {
   if (added?.role !== "admin") throw new Error("admin was not added");
 
   const denied = await messageOf(() =>
-    addConsolePerson({
+    grantPerson({
       actorRole: "admin",
       workspaceId: owner.workspaceId,
       name: "Nope",
@@ -157,7 +183,7 @@ it("keeps the last owner and lets an owner add an admin", async () => {
   });
   if (self?.name !== "Ada A. Admin") throw new Error("admin could not edit their profile");
 
-  const second = await addConsolePerson({
+  const second = await grantPerson({
     actorRole: "owner",
     workspaceId: owner.workspaceId,
     name: "Second Owner",
@@ -259,6 +285,52 @@ it("creates an app secret for that app and lets an owner edit it", async () => {
     if (editDenied !== "Only an owner can do that.") throw new Error("admin edited an app");
   } finally {
     await prisma.app.delete({ where: { id: created.id } });
+  }
+});
+
+it("rejects a mismatched password and limits a person to one app", async () => {
+  const owner = await prisma.adminUser.findFirstOrThrow({ where: { email: "owner@healthysteps.example" } });
+  const apps = await prisma.app.findMany({
+    where: { workspaceId: owner.workspaceId },
+    select: { id: true, slug: true },
+  });
+  const willow = apps.find((app) => app.slug === "willow");
+  if (!willow) throw new Error("willow missing");
+
+  const mismatch = await messageOf(() =>
+    addConsolePerson({
+      actorRole: "owner",
+      workspaceId: owner.workspaceId,
+      name: "Limited",
+      email: "limited-console@example.com",
+      password: "limited-password",
+      passwordConfirm: "different-password",
+      role: "admin",
+      appIds: [willow.id],
+    }),
+  );
+  if (mismatch !== "Passwords do not match.") throw new Error("mismatch was saved");
+  if (await prisma.adminUser.findFirst({ where: { email: "limited-console@example.com" } })) {
+    throw new Error("person exists after a mismatch");
+  }
+
+  const added = await addConsolePerson({
+    actorRole: "owner",
+    workspaceId: owner.workspaceId,
+    name: "Limited",
+    email: "limited-console@example.com",
+    password: "limited-password",
+    passwordConfirm: "limited-password",
+    role: "admin",
+    appIds: [willow.id],
+  });
+  try {
+    const visible = await listWorkspaceApps(owner.workspaceId, added!.id);
+    if (visible.map((app) => app.slug).join() !== "willow") throw new Error("limited person sees another app");
+    const ownerApps = (await listWorkspaceApps(owner.workspaceId, owner.id)).map((app) => app.slug).sort();
+    if (ownerApps.join() !== "earn-it,willow") throw new Error("owner lost an app");
+  } finally {
+    if (added?.id) await prisma.adminUser.delete({ where: { id: added.id } });
   }
 });
 

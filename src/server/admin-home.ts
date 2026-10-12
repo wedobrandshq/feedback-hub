@@ -1,15 +1,12 @@
 import { conversationNeedsReply } from "@/domain/conversation";
 import { ADMIN_LIST_LIMIT, TRENDING_LIMIT, adminWindow } from "@/domain/admin";
 import { feedbackPreview, userLabel } from "@/domain/feedback";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 
-function appScope(workspaceId: string, appId: string | null) {
-  return { workspaceId, ...(appId ? { id: appId } : {}) };
-}
-
-export async function getAdminHome(input: { workspaceId: string; appId: string | null; now?: Date }) {
+export async function getAdminHome(input: { workspaceId: string; appId: string | null; adminId?: string; now?: Date }) {
   const { since, prior } = adminWindow(input.now);
-  const app = appScope(input.workspaceId, input.appId);
+  const app = visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId });
   const inApp = { app };
 
   const [

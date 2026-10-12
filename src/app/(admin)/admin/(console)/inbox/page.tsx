@@ -21,13 +21,14 @@ export default async function InboxPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const admin = await requireAdmin();
-  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
+  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId, admin.id)]);
   const parsed = parseInboxFilter(first(params.filter));
   const result = parsed.error
     ? null
     : await listInbox({
         workspaceId: admin.workspaceId,
         appId: selected?.id ?? null,
+        adminId: admin.id,
         filter: parsed.filter,
       });
   const empty = emptyInboxCopy(parsed.filter, selected?.name ?? null);

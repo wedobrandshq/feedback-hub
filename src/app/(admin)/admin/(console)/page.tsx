@@ -24,8 +24,8 @@ function Signal({ label, value, name }: { label: string; value: number; name: st
 
 export default async function AdminHomePage() {
   const admin = await requireAdmin();
-  const selected = await getSelectedApp(admin.workspaceId);
-  const home = await getAdminHome({ workspaceId: admin.workspaceId, appId: selected?.id ?? null });
+  const selected = await getSelectedApp(admin.workspaceId, admin.id);
+  const home = await getAdminHome({ workspaceId: admin.workspaceId, appId: selected?.id ?? null, adminId: admin.id });
   const quiet =
     home.signals.feedback === 0 &&
     home.signals.newRequests === 0 &&

@@ -8,8 +8,8 @@ export const instant = false;
 async function ConsoleFrame({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   const [apps, selected] = await Promise.all([
-    listWorkspaceApps(admin.workspaceId),
-    getSelectedApp(admin.workspaceId),
+    listWorkspaceApps(admin.workspaceId, admin.id),
+    getSelectedApp(admin.workspaceId, admin.id),
   ]);
   return (
     <AdminShell admin={admin} apps={apps} selectedId={selected?.id ?? null}>

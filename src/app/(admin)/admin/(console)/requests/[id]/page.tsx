@@ -63,7 +63,7 @@ export default async function RequestDetailPage({
   const admin = await requireAdmin();
   const [{ id }, query] = await Promise.all([params, searchParams]);
   await refreshRequestSummary(id).catch(() => undefined);
-  const detail = await getAdminRequest({ workspaceId: admin.workspaceId, requestId: id });
+  const detail = await getAdminRequest({ workspaceId: admin.workspaceId, requestId: id, adminId: admin.id });
   if (!detail) notFound();
   const { request, metrics, events } = detail;
   const tab = tabOf(first(query.tab));

@@ -4,6 +4,7 @@ import { EditAppForm } from "@/components/admin/app-forms";
 import { InstallCodeBlock } from "@/components/admin/install-code";
 import { PageHeader } from "@/components/admin/page-header";
 import { hostServerInstall, viewInstall } from "@/domain/install-code";
+import { visibleApps } from "@/server/app-access";
 import { requireAdmin } from "@/server/auth/admin";
 import { resolveAppSecret } from "@/server/app-install";
 import { prisma } from "@/server/db";
@@ -16,7 +17,7 @@ export default async function AppInstallPage({ params }: { params: Promise<{ slu
   await connection();
   const [{ slug }, admin] = await Promise.all([params, requireAdmin()]);
   const app = await prisma.app.findFirst({
-    where: { workspaceId: admin.workspaceId, slug },
+    where: { ...visibleApps({ workspaceId: admin.workspaceId, adminId: admin.id }), slug },
     select: {
       id: true,
       name: true,

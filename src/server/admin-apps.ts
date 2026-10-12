@@ -1,9 +1,10 @@
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 
-export async function listAdminApps(workspaceId: string) {
+export async function listAdminApps(workspaceId: string, adminId?: string) {
   const [apps, latest] = await Promise.all([
     prisma.app.findMany({
-      where: { workspaceId },
+      where: visibleApps({ workspaceId, adminId }),
       orderBy: { name: "asc" },
     }),
     prisma.event.groupBy({

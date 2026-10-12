@@ -23,6 +23,7 @@ async function uniqueSlug(workspaceId: string, name: string) {
 
 export async function createWorkspaceApp(input: {
   actorRole: string;
+  actorId?: string;
   workspaceId: string;
   name: string;
   platform: string;
@@ -32,17 +33,23 @@ export async function createWorkspaceApp(input: {
   const platform = assertAppPlatform(input.platform);
   const slug = await uniqueSlug(input.workspaceId, name);
   const credential = createAppSecret();
-  return prisma.app.create({
-    data: {
-      workspaceId: input.workspaceId,
-      name,
-      slug,
-      platform,
-      status: "active",
-      credentialHash: credential.credentialHash,
-      issuedCredential: credential.secret,
-    },
-    select: { id: true, name: true, slug: true, platform: true, status: true, issuedCredential: true, credentialHash: true },
+  return prisma.$transaction(async (tx) => {
+    const app = await tx.app.create({
+      data: {
+        workspaceId: input.workspaceId,
+        name,
+        slug,
+        platform,
+        status: "active",
+        credentialHash: credential.credentialHash,
+        issuedCredential: credential.secret,
+      },
+      select: { id: true, name: true, slug: true, platform: true, status: true, issuedCredential: true, credentialHash: true },
+    });
+    if (input.actorId) {
+      await tx.adminAppAccess.create({ data: { adminUserId: input.actorId, appId: app.id } });
+    }
+    return app;
   });
 }
 

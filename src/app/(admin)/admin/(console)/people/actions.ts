@@ -26,7 +26,9 @@ export async function addPersonAction(_previous: PeopleState, formData: FormData
       name: String(formData.get("name") ?? ""),
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
+      passwordConfirm: String(formData.get("passwordConfirm") ?? ""),
       role: String(formData.get("role") ?? ""),
+      appIds: formData.getAll("appIds").map(String),
     });
   } catch (error) {
     return initialError(error);

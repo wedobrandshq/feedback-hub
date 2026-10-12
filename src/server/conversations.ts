@@ -9,6 +9,7 @@ import {
 } from "@/domain/conversation";
 import { DomainError } from "@/domain/errors";
 import { userLabel } from "@/domain/feedback";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 import { resolveAppBySecret } from "@/server/identify-user";
 
@@ -91,13 +92,11 @@ function toThreadMessage(
 export async function listInbox(input: {
   workspaceId: string;
   appId: string | null;
+  adminId?: string;
   filter: InboxFilter;
 }) {
   const appScope: Prisma.ConversationWhereInput = {
-    app: {
-      workspaceId: input.workspaceId,
-      ...(input.appId ? { id: input.appId } : {}),
-    },
+    app: visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId }),
   };
 
   let ids: string[] | null = null;
@@ -118,6 +117,7 @@ export async function listInbox(input: {
         AND c.status = 'open'::"ConversationStatus"
         AND latest.sender_type = ${latestFrom}::"SenderType"
         ${input.appId ? Prisma.sql`AND c.app_id = ${input.appId}` : Prisma.empty}
+        ${input.adminId ? Prisma.sql`AND EXISTS (SELECT 1 FROM admin_app_access access_row WHERE access_row.app_id = a.id AND access_row.admin_user_id = ${input.adminId})` : Prisma.empty}
       ORDER BY c.updated_at DESC
       LIMIT ${INBOX_LIST_LIMIT}
     `);
@@ -198,11 +198,11 @@ async function markRead(
   });
 }
 
-export async function getAdminConversation(input: { workspaceId: string; conversationId: string }) {
+export async function getAdminConversation(input: { workspaceId: string; conversationId: string; adminId?: string }) {
   const conversation = await prisma.conversation.findFirst({
     where: {
       id: input.conversationId,
-      app: { workspaceId: input.workspaceId },
+      app: visibleApps({ workspaceId: input.workspaceId, adminId: input.adminId }),
     },
     include: conversationInclude,
   });
@@ -234,11 +234,11 @@ export async function getAdminConversation(input: { workspaceId: string; convers
   };
 }
 
-export async function getAdminThreadForFeedback(input: { workspaceId: string; feedbackId: string }) {
+export async function getAdminThreadForFeedback(input: { workspaceId: string; feedbackId: string; adminId?: string }) {
   const conversation = await prisma.conversation.findFirst({
     where: {
       feedbackId: input.feedbackId,
-      app: { workspaceId: input.workspaceId },
+      app: visibleApps({ workspaceId: input.workspaceId, adminId: input.adminId }),
     },
     include: conversationInclude,
   });

@@ -3,7 +3,7 @@ import { HatchPanel, hatchRowTitle } from "@/components/admin/hatch";
 import { PageHeader } from "@/components/admin/page-header";
 import { consoleRoleLabel } from "@/domain/console";
 import { requireAdmin } from "@/server/auth/admin";
-import { listConsolePeople } from "@/server/console-people";
+import { listConsolePeople, listWorkspaceAppChoices } from "@/server/console-people";
 
 export const instant = false;
 
@@ -12,6 +12,7 @@ export const metadata = { title: "People" };
 export default async function PeoplePage() {
   const admin = await requireAdmin();
   const people = await listConsolePeople(admin.workspaceId);
+  const appChoices = admin.role === "owner" ? await listWorkspaceAppChoices(admin.workspaceId) : [];
   const ownerCount = people.filter((person) => person.role === "owner").length;
   const owner = admin.role === "owner";
 
@@ -27,7 +28,7 @@ export default async function PeoplePage() {
         }
       />
       <div className="space-y-8 px-4 py-6 md:px-8">
-        {owner ? <AddPersonForm /> : null}
+        {owner ? <AddPersonForm apps={appChoices} /> : null}
         <HatchPanel>
         <ul>
           {people.map((person) => (

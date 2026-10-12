@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { FEEDBACK_LIST_LIMIT } from "@/domain/config";
 import type { FeedbackListFilters, FeedbackSort, FeedbackSortDir } from "@/domain/feedback";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 
 function feedbackOrder(sort: FeedbackSort, dir: FeedbackSortDir): Prisma.FeedbackOrderByWithRelationInput[] {
@@ -20,9 +21,9 @@ const listInclude = {
   requestLink: { include: { request: { select: { id: true, title: true } } } },
 } satisfies Prisma.FeedbackInclude;
 
-export async function listWorkspaceApps(workspaceId: string) {
+export async function listWorkspaceApps(workspaceId: string, adminId?: string) {
   return prisma.app.findMany({
-    where: { workspaceId },
+    where: visibleApps({ workspaceId, adminId }),
     orderBy: { createdAt: "asc" },
     select: { id: true, name: true, slug: true },
   });
@@ -31,16 +32,14 @@ export async function listWorkspaceApps(workspaceId: string) {
 export async function listFeedback(input: {
   workspaceId: string;
   appId: string | null;
+  adminId?: string;
   filters: FeedbackListFilters;
   sort?: FeedbackSort;
   dir?: FeedbackSortDir;
 }) {
   const appScope: Prisma.FeedbackWhereInput = {
     deletedAt: null,
-    app: {
-      workspaceId: input.workspaceId,
-      ...(input.appId ? { id: input.appId } : {}),
-    },
+    app: visibleApps({ workspaceId: input.workspaceId, appId: input.appId, adminId: input.adminId }),
   };
 
   const where: Prisma.FeedbackWhereInput = {
@@ -85,12 +84,12 @@ export async function listFeedback(input: {
   };
 }
 
-export async function getFeedbackDetail(input: { workspaceId: string; feedbackId: string }) {
+export async function getFeedbackDetail(input: { workspaceId: string; feedbackId: string; adminId?: string }) {
   const feedback = await prisma.feedback.findFirst({
     where: {
       id: input.feedbackId,
       deletedAt: null,
-      app: { workspaceId: input.workspaceId },
+      app: visibleApps({ workspaceId: input.workspaceId, adminId: input.adminId }),
     },
     include: {
       user: true,

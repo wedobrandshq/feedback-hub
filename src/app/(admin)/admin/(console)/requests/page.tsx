@@ -66,13 +66,14 @@ export default async function RequestsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const admin = await requireAdmin();
-  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId)]);
+  const [params, selected] = await Promise.all([searchParams, getSelectedApp(admin.workspaceId, admin.id)]);
   const { sort, dir } = parseRequestSort(first(params.sort), first(params.dir));
   const rawStatus = first(params.status) ?? "";
   const status = isRequestStatus(rawStatus) ? rawStatus : "";
   const rows = await listAdminRequests({
     workspaceId: admin.workspaceId,
     appId: selected?.id ?? null,
+    adminId: admin.id,
     sort,
     dir,
     status: status || null,

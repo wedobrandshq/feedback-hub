@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { visibleApps } from "@/server/app-access";
 import { prisma } from "@/server/db";
 import { readSelectedAppCookie, readSessionAdminId } from "@/server/auth/session";
 
@@ -31,11 +32,11 @@ export async function requireAdmin(): Promise<CurrentAdmin> {
   };
 }
 
-export async function getSelectedApp(workspaceId: string) {
+export async function getSelectedApp(workspaceId: string, adminId?: string) {
   const appId = await readSelectedAppCookie();
   if (!appId) return null;
   return prisma.app.findFirst({
-    where: { id: appId, workspaceId },
+    where: visibleApps({ workspaceId, appId, adminId }),
     select: { id: true, name: true, slug: true },
   });
 }

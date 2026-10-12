@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 
 const initial: PeopleState = { error: null, saved: false };
 
-export function AddPersonForm() {
+export function AddPersonForm({ apps }: { apps: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState(addPersonAction, initial);
   const [open, setOpen] = useState(false);
   return (
@@ -45,6 +45,28 @@ export function AddPersonForm() {
             <Label htmlFor="person-password">Password</Label>
             <Input id="person-password" name="password" type="password" autoComplete="new-password" required className={hatchField} />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="person-password-confirm">Retype password</Label>
+            <Input
+              id="person-password-confirm"
+              name="passwordConfirm"
+              type="password"
+              autoComplete="new-password"
+              required
+              className={hatchField}
+            />
+          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium text-[#0e0e1a]">Apps</legend>
+            <div className="space-y-2 pt-1.5">
+              {apps.map((app) => (
+                <label key={app.id} className="flex items-center gap-2 text-sm font-normal text-[#0e0e1a]">
+                  <input type="checkbox" name="appIds" value={app.id} className="size-4 accent-[#0e0e1a]" />
+                  {app.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <div className="space-y-1.5">
             <Label htmlFor="person-role">Role</Label>
             <select id="person-role" name="role" defaultValue="admin" className={hatchSelect}>
