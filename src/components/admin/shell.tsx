@@ -27,8 +27,8 @@ export function AdminShell({
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <MobileBar admin={admin} />
-        <div className="flex h-14 items-center justify-end px-4 md:px-8">
+        <MobileBar admin={admin} apps={apps} selectedId={selectedId} />
+        <div className="hidden h-14 items-center justify-end px-4 md:flex md:px-8">
           <AppSelector apps={apps} selectedId={selectedId} />
         </div>
         <div className="min-w-0 flex-1">{children}</div>

@@ -7,9 +7,11 @@ import { hatchSelect } from "@/components/admin/hatch";
 export function AppSelector({
   apps,
   selectedId,
+  id = "app-selector",
 }: {
   apps: { id: string; name: string }[];
   selectedId: string | null;
+  id?: string;
 }) {
   const [value, setValue] = useState(selectedId ?? "all");
   const [pending, setPending] = useState(false);
@@ -17,7 +19,7 @@ export function AppSelector({
   return (
     <form action={setSelectedAppAction}>
       <select
-        id="app-selector"
+        id={id}
         name="app"
         aria-label="App"
         value={value}

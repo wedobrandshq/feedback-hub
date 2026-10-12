@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AccountBlock, Wordmark } from "@/components/admin/chrome";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { AppSelector } from "@/components/admin/app-selector";
 
 function MenuIcon() {
   return (
@@ -23,8 +24,12 @@ function CloseIcon() {
 
 export function MobileBar({
   admin,
+  apps,
+  selectedId,
 }: {
   admin: { name: string; role: string; workspaceName: string };
+  apps: { id: string; name: string }[];
+  selectedId: string | null;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -35,11 +40,10 @@ export function MobileBar({
 
   return (
     <div className="sticky top-0 z-30 bg-[#fffcf2] md:hidden">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-[#0e0e1a] px-4 py-3">
-        <Wordmark />
+      <div className="flex items-center gap-2 px-3 py-3">
         <button
           type="button"
-          className="inline-flex size-10 items-center justify-center text-[#0e0e1a]"
+          className="inline-flex size-10 shrink-0 items-center justify-center text-[#0e0e1a]"
           aria-expanded={open}
           aria-controls="admin-menu"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -47,6 +51,10 @@ export function MobileBar({
         >
           {open ? <CloseIcon /> : <MenuIcon />}
         </button>
+        <Wordmark />
+        <div className="ml-auto min-w-0">
+          <AppSelector apps={apps} selectedId={selectedId} id="app-selector-mobile" />
+        </div>
       </div>
       {open ? (
         <div id="admin-menu" className="max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-b-2 border-[#0e0e1a]">
