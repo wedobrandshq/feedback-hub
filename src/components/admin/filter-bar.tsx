@@ -23,13 +23,13 @@ export function FilterBar({
     <div className="px-4 pt-4 md:px-8">
       <HatchPanel>
         <form action="/admin/feedback" method="get" className="flex flex-wrap items-end gap-3 px-4 py-4">
-          <label className="flex min-w-48 flex-1 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
+          <label className="flex w-full min-w-0 flex-1 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:min-w-48">
             Search
             <Input name="q" defaultValue={q} placeholder="Message, name, or email" className={hatchField} />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
+          <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
             <WithMarker kind="type">Type</WithMarker>
-            <select name="type" defaultValue={type} className={hatchSelect}>
+            <select name="type" defaultValue={type} className={`${hatchSelect} w-full sm:w-auto`}>
               <option value="">All types</option>
               {FEEDBACK_TYPES.map((value) => (
                 <option key={value} value={value}>
@@ -38,9 +38,9 @@ export function FilterBar({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
+          <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
             <WithMarker kind="status">Status</WithMarker>
-            <select name="status" defaultValue={status} className={hatchSelect}>
+            <select name="status" defaultValue={status} className={`${hatchSelect} w-full sm:w-auto`}>
               <option value="">All statuses</option>
               {FEEDBACK_STATUSES.map((value) => (
                 <option key={value} value={value}>
@@ -49,13 +49,13 @@ export function FilterBar({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
+          <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
             From
-            <Input name="from" type="date" defaultValue={from} className={hatchField} />
+            <Input name="from" type="date" defaultValue={from} className={`${hatchField} hatch-date w-full min-w-0 sm:w-40`} />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
+          <label className="flex w-full min-w-0 flex-col gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)] sm:w-auto">
             To
-            <Input name="to" type="date" defaultValue={to} className={hatchField} />
+            <Input name="to" type="date" defaultValue={to} className={`${hatchField} hatch-date w-full min-w-0 sm:w-40`} />
           </label>
           <Button type="submit" className={hatchPrimary}>Apply</Button>
           <Link href="/admin/feedback" className={hatchSecondary}>

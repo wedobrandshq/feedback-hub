@@ -37,23 +37,24 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminNav() {
+export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-2 overflow-x-auto px-3 pt-1 pr-3 pb-3 md:flex-col md:gap-0 md:overflow-visible md:px-3 md:pb-4">
+    <nav className="flex flex-col gap-0 overflow-visible px-3 pt-1 pr-3 pb-4">
       {NAV.map((group) => (
-        <div key={group.label} className="md:mt-5 md:first:mt-0">
-          <p className="hidden px-1 pb-2 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase md:block [font-family:var(--font-mono)]">
+        <div key={group.label} className="mt-5 first:mt-0">
+          <p className="px-1 pb-2 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#5a5b70] uppercase [font-family:var(--font-mono)]">
             {group.label}
           </p>
-          <ul className="flex gap-2 md:flex-col md:gap-1.5">
+          <ul className="flex flex-col gap-1.5">
             {group.items.map((item) => {
               const active = isActive(pathname, item.href);
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[17px] leading-[26px] font-medium whitespace-nowrap text-[#0e0e1a] ${hatchLift} ${
                       active
