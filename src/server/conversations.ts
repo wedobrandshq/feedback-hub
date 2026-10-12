@@ -101,7 +101,8 @@ export async function listInbox(input: {
   };
 
   let ids: string[] | null = null;
-  if (input.filter === "needs_reply") {
+  if (input.filter === "needs_reply" || input.filter === "open") {
+    const latestFrom = input.filter === "needs_reply" ? "user" : "admin";
     const rows = await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
       SELECT c.id
       FROM conversations c
@@ -115,7 +116,7 @@ export async function listInbox(input: {
       ) latest ON true
       WHERE a.workspace_id = ${input.workspaceId}
         AND c.status = 'open'::"ConversationStatus"
-        AND latest.sender_type = 'user'::"SenderType"
+        AND latest.sender_type = ${latestFrom}::"SenderType"
         ${input.appId ? Prisma.sql`AND c.app_id = ${input.appId}` : Prisma.empty}
       ORDER BY c.updated_at DESC
       LIMIT ${INBOX_LIST_LIMIT}
@@ -126,7 +127,6 @@ export async function listInbox(input: {
   const where: Prisma.ConversationWhereInput = {
     ...appScope,
     ...(ids ? { id: { in: ids } } : {}),
-    ...(input.filter === "open" ? { status: "open" } : {}),
     ...(input.filter === "closed" ? { status: "closed" } : {}),
     ...(input.filter === "unread"
       ? { messages: { some: { senderType: "user", readAt: null } } }

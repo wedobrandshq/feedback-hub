@@ -383,7 +383,7 @@ describe("conversations", () => {
     expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(2);
   });
 
-  it("lists open conversations whether they wait on the admin or the user", async () => {
+  it("keeps waiting-on-user conversations out of Needs reply", async () => {
     const waitingOnAdmin = await willowThread("The chart is blank.");
     const waitingOnUser = await willowThread("The reminder never fires.");
     await replyAsAdmin({
@@ -406,11 +406,8 @@ describe("conversations", () => {
       appId: waitingOnAdmin.app.id,
       filter: "open",
     });
-    expect(open.rows.map((row) => row.id).sort()).toEqual(
-      [waitingOnAdmin.conversation.id, waitingOnUser.conversation.id].sort(),
-    );
-    expect(open.rows.find((row) => row.id === waitingOnAdmin.conversation.id)?.needsReply).toBe(true);
-    expect(open.rows.find((row) => row.id === waitingOnUser.conversation.id)?.needsReply).toBe(false);
+    expect(open.rows.map((row) => row.id)).toEqual([waitingOnUser.conversation.id]);
+    expect(open.rows[0]?.needsReply).toBe(false);
 
     const needsReply = await listInbox({
       workspaceId: waitingOnAdmin.app.workspaceId,
@@ -420,6 +417,7 @@ describe("conversations", () => {
     expect(needsReply.rows.map((row) => row.id)).toContain(waitingOnAdmin.conversation.id);
     expect(needsReply.rows.map((row) => row.id)).not.toContain(waitingOnUser.conversation.id);
     expect(needsReply.rows.map((row) => row.id)).not.toContain(closed.conversation.id);
+    expect(open.rows.map((row) => row.id)).not.toContain(closed.conversation.id);
   });
 
   it("stores a reply from the same user", async () => {

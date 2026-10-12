@@ -41,8 +41,8 @@ export function emptyInboxCopy(filter: InboxFilter, appName: string | null) {
   }
   if (filter === "open") {
     return {
-      title: "No open conversations",
-      description: "Open conversations, including ones waiting on you and ones waiting on the user, will show up here.",
+      title: "No conversations waiting on the user",
+      description: "Open conversations whose latest message is from you will show up here.",
     };
   }
   if (filter === "closed") {
