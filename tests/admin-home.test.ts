@@ -124,6 +124,38 @@ describe("admin home, users, and apps", () => {
     expect(detail?.user.plan).toBe("Plus");
   });
 
+  it("sorts users by last seen and reverses, and keeps a search", async () => {
+    const maya = await identifyUser({
+      appSecret: willowSecret,
+      externalUserId: WILLOW_DEMO_USER.externalUserId,
+      email: WILLOW_DEMO_USER.email,
+      name: WILLOW_DEMO_USER.name,
+    });
+    const amy = await identifyUser({
+      appSecret: willowSecret,
+      externalUserId: "amy",
+      email: "amy@example.com",
+      name: "Amy Cho",
+    });
+    await prisma.user.update({ where: { id: maya.id }, data: { lastSeenAt: new Date("2026-02-01T00:00:00.000Z") } });
+    await prisma.user.update({ where: { id: amy.id }, data: { lastSeenAt: new Date("2026-08-01T00:00:00.000Z") } });
+    const admin = await prisma.adminUser.findFirstOrThrow();
+    const willow = await prisma.app.findFirstOrThrow({ where: { slug: "willow", workspaceId: admin.workspaceId } });
+    const scope = { workspaceId: admin.workspaceId, appId: willow.id, search: null, plan: null, activity: null };
+
+    const newest = await listAdminUsers({ ...scope, sort: "lastSeen", dir: "desc" });
+    expect(newest.rows.map((row) => row.id)).toEqual([amy.id, maya.id]);
+
+    const oldest = await listAdminUsers({ ...scope, sort: "lastSeen", dir: "asc" });
+    expect(oldest.rows.map((row) => row.id)).toEqual([maya.id, amy.id]);
+
+    const byName = await listAdminUsers({ ...scope, sort: "user", dir: "asc" });
+    expect(byName.rows.map((row) => row.name)).toEqual(["Amy Cho", "Maya Chen"]);
+
+    const searched = await listAdminUsers({ ...scope, search: "maya", sort: "lastSeen", dir: "asc" });
+    expect(searched.rows.map((row) => row.id)).toEqual([maya.id]);
+  });
+
   it("lists Willow and Earn It with platform and status", async () => {
     const admin = await prisma.adminUser.findFirstOrThrow();
     const apps = await listAdminApps(admin.workspaceId);

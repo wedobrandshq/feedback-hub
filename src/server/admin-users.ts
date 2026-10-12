@@ -1,4 +1,11 @@
-import { ADMIN_LIST_LIMIT, adminWindow, type UserActivityName } from "@/domain/admin";
+import type { Prisma } from "@prisma/client";
+import {
+  ADMIN_LIST_LIMIT,
+  adminWindow,
+  type UserActivityName,
+  type UserSort,
+  type UserSortDir,
+} from "@/domain/admin";
 import { prisma } from "@/server/db";
 
 function appScope(workspaceId: string, appId: string | null) {
@@ -15,15 +22,55 @@ export async function listUserPlans(input: { workspaceId: string; appId: string 
   return rows.flatMap((row) => (row.plan ? [row.plan] : []));
 }
 
+const adminUserInclude = {
+  app: { select: { name: true } },
+  _count: {
+    select: {
+      votes: true,
+      conversations: true,
+      feedback: { where: { deletedAt: null } },
+    },
+  },
+} satisfies Prisma.UserInclude;
+
+function toAdminUserRow(row: Prisma.UserGetPayload<{ include: typeof adminUserInclude }>) {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    externalUserId: row.externalUserId,
+    plan: row.plan,
+    appName: row.app.name,
+    feedbackCount: row._count.feedback,
+    voteCount: row._count.votes,
+    conversationCount: row._count.conversations,
+    lastSeenAt: row.lastSeenAt,
+  };
+}
+
+function userOrder(sort: UserSort, dir: UserSortDir): Prisma.UserOrderByWithRelationInput[] {
+  const tie = { id: "asc" as const };
+  if (sort === "user") return [{ name: dir }, { email: dir }, { externalUserId: dir }, tie];
+  if (sort === "app") return [{ app: { name: dir } }, tie];
+  if (sort === "plan") return [{ plan: dir }, tie];
+  if (sort === "votes") return [{ votes: { _count: dir } }, tie];
+  if (sort === "conversations") return [{ conversations: { _count: dir } }, tie];
+  return [{ lastSeenAt: dir }, tie];
+}
+
 export async function listAdminUsers(input: {
   workspaceId: string;
   appId: string | null;
   search: string | null;
   plan: string | null;
   activity: UserActivityName | null;
+  sort?: UserSort;
+  dir?: UserSortDir;
   now?: Date;
 }) {
   const { since } = adminWindow(input.now);
+  const sort = input.sort ?? "lastSeen";
+  const dir = input.dir ?? "desc";
   const search = input.search?.trim() ? input.search.trim().slice(0, 200) : null;
   const where = {
     app: appScope(input.workspaceId, input.appId),
@@ -41,35 +88,32 @@ export async function listAdminUsers(input: {
       : {}),
   };
 
-  const [totalInScope, rows] = await Promise.all([
-    prisma.user.count({ where: { app: appScope(input.workspaceId, input.appId) } }),
-    prisma.user.findMany({
-      where,
-      orderBy: { lastSeenAt: "desc" },
-      take: ADMIN_LIST_LIMIT,
-      include: {
-        app: { select: { name: true } },
-        _count: { select: { votes: true, conversations: true } },
-        feedback: { where: { deletedAt: null }, select: { id: true } },
-      },
-    }),
-  ]);
+  const totalInScope = await prisma.user.count({ where: { app: appScope(input.workspaceId, input.appId) } });
+  if (sort === "feedback") {
+    const rows = await prisma.user.findMany({ where, include: adminUserInclude });
+    const mapped = rows.map(toAdminUserRow);
+    mapped.sort((left, right) => {
+      if (left.feedbackCount !== right.feedbackCount) {
+        const delta = left.feedbackCount - right.feedbackCount;
+        return dir === "asc" ? delta : -delta;
+      }
+      return left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+    });
+    const limited = mapped.slice(0, ADMIN_LIST_LIMIT);
+    return { totalInScope, truncated: limited.length === ADMIN_LIST_LIMIT, rows: limited };
+  }
+
+  const rows = await prisma.user.findMany({
+    where,
+    orderBy: userOrder(sort, dir),
+    take: ADMIN_LIST_LIMIT,
+    include: adminUserInclude,
+  });
 
   return {
     totalInScope,
     truncated: rows.length === ADMIN_LIST_LIMIT,
-    rows: rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      email: row.email,
-      externalUserId: row.externalUserId,
-      plan: row.plan,
-      appName: row.app.name,
-      feedbackCount: row.feedback.length,
-      voteCount: row._count.votes,
-      conversationCount: row._count.conversations,
-      lastSeenAt: row.lastSeenAt,
-    })),
+    rows: rows.map(toAdminUserRow),
   };
 }
 

@@ -23,3 +23,27 @@ export function parseUserActivity(value: string | undefined): UserActivityName |
   if (value && (USER_ACTIVITY as readonly string[]).includes(value)) return value as UserActivityName;
   return null;
 }
+
+export const USER_SORTS = ["user", "app", "plan", "feedback", "votes", "conversations", "lastSeen"] as const;
+export type UserSort = (typeof USER_SORTS)[number];
+export type UserSortDir = "asc" | "desc";
+
+export function parseUserSort(sort: string | undefined, dir: string | undefined): {
+  sort: UserSort;
+  dir: UserSortDir;
+} {
+  if (!sort || !(USER_SORTS as readonly string[]).includes(sort)) {
+    return { sort: "lastSeen", dir: "desc" };
+  }
+  const column = sort as UserSort;
+  if (dir === "asc" || dir === "desc") return { sort: column, dir };
+  return { sort: column, dir: "asc" };
+}
+
+export function nextUserSort(
+  current: { sort: UserSort; dir: UserSortDir },
+  column: UserSort,
+): { sort: UserSort; dir: UserSortDir } {
+  if (current.sort !== column) return { sort: column, dir: "asc" };
+  return { sort: column, dir: current.dir === "asc" ? "desc" : "asc" };
+}

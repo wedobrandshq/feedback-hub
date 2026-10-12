@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ADMIN_LIST_LIMIT, parseUserActivity } from "@/domain/admin";
+import { ADMIN_LIST_LIMIT, nextUserSort, parseUserActivity, parseUserSort, type UserSort, type UserSortDir } from "@/domain/admin";
 import { formatDateTime, userLabel } from "@/domain/feedback";
 import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
 import { listAdminUsers, listUserPlans } from "@/server/admin-users";
@@ -25,6 +25,33 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+const COLUMNS: { sort: UserSort; label: string }[] = [
+  { sort: "user", label: "User" },
+  { sort: "app", label: "App" },
+  { sort: "plan", label: "Plan" },
+  { sort: "feedback", label: "Feedback" },
+  { sort: "votes", label: "Votes" },
+  { sort: "conversations", label: "Conversations" },
+  { sort: "lastSeen", label: "Last seen" },
+];
+
+function usersHref(
+  filters: { q: string; plan: string; activity: string },
+  sort: UserSort,
+  dir: UserSortDir,
+) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.plan) params.set("plan", filters.plan);
+  if (filters.activity) params.set("activity", filters.activity);
+  if (!(sort === "lastSeen" && dir === "desc")) {
+    params.set("sort", sort);
+    params.set("dir", dir);
+  }
+  const query = params.toString();
+  return query ? `/admin/users?${query}` : "/admin/users";
+}
+
 export default async function UsersPage({
   searchParams,
 }: {
@@ -35,15 +62,19 @@ export default async function UsersPage({
   const q = first(params.q) ?? "";
   const plan = first(params.plan) ?? "";
   const activity = parseUserActivity(first(params.activity));
+  const { sort, dir } = parseUserSort(first(params.sort), first(params.dir));
   const appId = selected?.id ?? null;
   const plans = await listUserPlans({ workspaceId: admin.workspaceId, appId });
   const planFilter = plan && plans.includes(plan) ? plan : "";
+  const filters = { q, plan: planFilter, activity: activity ?? "" };
   const result = await listAdminUsers({
     workspaceId: admin.workspaceId,
     appId,
     search: q,
     plan: planFilter || null,
     activity,
+    sort,
+    dir,
   });
 
   return (
@@ -58,6 +89,12 @@ export default async function UsersPage({
         }
       />
       <form method="get" className="flex flex-wrap items-center gap-2 px-4 py-4 md:px-8">
+        {sort === "lastSeen" && dir === "desc" ? null : (
+          <>
+            <input type="hidden" name="sort" value={sort} />
+            <input type="hidden" name="dir" value={dir} />
+          </>
+        )}
         <Input
           name="q"
           defaultValue={q}
@@ -97,13 +134,29 @@ export default async function UsersPage({
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
-              <TableHead className={hatchHead}>User</TableHead>
-              <TableHead className={hatchHead}>App</TableHead>
-              <TableHead className={hatchHead}>Plan</TableHead>
-              <TableHead className={hatchHead}>Feedback</TableHead>
-              <TableHead className={hatchHead}>Votes</TableHead>
-              <TableHead className={hatchHead}>Conversations</TableHead>
-              <TableHead className={hatchHead}>Last seen</TableHead>
+              {COLUMNS.map((column) => {
+                const active = sort === column.sort;
+                const next = nextUserSort({ sort, dir }, column.sort);
+                return (
+                  <TableHead
+                    key={column.sort}
+                    className={hatchHead}
+                    aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <Link
+                      href={usersHref(filters, next.sort, next.dir)}
+                      className="inline-flex items-center gap-1 text-[11px] leading-[11px] font-bold tracking-[0.6px] text-[#0e0e1a] uppercase no-underline [font-family:var(--font-mono)] hover:text-[#0e0e1a]"
+                    >
+                      {column.label}
+                      {active ? (
+                        <span aria-hidden className="text-[10px] leading-none font-normal tracking-normal normal-case">
+                          {dir === "asc" ? "↑" : "↓"}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
