@@ -8,6 +8,7 @@ import {
   type PeopleState,
 } from "@/app/(admin)/admin/(console)/people/actions";
 import { CONSOLE_ROLES, consoleRoleLabel } from "@/domain/console";
+import { Disclose } from "@/components/admin/disclose";
 import { hatchField, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +30,8 @@ export function AddPersonForm() {
       >
         Add person
       </Button>
-      {open ? (
-        <form id="add-person-form" action={action} className="mt-4 space-y-4">
+      <Disclose open={open}>
+        <form id="add-person-form" action={action} className="space-y-4 pt-4">
           <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add a person</h2>
           <div className="space-y-1.5">
             <Label htmlFor="person-name">Name</Label>
@@ -64,7 +65,7 @@ export function AddPersonForm() {
             {pending ? "Adding…" : "Add person"}
           </Button>
         </form>
-      ) : null}
+      </Disclose>
     </div>
   );
 }

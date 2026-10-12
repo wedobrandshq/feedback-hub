@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createAppAction, updateAppAction, type AppFormState } from "@/app/(admin)/admin/(console)/apps/actions";
 import { APP_PLATFORMS, APP_STATUSES } from "@/domain/app";
+import { Disclose } from "@/components/admin/disclose";
 import { hatchField, hatchPrimary, hatchSelect } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +25,8 @@ export function CreateAppForm() {
       >
         Add app
       </Button>
-      {open ? (
-        <form id="add-app-form" action={action} className="mt-4 space-y-4">
+      <Disclose open={open}>
+        <form id="add-app-form" action={action} className="space-y-4 pt-4">
           <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add an app</h2>
           <div className="space-y-1.5">
             <Label htmlFor="new-app-name">Name</Label>
@@ -50,7 +51,7 @@ export function CreateAppForm() {
             {pending ? "Adding…" : "Add app"}
           </Button>
         </form>
-      ) : null}
+      </Disclose>
     </div>
   );
 }
