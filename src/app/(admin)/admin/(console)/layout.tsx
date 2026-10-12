@@ -1,29 +1,12 @@
-import { headers } from "next/headers";
 import { Suspense } from "react";
 import { AdminShell } from "@/components/admin/shell";
-import { getSelectedApp, requireAdmin } from "@/server/auth/admin";
-import { listWorkspaceApps } from "@/server/feedback-queries";
+import { requireAdmin } from "@/server/auth/admin";
 
 export const instant = false;
 
 async function ConsoleFrame({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
-  const [apps, selected, headerList] = await Promise.all([
-    listWorkspaceApps(admin.workspaceId),
-    getSelectedApp(admin.workspaceId),
-    headers(),
-  ]);
-
-  return (
-    <AdminShell
-      admin={admin}
-      pathname={headerList.get("x-pathname") ?? ""}
-      apps={apps}
-      selectedId={selected?.id ?? null}
-    >
-      {children}
-    </AdminShell>
-  );
+  return <AdminShell admin={admin}>{children}</AdminShell>;
 }
 
 export default function ConsoleLayout({ children }: { children: React.ReactNode }) {
