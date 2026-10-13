@@ -310,6 +310,8 @@ model FeedbackSuggestion {
   feedbackId    String           @unique @map("feedback_id")
   suggestedType FeedbackType?    @map("suggested_type")
   topics        String[]
+  urgent        Boolean          @default(false)
+  summary       String           @default("")
   requestId     String?          @map("request_id")
   similarity    Float?
   model         String

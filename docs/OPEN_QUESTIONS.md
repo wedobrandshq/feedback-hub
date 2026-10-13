@@ -124,7 +124,7 @@ The spec says the host app decides where Feedback Hub opens and does not name a 
 
 ## Suggestions
 
-Section 57 also names language and sentiment. This slice stores a suggested type, topics, and at most one existing request. Language, sentiment, clusters, trends, and translation are not stored. A suggestion is written only when a model provider is configured. The similarity number is the one the model returned, and only when that request id was in the list sent to the model. There is no local similarity score.
+Section 57 also names language and sentiment. This slice asks TypeLLM once after the feedback message is saved. The context is the original message, plus the screenshot when there is one. The stored suggestion is a type (idea, bug, improvement, or other), an urgent flag, one sentence for the admin, and at most one existing request. A match is stored only when that request was offered and the model’s confidence is at least 0.8. The probability itself is not stored and is not shown. Language, sentiment, clusters, trends, and translation are not stored. A suggestion is written only when TYPELLM_API_KEY is set. Urgent does not change the feedback status.
 
 The candidate list is the 40 most recently updated requests in the same app, private and public. Ignore does not write an event and does not change the feedback type, body, or links. Link and Create use the existing request actions, so they do not copy the suggested type onto the feedback. Linking does not publish the request. The suggestion’s stored request id stays the model’s match even when the admin creates a different request. After a link or a create, a pending suggestion is marked linked.
 

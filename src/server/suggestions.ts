@@ -1,30 +1,25 @@
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { FEEDBACK_TYPES } from "@/domain/config";
 import { DomainError } from "@/domain/errors";
 import {
   SUGGESTION_CANDIDATE_LIMIT,
   SUGGESTION_MODEL,
-  interpretModelSuggestion,
+  TYPELLM_MODEL,
+  buildSuggestionQuestions,
+  interpretTypeLlmResult,
   providerConfigured,
+  screenshotDataPrefix,
+  typeLlmConfigured,
 } from "@/domain/suggestions";
+import { readAttachment } from "@/server/attachments";
 import { prisma } from "@/server/db";
 import { linkFeedbackToRequest } from "@/server/requests";
-
-const suggestionSchema = z.object({
-  type: z.enum(FEEDBACK_TYPES),
-  topics: z.array(z.string()).max(8),
-  match: z
-    .object({
-      requestId: z.string(),
-      similarity: z.number(),
-    })
-    .nullable(),
-});
 
 const summarySchema = z.object({
   summary: z.string(),
 });
+
+const TYPELLM_URL = "https://api.typellm.ai/v1/generate";
 
 async function modelObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T> {
   const { output } = await generateText({
@@ -37,13 +32,65 @@ async function modelObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T> 
   return output;
 }
 
+async function screenshotImages(attachments: { contentType: string; storageKey: string }[]) {
+  const images: string[] = [];
+  for (const attachment of attachments) {
+    if (images.length >= 8) break;
+    const prefix = screenshotDataPrefix(attachment.contentType);
+    if (!prefix) continue;
+    try {
+      const bytes = await readAttachment(attachment.storageKey);
+      images.push(`${prefix}${bytes.toString("base64")}`);
+    } catch {
+      // The saved message can still be classified without this screenshot.
+    }
+  }
+  return images;
+}
+
+async function generateWithTypeLlm(input: { context: string; images: string[]; questions: object }) {
+  const key = process.env.TYPELLM_API_KEY;
+  if (!key) return null;
+  const response = await fetch(TYPELLM_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      context: input.context,
+      ...(input.images.length > 0 ? { images: input.images } : {}),
+      questions: input.questions,
+      timeout: 60,
+    }),
+    signal: AbortSignal.timeout(65_000),
+  });
+  if (!response.ok) {
+    const detail = (await response.json().catch(() => null)) as { error?: { type?: unknown } } | null;
+    const type = typeof detail?.error?.type === "string" ? detail.error.type : "unknown";
+    console.error(`TypeLLM generate failed: ${response.status} ${type}`);
+    return null;
+  }
+  const payload = (await response.json()) as { model?: unknown; result?: unknown };
+  if (!payload.result || typeof payload.result !== "object") return null;
+  return {
+    model: typeof payload.model === "string" && payload.model ? payload.model : TYPELLM_MODEL,
+    result: payload.result as { type?: unknown; urgent?: unknown; summary?: unknown; match?: unknown },
+  };
+}
+
 export async function ensureFeedbackSuggestion(feedbackId: string) {
   const existing = await prisma.feedbackSuggestion.findUnique({ where: { feedbackId } });
-  if (existing || !providerConfigured()) return existing;
+  if (existing || !typeLlmConfigured()) return existing;
 
   const feedback = await prisma.feedback.findUnique({
     where: { id: feedbackId },
-    select: { id: true, appId: true, body: true, type: true },
+    select: {
+      id: true,
+      appId: true,
+      body: true,
+      attachments: { select: { contentType: true, storageKey: true } },
+    },
   });
   if (!feedback) return null;
 
@@ -51,43 +98,28 @@ export async function ensureFeedbackSuggestion(feedbackId: string) {
     where: { appId: feedback.appId },
     orderBy: { updatedAt: "desc" },
     take: SUGGESTION_CANDIDATE_LIMIT,
-    select: { id: true, title: true, description: true, visibility: true },
+    select: { id: true, title: true, description: true },
   });
 
-  const catalog = candidates
-    .map(
-      (request) =>
-        `${request.id}\t${request.visibility}\t${request.title}\t${request.description.replace(/\s+/g, " ").slice(0, 280)}`,
-    )
-    .join("\n");
-
   try {
-    const output = await modelObject(
-      suggestionSchema,
-      [
-        "You organize product feedback. Do not rewrite the feedback.",
-        "Choose a type, up to 8 short topics, and at most one request from the list.",
-        "If you choose a request, similarity is your own confidence from 0 to 1 that this feedback is the same need. Do not count keywords.",
-        "If none of the requests is the same need, match is null.",
-        "Use a request id only from the list.",
-        "",
-        `Submitted type: ${feedback.type}`,
-        `Feedback: ${feedback.body}`,
-        "",
-        "Requests (id, visibility, title, description):",
-        catalog || "(none)",
-      ].join("\n"),
-    );
-    const interpreted = interpretModelSuggestion(output, new Set(candidates.map((request) => request.id)));
+    const generated = await generateWithTypeLlm({
+      context: feedback.body,
+      images: await screenshotImages(feedback.attachments),
+      questions: buildSuggestionQuestions(candidates),
+    });
+    if (!generated) return null;
+    const interpreted = interpretTypeLlmResult(generated.result, new Set(candidates.map((request) => request.id)));
     if (!interpreted) return null;
     return await prisma.feedbackSuggestion.create({
       data: {
         feedbackId: feedback.id,
         suggestedType: interpreted.type,
-        topics: interpreted.topics,
+        topics: [],
+        urgent: interpreted.urgent,
+        summary: interpreted.summary,
         requestId: interpreted.match?.requestId ?? null,
-        similarity: interpreted.match?.similarity ?? null,
-        model: SUGGESTION_MODEL,
+        similarity: null,
+        model: generated.model,
         status: "pending",
       },
     });

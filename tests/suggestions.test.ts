@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { interpretModelSuggestion, providerConfigured } from "@/domain/suggestions";
+import {
+  MATCH_CONFIDENCE,
+  buildSuggestionQuestions,
+  interpretTypeLlmResult,
+  providerConfigured,
+  screenshotDataPrefix,
+} from "@/domain/suggestions";
 import { willowAppSecret } from "@/domain/secrets";
 import { DomainError } from "@/domain/errors";
 import { prisma } from "@/server/db";
@@ -58,41 +64,61 @@ afterAll(async () => {
 });
 
 describe("suggestions", () => {
-  it("keeps a model similarity only for a request that was offered", () => {
-    const kept = interpretModelSuggestion(
+  it("keeps a request match only when the model is confident and the request was offered", () => {
+    const questions = buildSuggestionQuestions([
+      { id: "req_mood", title: "Weekly mood chart", description: "A chart of the week." },
+    ]);
+    expect(questions.type.enum).toEqual(["idea", "bug", "improvement", "other"]);
+    expect(questions.urgent.type).toBe("boolean");
+    expect(questions.match.return_probabilities).toBe(true);
+    expect(questions.match.choices.map((choice) => choice.value)).toEqual(["none", "req_mood"]);
+
+    const kept = interpretTypeLlmResult(
       {
-        type: "idea",
-        topics: [" mood ", ""],
-        match: { requestId: "req_mood", similarity: 0.82 },
+        type: "bug",
+        urgent: true,
+        summary: "  The weekly chart fails to load.  ",
+        match: {
+          value: "req_mood",
+          confidence: MATCH_CONFIDENCE,
+          probabilities: { req_mood: MATCH_CONFIDENCE, none: 0.2 },
+        },
       },
       new Set(["req_mood"]),
     );
     expect(kept).toEqual({
-      type: "idea",
-      topics: ["mood"],
-      match: { requestId: "req_mood", similarity: 0.82 },
+      type: "bug",
+      urgent: true,
+      summary: "The weekly chart fails to load.",
+      match: { requestId: "req_mood" },
     });
+    expect(JSON.stringify(kept)).not.toContain("probabilities");
+    expect(JSON.stringify(kept)).not.toContain(String(MATCH_CONFIDENCE));
 
-    const dropped = interpretModelSuggestion(
+    const low = interpretTypeLlmResult(
       {
         type: "idea",
-        topics: ["mood"],
-        match: { requestId: "req_other", similarity: 0.99 },
+        urgent: false,
+        summary: "A weekly mood chart would help.",
+        match: { value: "req_mood", confidence: MATCH_CONFIDENCE - 0.01, probabilities: { req_mood: 0.7 } },
       },
       new Set(["req_mood"]),
     );
-    expect(dropped?.match).toBeNull();
+    expect(low?.match).toBeNull();
 
-    const notANumber = interpretModelSuggestion(
+    const unknown = interpretTypeLlmResult(
       {
         type: "idea",
-        topics: [],
-        match: { requestId: "req_mood", similarity: Number.NaN },
+        urgent: false,
+        summary: "A weekly mood chart would help.",
+        match: { value: "req_other", confidence: 0.99, probabilities: { req_other: 0.99 } },
       },
       new Set(["req_mood"]),
     );
-    expect(notANumber?.match).toBeNull();
-    expect(interpretModelSuggestion({ type: "praise", topics: [], match: null }, new Set())).toBeNull();
+    expect(unknown?.match).toBeNull();
+    expect(interpretTypeLlmResult({ type: "praise", urgent: false, summary: "Nice.", match: null }, new Set())).toBeNull();
+    expect(screenshotDataPrefix("image/jpeg")).toBe("data:image/jpeg;base64,");
+    expect(screenshotDataPrefix("text/plain")).toBeNull();
   });
 
   it("does not change type or links until the suggestion is accepted", async () => {
@@ -203,6 +229,8 @@ describe("suggestions", () => {
         feedbackId: feedback.id,
         suggestedType: "idea",
         topics: ["mood-topic-token"],
+        urgent: true,
+        summary: "admin-sentence-9f3a",
         requestId: request.id,
         similarity: 0.77,
         model: "openai/gpt-5-mini",
@@ -213,6 +241,7 @@ describe("suggestions", () => {
     const visible = await listPublicRequests({ appSecret: willowSecret, externalUserId: "maya" });
     const json = JSON.stringify(visible);
     expect(json).not.toContain("model-wrote-this-summary-9f3a");
+    expect(json).not.toContain("admin-sentence-9f3a");
     expect(json).not.toContain("mood-topic-token");
     expect(json).not.toContain("openai/gpt-5-mini");
     expect(json).not.toContain("0.77");

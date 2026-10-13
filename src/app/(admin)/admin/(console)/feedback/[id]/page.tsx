@@ -141,8 +141,8 @@ export default async function FeedbackDetailPage({
                     suggestion={{
                       status: feedback.suggestion.status,
                       suggestedType: feedback.suggestion.suggestedType,
-                      topics: feedback.suggestion.topics,
-                      similarity: feedback.suggestion.similarity,
+                      urgent: feedback.suggestion.urgent,
+                      summary: feedback.suggestion.summary,
                       model: feedback.suggestion.model,
                       request: feedback.suggestion.request,
                     }}
