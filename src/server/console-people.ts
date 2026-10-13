@@ -44,6 +44,7 @@ export async function updateOwnProfile(input: {
   email: string;
   currentPassword: string;
   nextPassword: string;
+  passwordConfirm: string;
 }) {
   const name = cleanProfileName(input.name);
   const email = cleanProfileEmail(input.email);
@@ -55,6 +56,11 @@ export async function updateOwnProfile(input: {
     select: { id: true },
   });
   if (taken) throw new DomainError("That email is already used.", "conflict");
+
+  const changingPassword = input.nextPassword.length > 0 || input.passwordConfirm.length > 0;
+  if (changingPassword && input.nextPassword !== input.passwordConfirm) {
+    throw new DomainError("Passwords do not match.", "validation");
+  }
 
   const data: { name: string; email: string; passwordHash?: string } = { name, email };
   if (input.nextPassword) {

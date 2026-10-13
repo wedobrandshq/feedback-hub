@@ -81,6 +81,7 @@ it("lets the signed-in person change name, email, and password", async () => {
       email: "owner@healthysteps.example",
       currentPassword: "",
       nextPassword: "",
+      passwordConfirm: "",
     });
     if (renamed?.name !== "Alex Edited") throw new Error("name was not saved");
 
@@ -91,6 +92,7 @@ it("lets the signed-in person change name, email, and password", async () => {
         email: "taken-console@example.com",
         currentPassword: "",
         nextPassword: "",
+        passwordConfirm: "",
       }),
     );
     if (conflict !== "That email is already used.") throw new Error("email uniqueness");
@@ -102,6 +104,7 @@ it("lets the signed-in person change name, email, and password", async () => {
         email: owner.email,
         currentPassword: "",
         nextPassword: "another-password",
+        passwordConfirm: "another-password",
       }),
     );
     if (missing !== "Enter your current password to set a new one.") throw new Error("current password required");
@@ -113,9 +116,26 @@ it("lets the signed-in person change name, email, and password", async () => {
         email: owner.email,
         currentPassword: "not-the-password",
         nextPassword: "another-password",
+        passwordConfirm: "another-password",
       }),
     );
     if (wrong !== "Current password is wrong.") throw new Error("wrong current password");
+
+    const mismatch = await messageOf(() =>
+      updateOwnProfile({
+        adminId: owner.id,
+        name: "Alex Edited",
+        email: owner.email,
+        currentPassword: seededAdminPassword(),
+        nextPassword: "another-password",
+        passwordConfirm: "different-password",
+      }),
+    );
+    if (mismatch !== "Passwords do not match.") throw new Error("password confirm");
+    const still = await prisma.adminUser.findUniqueOrThrow({ where: { id: owner.id } });
+    if (!(await bcrypt.compare(seededAdminPassword(), still.passwordHash))) {
+      throw new Error("mismatch changed the password");
+    }
 
     await updateOwnProfile({
       adminId: owner.id,
@@ -123,6 +143,7 @@ it("lets the signed-in person change name, email, and password", async () => {
       email: owner.email,
       currentPassword: seededAdminPassword(),
       nextPassword: "changed-password-1",
+      passwordConfirm: "changed-password-1",
     });
     const row = await prisma.adminUser.findUniqueOrThrow({ where: { id: owner.id } });
     if (!(await bcrypt.compare("changed-password-1", row.passwordHash))) throw new Error("password was not saved");
@@ -180,6 +201,7 @@ it("keeps the last owner and lets an owner add an admin", async () => {
     email: "ada-console@example.com",
     currentPassword: "",
     nextPassword: "",
+    passwordConfirm: "",
   });
   if (self?.name !== "Ada A. Admin") throw new Error("admin could not edit their profile");
 
