@@ -5,12 +5,32 @@ import { DomainError } from "@/domain/errors";
 import { requireAdmin } from "@/server/auth/admin";
 import { addConsolePerson, removeConsolePerson, setConsoleRole } from "@/server/console-people";
 
-export type PeopleState = { error: string | null; saved: boolean };
+export type PersonDraft = {
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  role: string;
+  appIds: string[];
+};
 
-const initialError = (error: unknown): PeopleState => {
-  if (error instanceof DomainError) return { error: error.message, saved: false };
+export type PeopleState = { error: string | null; saved: boolean; fields: PersonDraft | null };
+
+const initialError = (error: unknown, fields: PersonDraft | null = null): PeopleState => {
+  if (error instanceof DomainError) return { error: error.message, saved: false, fields };
   throw error;
 };
+
+function personDraft(formData: FormData): PersonDraft {
+  return {
+    name: String(formData.get("name") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    password: String(formData.get("password") ?? ""),
+    passwordConfirm: String(formData.get("passwordConfirm") ?? ""),
+    role: String(formData.get("role") ?? ""),
+    appIds: formData.getAll("appIds").map(String),
+  };
+}
 
 function refresh() {
   revalidatePath("/admin/people");
@@ -19,22 +39,18 @@ function refresh() {
 
 export async function addPersonAction(_previous: PeopleState, formData: FormData): Promise<PeopleState> {
   const admin = await requireAdmin();
+  const fields = personDraft(formData);
   try {
     await addConsolePerson({
       actorRole: admin.role,
       workspaceId: admin.workspaceId,
-      name: String(formData.get("name") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? ""),
-      passwordConfirm: String(formData.get("passwordConfirm") ?? ""),
-      role: String(formData.get("role") ?? ""),
-      appIds: formData.getAll("appIds").map(String),
+      ...fields,
     });
   } catch (error) {
-    return initialError(error);
+    return initialError(error, fields);
   }
   refresh();
-  return { error: null, saved: true };
+  return { error: null, saved: true, fields: null };
 }
 
 export async function setRoleAction(_previous: PeopleState, formData: FormData): Promise<PeopleState> {
@@ -50,7 +66,7 @@ export async function setRoleAction(_previous: PeopleState, formData: FormData):
     return initialError(error);
   }
   refresh();
-  return { error: null, saved: true };
+  return { error: null, saved: true, fields: null };
 }
 
 export async function removePersonAction(_previous: PeopleState, formData: FormData): Promise<PeopleState> {
@@ -65,5 +81,5 @@ export async function removePersonAction(_previous: PeopleState, formData: FormD
     return initialError(error);
   }
   refresh();
-  return { error: null, saved: true };
+  return { error: null, saved: true, fields: null };
 }

@@ -6,27 +6,33 @@ import { DomainError } from "@/domain/errors";
 import { requireAdmin } from "@/server/auth/admin";
 import { createWorkspaceApp, updateWorkspaceApp } from "@/server/workspace-apps";
 
-export type AppFormState = { error: string | null; saved: boolean };
+export type AppDraft = { name: string; platform: string };
 
-function fail(error: unknown): AppFormState {
-  if (error instanceof DomainError) return { error: error.message, saved: false };
+export type AppFormState = { error: string | null; saved: boolean; fields: AppDraft | null };
+
+function fail(error: unknown, fields: AppDraft | null = null): AppFormState {
+  if (error instanceof DomainError) return { error: error.message, saved: false, fields };
   throw error;
 }
 
 export async function createAppAction(_previous: AppFormState, formData: FormData): Promise<AppFormState> {
   const admin = await requireAdmin();
+  const fields = {
+    name: String(formData.get("name") ?? ""),
+    platform: String(formData.get("platform") ?? ""),
+  };
   let slug = "";
   try {
     const app = await createWorkspaceApp({
       actorRole: admin.role,
       actorId: admin.id,
       workspaceId: admin.workspaceId,
-      name: String(formData.get("name") ?? ""),
-      platform: String(formData.get("platform") ?? ""),
+      name: fields.name,
+      platform: fields.platform,
     });
     slug = app.slug;
   } catch (error) {
-    return fail(error);
+    return fail(error, fields);
   }
   revalidatePath("/admin/apps");
   revalidatePath("/admin", "layout");
@@ -51,5 +57,5 @@ export async function updateAppAction(_previous: AppFormState, formData: FormDat
   revalidatePath("/admin/apps");
   revalidatePath(`/admin/apps/${slug}`);
   revalidatePath("/admin", "layout");
-  return { error: null, saved: true };
+  return { error: null, saved: true, fields: null };
 }

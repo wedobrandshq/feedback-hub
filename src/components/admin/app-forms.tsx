@@ -1,19 +1,26 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useLayoutEffect, useState } from "react";
 import { createAppAction, updateAppAction, type AppFormState } from "@/app/(admin)/admin/(console)/apps/actions";
 import { APP_PLATFORMS, APP_STATUSES } from "@/domain/app";
 import { Disclose } from "@/components/admin/disclose";
+import { restoreFields } from "@/components/admin/restore-fields";
 import { hatchField, hatchPrimary, hatchSelect } from "@/components/admin/hatch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const initial: AppFormState = { error: null, saved: false };
+const initial: AppFormState = { error: null, saved: false, fields: null };
 
 export function CreateAppForm() {
   const [state, action, pending] = useActionState(createAppAction, initial);
   const [open, setOpen] = useState(false);
+  const fields = state.fields;
+  useLayoutEffect(() => {
+    if (!state.error || !fields) return;
+    const form = document.getElementById("add-app-form");
+    if (form instanceof HTMLFormElement) restoreFields(form, fields);
+  }, [state.error, fields]);
   return (
     <div className="max-w-md">
       <Button
@@ -30,11 +37,11 @@ export function CreateAppForm() {
           <h2 className="text-lg font-extrabold tracking-[-0.03em] [font-family:var(--font-display)]">Add an app</h2>
           <div className="space-y-1.5">
             <Label htmlFor="new-app-name">Name</Label>
-            <Input id="new-app-name" name="name" required className={hatchField} />
+            <Input id="new-app-name" name="name" required defaultValue={fields?.name ?? ""} className={hatchField} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-app-platform">Platform</Label>
-            <select id="new-app-platform" name="platform" defaultValue="iOS" className={`${hatchSelect} w-full`}>
+            <select id="new-app-platform" name="platform" defaultValue={fields?.platform || "iOS"} className={`${hatchSelect} w-full`}>
               {APP_PLATFORMS.map((platform) => (
                 <option key={platform.value} value={platform.value}>
                   {platform.label}
