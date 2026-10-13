@@ -91,7 +91,7 @@ export async function getAdminHome(input: { workspaceId: string; appId: string |
     attention: {
       openConversations: openRows.length,
       attentionTruncated: openRows.length === ADMIN_LIST_LIMIT,
-      needsReply: needingReply.slice(0, 8).map((row) => ({
+      needsReply: needingReply.map((row) => ({
         id: row.id,
         user: userLabel(row.user),
         preview: feedbackPreview(row.feedback.body),

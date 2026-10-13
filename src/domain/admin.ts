@@ -1,6 +1,18 @@
 export const ADMIN_WINDOW_DAYS = 30;
 export const ADMIN_LIST_LIMIT = 200;
-export const TRENDING_LIMIT = 8;
+export const TRENDING_LIMIT = 40;
+export const HOME_LIST_STEP = 5;
+
+export function homeListWindow(total: number, shown: number, step = HOME_LIST_STEP) {
+  const visible = Math.min(Math.max(shown, 0), total);
+  const hidden = total - visible;
+  return {
+    visible,
+    hidden,
+    more: Math.min(step, hidden),
+    canCollapse: visible > step,
+  };
+}
 
 export function adminWindow(now = new Date()) {
   const span = ADMIN_WINDOW_DAYS * 24 * 60 * 60 * 1000;

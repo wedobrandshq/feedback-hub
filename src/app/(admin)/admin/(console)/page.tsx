@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
+import { StepList } from "@/components/admin/show-more";
 import { HatchPanel, hatchBody, hatchRowTitle, hatchSticker, hatchStrong } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
 import { PageHeader } from "@/components/admin/page-header";
@@ -81,7 +82,7 @@ export default async function AdminHomePage() {
             {home.trending.length === 0 ? (
               <p className="mt-3 text-sm text-[#5a5b70]">No requests received a vote in the last 30 days.</p>
             ) : (
-              <ul className="mt-3">
+              <StepList>
                 {home.trending.map((request) => (
                   <li key={request.id} className="flex flex-wrap items-baseline justify-between gap-3 border-t border-[#0e0e1a] py-3">
                     <div>
@@ -97,7 +98,7 @@ export default async function AdminHomePage() {
                     </p>
                   </li>
                 ))}
-              </ul>
+              </StepList>
             )}
             </section>
           </HatchPanel>
@@ -116,7 +117,7 @@ export default async function AdminHomePage() {
             {home.attention.needsReplyCount === 0 ? (
               <p className="mt-3 text-sm">You’re all caught up. No conversations currently need a reply.</p>
             ) : (
-              <ul className="mt-3">
+              <StepList>
                 {home.attention.needsReply.map((row) => (
                   <li key={row.id} className="border-t border-[#0e0e1a] py-3">
                     <Link href={`/admin/inbox/${row.id}`} className={hatchRowTitle}>
@@ -125,7 +126,7 @@ export default async function AdminHomePage() {
                     <p className="mt-1 text-sm text-[#5a5b70]">{row.preview}</p>
                   </li>
                 ))}
-              </ul>
+              </StepList>
             )}
             </section>
           </HatchPanel>
