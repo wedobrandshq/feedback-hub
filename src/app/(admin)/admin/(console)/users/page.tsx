@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
 import { HatchPanel, hatchDataRow, hatchField, hatchHead, hatchPrimary, hatchRowTitle, hatchSelect } from "@/components/admin/hatch";
+import { MobileCard, MobileCards, MobileSort } from "@/components/admin/mobile-list";
 import { PageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +132,30 @@ export default async function UsersPage({
       ) : null}
       {result.rows.length > 0 ? (
         <div className="px-4 pb-8 md:px-8">
-        <HatchPanel clip>
+        <MobileSort
+          options={COLUMNS.map((column) => {
+            const next = nextUserSort({ sort, dir }, column.sort);
+            return { value: column.sort, label: column.label, href: usersHref(filters, next.sort, next.dir) };
+          })}
+          value={sort}
+          dir={dir}
+          flipHref={(() => {
+            const next = nextUserSort({ sort, dir }, sort);
+            return usersHref(filters, next.sort, next.dir);
+          })()}
+        />
+        <MobileCards>
+          {result.rows.map((row) => (
+            <MobileCard
+              key={row.id}
+              href={`/admin/users/${row.id}`}
+              title={userLabel(row)}
+              subtitle={[row.email && row.name ? row.email : null, row.appName, row.plan || null].filter(Boolean).join(" · ")}
+              meta={`${row.feedbackCount} feedback · ${row.voteCount} votes · ${row.conversationCount} conversations · Last seen ${formatDateTime(row.lastSeenAt)}`}
+            />
+          ))}
+        </MobileCards>
+        <HatchPanel clip className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

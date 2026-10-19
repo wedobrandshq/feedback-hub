@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HatchPanel, hatchChip, hatchDataRow, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
+import { MobileCard, MobileCards } from "@/components/admin/mobile-list";
 import {
   Table,
   TableBody,
@@ -37,7 +38,26 @@ function Attention({ row }: { row: InboxRow }) {
 export function InboxTable({ rows }: { rows: InboxRow[] }) {
   return (
     <div className="px-4 py-4 md:px-8">
-      <HatchPanel clip>
+      <MobileCards>
+        {rows.map((row) => (
+          <MobileCard
+            key={row.id}
+            href={`/admin/inbox/${row.id}`}
+            title={
+              <span className="inline-flex items-center gap-2">
+                {row.unread ? (
+                  <span className="size-2 shrink-0 rounded-full border border-[#0e0e1a] bg-[#c6ff4f]" aria-label="Unread" />
+                ) : null}
+                {feedbackPreview(row.preview)}
+              </span>
+            }
+            subtitle={`${userLabel(row.user)} · ${row.app.name}`}
+            chips={<Attention row={row} />}
+            meta={formatDateTime(row.updatedAt)}
+          />
+        ))}
+      </MobileCards>
+      <HatchPanel clip className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
 import { HatchPanel, hatchChip, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
+import { MobileCard, MobileCards } from "@/components/admin/mobile-list";
 import {
   Table,
   TableBody,
@@ -42,7 +43,23 @@ export default async function AppsPage() {
         <EmptyState title="No apps yet" description="No feedback yet. Connect your first app or send test feedback." />
       ) : (
         <div className="px-4 pb-8 md:px-8">
-        <HatchPanel clip>
+        <MobileCards>
+          {apps.map((app) => (
+            <MobileCard
+              key={app.id}
+              href={`/admin/apps/${app.slug}`}
+              title={app.name}
+              subtitle={appPlatformLabel(app.platform)}
+              chips={
+                <span className={hatchChip(app.status)}>
+                  <WithMarker kind="status">{app.status}</WithMarker>
+                </span>
+              }
+              meta={`Last event ${app.lastEventAt ? formatDateTime(app.lastEventAt) : "—"}`}
+            />
+          ))}
+        </MobileCards>
+        <HatchPanel clip className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">

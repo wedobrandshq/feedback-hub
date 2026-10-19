@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { hatchChip, hatchPrimary, hatchSecondary, hatchSelect } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
+import { MobileCard, MobileCards, MobileSort } from "@/components/admin/mobile-list";
 import { formatDateTime } from "@/domain/feedback";
 import {
   isRequestStatus,
@@ -135,7 +136,39 @@ export default async function RequestsPage({
           ) : null}
         </div>
       ) : (
-        <div className="mt-6 rounded-[32px] shadow-[5px_5px_0_#0e0e1a]">
+        <div className="mt-6">
+        <MobileSort
+          options={COLUMNS.map((column) => {
+            const next = nextRequestSort({ sort, dir }, column.sort);
+            return { value: column.sort, label: column.label, href: requestsHref(next.sort, next.dir, status) };
+          })}
+          value={sort}
+          dir={dir}
+          flipHref={(() => {
+            const next = nextRequestSort({ sort, dir }, sort);
+            return requestsHref(next.sort, next.dir, status);
+          })()}
+        />
+        <MobileCards>
+          {rows.map((row) => (
+            <MobileCard
+              key={row.id}
+              href={`/admin/requests/${row.id}`}
+              title={row.title}
+              subtitle={selected ? null : row.appName}
+              chips={
+                <>
+                  <span className={hatchChip(row.status)}>
+                    <WithMarker kind="status">{REQUEST_STATUS_LABELS[row.status]}</WithMarker>
+                  </span>
+                  <MonoLabel>{row.visibility}</MonoLabel>
+                </>
+              }
+              meta={`${row.voteCount} votes · ${row.feedbackCount} feedback · ${row.uniqueFeedbackUsers} users · ${row.conversationCount} conversations · Updated ${formatDateTime(row.updatedAt)}`}
+            />
+          ))}
+        </MobileCards>
+        <div className="hidden rounded-[32px] shadow-[5px_5px_0_#0e0e1a] md:block">
           <div className="overflow-hidden rounded-[32px] border-2 border-[#0e0e1a] bg-white">
             <Table>
               <TableHeader>
@@ -198,6 +231,7 @@ export default async function RequestsPage({
               </TableBody>
             </Table>
           </div>
+        </div>
         </div>
       )}
     </div>

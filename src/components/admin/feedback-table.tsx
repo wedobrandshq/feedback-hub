@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HatchPanel, hatchDataRow, hatchHead, hatchRowTitle } from "@/components/admin/hatch";
 import { WithMarker } from "@/components/admin/markers";
+import { MobileCard, MobileCards, MobileSort } from "@/components/admin/mobile-list";
 import { StatusBadge, TypeBadge } from "@/components/admin/status-badge";
 import {
   Table,
@@ -74,7 +75,38 @@ export function FeedbackTable({
 }) {
   return (
     <div className="px-4 py-4 md:px-8">
-      <HatchPanel clip>
+      <MobileSort
+        options={COLUMNS.map((column) => ({
+          value: column.sort,
+          label: column.label,
+          href: feedbackHref(filters, { sort, dir }, column.sort),
+        }))}
+        value={sort}
+        dir={dir}
+        flipHref={feedbackHref(filters, { sort, dir }, sort)}
+      />
+      <MobileCards>
+        {rows.map((row) => (
+          <MobileCard
+            key={row.id}
+            href={`/admin/feedback/${row.id}`}
+            title={feedbackPreview(row.body)}
+            subtitle={`${userLabel(row.user)} · ${row.app.name}`}
+            chips={
+              <>
+                <TypeBadge type={row.type} />
+                <StatusBadge status={row.status} />
+              </>
+            }
+            meta={
+              row.requestLink
+                ? `${formatDate(row.createdAt)} · Request: ${row.requestLink.request.title}`
+                : formatDate(row.createdAt)
+            }
+          />
+        ))}
+      </MobileCards>
+      <HatchPanel clip className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-[#0e0e1a] hover:bg-transparent">
