@@ -5,7 +5,7 @@ import { INBOX_FILTERS, INBOX_FILTER_LABELS, type InboxFilter } from "@/domain/c
 
 export function InboxFilters({ current }: { current: InboxFilter }) {
   return (
-    <nav aria-label="Inbox filters" className="flex gap-2 overflow-x-auto px-4 pt-4 pr-4 pb-2 md:px-8">
+    <nav aria-label="Inbox filters" className="flex flex-wrap gap-2 px-4 pt-4 pb-2 md:flex-nowrap md:overflow-x-auto md:px-8">
       {INBOX_FILTERS.map((filter) => {
         const active = filter === current;
         const href = filter === "all" ? "/admin/inbox" : `/admin/inbox?filter=${filter}`;

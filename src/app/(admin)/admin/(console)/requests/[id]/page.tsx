@@ -81,7 +81,7 @@ export default async function RequestDetailPage({
         description={`${request.app.name} · ${REQUEST_STATUS_LABELS[request.status]} · ${request.visibility}`}
         actions={request.visibility === "private" ? <PublishRequestForm requestId={request.id} /> : undefined}
       />
-      <nav aria-label="Request sections" className="flex gap-2 overflow-x-auto px-4 pt-4 pb-2 md:px-8">
+      <nav aria-label="Request sections" className="flex flex-wrap gap-2 px-4 pt-4 pb-2 md:flex-nowrap md:overflow-x-auto md:px-8">
         {TABS.map((item) => (
           <Link
             key={item}

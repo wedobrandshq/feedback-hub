@@ -137,7 +137,7 @@ export function PersonControls({
   }
 
   return (
-    <div className="flex flex-col items-start gap-2 sm:items-end">
+    <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end">
       <form action={roleAction} className="flex items-center gap-2">
         <input type="hidden" name="personId" value={personId} />
         <label htmlFor={`role-${personId}`} className="sr-only">
