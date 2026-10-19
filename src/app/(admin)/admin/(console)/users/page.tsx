@@ -108,7 +108,7 @@ export default async function UsersPage({
           name="plan"
           defaultValue={planFilter}
           aria-label="Plan"
-          className={hatchSelect}
+          className={`${hatchSelect} min-w-0 grow basis-[calc(50%-0.25rem)] sm:grow-0 sm:basis-auto`}
         >
           <option value="">All plans</option>
           {plans.map((item) => (
@@ -119,7 +119,7 @@ export default async function UsersPage({
           name="activity"
           defaultValue={activity ?? ""}
           aria-label="Activity"
-          className={hatchSelect}
+          className={`${hatchSelect} min-w-0 grow basis-[calc(50%-0.25rem)] sm:grow-0 sm:basis-auto`}
         >
           <option value="">Any activity</option>
           <option value="recent">Seen in the last 30 days</option>
