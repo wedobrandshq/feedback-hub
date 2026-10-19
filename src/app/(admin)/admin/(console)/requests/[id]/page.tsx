@@ -128,40 +128,33 @@ export default async function RequestDetailPage({
             <section className="max-w-2xl">
               <h2 className={hatchSticker}>Recent feedback</h2>
               {request.links.length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">No linked feedback yet.</p>
+                <p className="mt-3 text-sm text-muted-foreground">No linked feedback yet.</p>
               ) : (
-                <HatchPanel clip className="mt-4">
-                  <ul className="divide-y divide-[#0e0e1a]">
-                    {request.links.slice(0, 5).map((link) => (
-                      <li key={link.id} className="relative px-5 py-3.5 hover:bg-[#fffcf2]">
-                        <Link
-                          href={`/admin/feedback/${link.feedback.id}`}
-                          className="block text-sm leading-6 font-medium text-[#0e0e1a] after:absolute after:inset-0"
-                        >
-                          {link.feedback.body}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-[#5a5b70]">{formatDateTime(link.feedback.createdAt)}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </HatchPanel>
+                <ul className="mt-3 divide-y divide-border">
+                  {request.links.slice(0, 5).map((link) => (
+                    <li key={link.id} className="py-3">
+                      <Link href={`/admin/feedback/${link.feedback.id}`} className="text-sm font-medium">
+                        {link.feedback.body}
+                      </Link>
+                      <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(link.feedback.createdAt)}</p>
+                    </li>
+                  ))}
+                </ul>
               )}
             </section>
             <section className="max-w-2xl">
               <h2 className={hatchSticker}>Recent votes</h2>
               {metrics.recentVotes.length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">No votes yet.</p>
+                <p className="mt-3 text-sm text-muted-foreground">No votes yet.</p>
               ) : (
-                <HatchPanel clip className="mt-4">
-                  <ul className="divide-y divide-[#0e0e1a] text-sm">
-                    {metrics.recentVotes.map((vote) => (
-                      <li key={vote.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-5 py-3.5">
-                        <span className="font-medium text-[#0e0e1a]">{userLabel(vote.user)}</span>
-                        <span className="text-xs text-[#5a5b70]">{formatDateTime(vote.createdAt)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </HatchPanel>
+                <ul className="mt-3 divide-y divide-border">
+                  {metrics.recentVotes.map((vote) => (
+                    <li key={vote.id} className="py-3">
+                      <p className="text-sm font-medium">{userLabel(vote.user)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(vote.createdAt)}</p>
+                    </li>
+                  ))}
+                </ul>
               )}
             </section>
           </div>
